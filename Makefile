@@ -1,2 +1,2 @@
 main:
-	g++ mainMenuSrc.cpp
+	g++ src/mainMenuSrc.cpp
