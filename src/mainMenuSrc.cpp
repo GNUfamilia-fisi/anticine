@@ -1,7 +1,7 @@
 #include <iostream>
-
+#include "funciones.h"
 
 int main(){
-
-  return 0;
+    std::cout << "CiNext" << std::endl;
+    return 0;
 }
