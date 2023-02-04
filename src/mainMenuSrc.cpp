@@ -2,6 +2,6 @@
 #include "funciones.h"
 
 int main(){
-    std::cout << "hola 2" << std::endl;
+    std::cout << "CiNext jeje" << std::endl;
     return 0;
 }
