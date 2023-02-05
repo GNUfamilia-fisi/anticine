@@ -3,6 +3,11 @@
 
 void gotoXY(int x, int y);
 
+auto fetch();
+
+std::string exec(const char* cmd);
+
+
 enum ForegroundColors {
     BLACK = 0,
     BLUE = 1,
