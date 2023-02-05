@@ -1,11 +1,27 @@
 #ifndef GRANDPARENT_H
 #define GRANDPARENT_H
 
+#include "json.hpp"
+
+using json = nlohmann::json;
+
+
+typedef struct {
+    int x;
+    int y;
+} consoleSize;
+
+
 void gotoXY(int x, int y);
 
-auto fetch();
+json fetch(std::string f);
 
 std::string exec(const char* cmd);
+
+unsigned int get_term_width();
+
+consoleSize getConsoleRectSize();
+
 
 
 enum ForegroundColors {

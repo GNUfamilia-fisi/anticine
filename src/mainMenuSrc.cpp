@@ -4,11 +4,18 @@
 #include <chrono>
 
 #include "utilsDisplay.h"
+#include "json.hpp"
 
 void logoDisplay(DWORD color);
 
 
 HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+void cinemaDisplay();
+
+using json = nlohmann::json;
+
+
 
 //refer to utisDisplay.h for the complete list of foreground colors
 
@@ -17,31 +24,24 @@ HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 int main(){
     system("cls");
 
-    DWORD color = 1;
-
-    std::string load = "          ";
-
-    short pos = 0;
+    DWORD color = 7;
 
     //main menu loop
     while(1){
 
-        load[pos] = '>';
-
-        gotoXY(0,0);
+        gotoXY(getConsoleRectSize().x / 2,0);
         
         logoDisplay(color);
 
         color++;
 
         if(color == 15){
-            color = 0;
+            color = 7;
         }
 
-        std::cout << "\n\n" << load << std::endl;
+        //gotoXY(getConsoleRectSize().x / 2, 10);
 
-        pos++;
-
+        cinemaDisplay();
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -51,14 +51,38 @@ int main(){
 
 void logoDisplay(DWORD color){
     SetConsoleTextAttribute(consoleHandle, color);
+
     std::cout << R"(
-     $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\ 
-    $$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
-    $$ /  \__|$$\ $$$$\ $$ |$$ |      \$$\ $$  |   $$ |   
-    $$ |      $$ |$$ $$\$$ |$$$$$\     \$$$$  /    $$ |   
-    $$ |      $$ |$$ \$$$$ |$$  __|    $$  $$<     $$ |   
-    $$ |  $$\ $$ |$$ |\$$$ |$$ |      $$  /\$$\    $$ |   
-    \$$$$$$  |$$ |$$ | \$$ |$$$$$$$$\ $$ /  $$ |   $$ |   
-     \______/ \__|\__|  \__|\________|\__|  \__|   \__|   
+         $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\ 
+        $$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
+        $$ /  \__|$$\ $$$$\ $$ |$$ |      \$$\ $$  |   $$ |   
+        $$ |      $$ |$$ $$\$$ |$$$$$\     \$$$$  /    $$ |   
+        $$ |      $$ |$$ \$$$$ |$$  __|    $$  $$<     $$ |   
+        $$ |  $$\ $$ |$$ |\$$$ |$$ |      $$  /\$$\    $$ |   
+        \$$$$$$  |$$ |$$ | \$$ |$$$$$$$$\ $$ /  $$ |   $$ |   
+         \______/ \__|\__|  \__|\________|\__|  \__|   \__|   
     )";
+}
+
+
+void cinemaDisplay(){
+    for (int i = 0; i < getConsoleRectSize().x / 3; i++){
+        std::cout << "=";
+    }
+    std::cout << std::endl;
+    for (int i = 0; i < getConsoleRectSize().x / 3; i++){
+        if (i == 0 || i == (getConsoleRectSize().x / 3) - 1){
+            std::cout << "|";
+        }
+        else{
+            std::cout << " ";
+        }
+    }
+
+    json data = fetch("https://726b-181-66-156-128.sa.ngrok.io/cines");
+
+    std::cout << data["cines_en_tu_ciudad"];
+
+
+    std::cout << std::endl;
 }

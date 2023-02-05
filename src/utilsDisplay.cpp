@@ -9,33 +9,24 @@
 #include <windows.h>
 
 #include "json.hpp"
+#include "utilsDisplay.h"
+
 
 using json = nlohmann::json;
 
 
-COORD pos;
+COORD cursorPosition;
+
+
 HANDLE consoleWinHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 
 void gotoXY(int x, int y){
-    pos = {x,y};
-    SetConsoleCursorPosition(consoleWinHandle, pos);
+    cursorPosition = {x,y};
+    SetConsoleCursorPosition(consoleWinHandle, cursorPosition);
 }
 
-std::string exec(const char* cmd);
-
-
-auto fetch(){
-
-    std::string fetchedString = exec("curl -s https://726b-181-66-156-128.sa.ngrok.io");
-
-    json data = json::parse(fetchedString);
-
-    return data;
-}
-
-
-std::string exec(const char* cmd) {
+std::string exec(const char* cmd){
     std::array<char, 128> buffer;
     std::string result;
     std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
@@ -46,4 +37,28 @@ std::string exec(const char* cmd) {
         result += buffer.data();
     }
     return result;
+}
+
+json fetch(std::string f){
+
+    std::string ToFetch = "curl -s " + f;
+
+    std::string fetchedString = exec(ToFetch.c_str());
+
+    json data = json::parse(fetchedString);
+
+    return data;
+}
+
+consoleSize getConsoleRectSize(){
+    CONSOLE_SCREEN_BUFFER_INFO BufferInfo;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &BufferInfo);
+
+    consoleSize obj = {
+        BufferInfo.srWindow.Right - BufferInfo.srWindow.Left + 1,
+        BufferInfo.srWindow.Bottom - BufferInfo.srWindow.Top + 1,
+    };
+
+    return obj;
 }
