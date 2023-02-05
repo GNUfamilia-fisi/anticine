@@ -11,7 +11,7 @@ void logoDisplay(DWORD color);
 
 HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-void cinemaDisplay();
+void cinemaDisplay(json closeData);
 
 using json = nlohmann::json;
 
@@ -22,6 +22,9 @@ using json = nlohmann::json;
 
 
 int main(){
+
+    json closeCineData = fetch("https://a195-181-66-156-128.sa.ngrok.io/cines");
+
     system("cls");
 
     DWORD color = 7;
@@ -39,9 +42,7 @@ int main(){
             color = 7;
         }
 
-        //gotoXY(getConsoleRectSize().x / 2, 10);
-
-        cinemaDisplay();
+        cinemaDisplay(closeCineData);
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -61,28 +62,20 @@ void logoDisplay(DWORD color){
         $$ |  $$\ $$ |$$ |\$$$ |$$ |      $$  /\$$\    $$ |   
         \$$$$$$  |$$ |$$ | \$$ |$$$$$$$$\ $$ /  $$ |   $$ |   
          \______/ \__|\__|  \__|\________|\__|  \__|   \__|   
-    )";
+    )" << std::endl;
 }
 
 
-void cinemaDisplay(){
-    for (int i = 0; i < getConsoleRectSize().x / 3; i++){
-        std::cout << "=";
-    }
-    std::cout << std::endl;
-    for (int i = 0; i < getConsoleRectSize().x / 3; i++){
-        if (i == 0 || i == (getConsoleRectSize().x / 3) - 1){
-            std::cout << "|";
-        }
-        else{
-            std::cout << " ";
-        }
-    }
+void cinemaDisplay(json closeData){
+    SetConsoleTextAttribute(consoleHandle, WHITE);
 
-    json data = fetch("https://726b-181-66-156-128.sa.ngrok.io/cines");
+    gotoXY(getConsoleRectSize().x / 6, 16);
 
-    std::cout << data["cines_en_tu_ciudad"];
-
+    std::cout << "< " << to_string(closeData["cine_mas_cercano"]["name"]) << " >";
 
     std::cout << std::endl;
+
+    std::cout << std::endl;
+
+    gotoXY(getConsoleRectSize().x / 6 + 3, 16);
 }
