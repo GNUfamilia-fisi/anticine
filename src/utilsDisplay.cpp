@@ -13,6 +13,8 @@
 
 
 using json = nlohmann::json;
+using namespace nlohmann::literals;
+
 
 
 COORD cursorPosition;
@@ -44,6 +46,7 @@ json fetch(std::string f){
     std::string ToFetch = "curl -s " + f;
 
     std::string fetchedString = exec(ToFetch.c_str());
+
 
     json data = json::parse(fetchedString);
 

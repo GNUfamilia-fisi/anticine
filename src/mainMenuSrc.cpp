@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <thread>
 #include <chrono>
+#include <conio.h>
 
 #include "utilsDisplay.h"
 #include "json.hpp"
@@ -23,8 +24,10 @@ using json = nlohmann::json;
 
 int main(){
 
-    json closeCineData = fetch("https://a195-181-66-156-128.sa.ngrok.io/cines");
+    short currentCine = 0;
 
+    json closeCineData = fetch("https://a195-181-66-156-128.sa.ngrok.io/cines/cercanos");
+    
     system("cls");
 
     DWORD color = 7;
@@ -42,7 +45,23 @@ int main(){
             color = 7;
         }
 
-        cinemaDisplay(closeCineData);
+        std::cout << std::endl;
+
+        if (GetAsyncKeyState(VK_RIGHT)){
+            //TODO
+        }
+
+        else if(GetAsyncKeyState(VK_LEFT)){
+            //TODO
+        }
+
+        else{
+            //TODO
+        }
+
+        cinemaDisplay(closeCineData["cinemas"][currentCine]["name"]);
+
+        gotoXY(getConsoleRectSize().x / 3 + 3, 20);
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -69,13 +88,11 @@ void logoDisplay(DWORD color){
 void cinemaDisplay(json closeData){
     SetConsoleTextAttribute(consoleHandle, WHITE);
 
-    gotoXY(getConsoleRectSize().x / 6, 16);
+    gotoXY(getConsoleRectSize().x / 3, 16);
 
-    std::cout << "< " << to_string(closeData["cine_mas_cercano"]["name"]) << " >";
-
-    std::cout << std::endl;
+    std::cout << "< " << to_string(closeData) << " >";
 
     std::cout << std::endl;
 
-    gotoXY(getConsoleRectSize().x / 6 + 3, 16);
+    std::cout << std::endl;
 }
