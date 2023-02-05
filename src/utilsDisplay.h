@@ -22,6 +22,7 @@ unsigned int get_term_width();
 
 consoleSize getConsoleRectSize();
 
+void cleanLine();
 
 
 enum ForegroundColors {

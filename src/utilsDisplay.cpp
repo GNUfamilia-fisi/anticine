@@ -65,3 +65,9 @@ consoleSize getConsoleRectSize(){
 
     return obj;
 }
+
+void cleanLine(){
+    for (int i = 0; i < getConsoleRectSize().x; i++){
+        std::cout << " ";
+    }
+}
