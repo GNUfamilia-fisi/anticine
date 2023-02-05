@@ -1,5 +1,5 @@
 #include <iostream>
-#include "funciones.h"
+#include "utilsDisplay.h"
 
 int main(){
     std::cout << "CiNext jeje" << std::endl;
