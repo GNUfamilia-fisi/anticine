@@ -7,6 +7,7 @@
 
 void logoDisplay(DWORD color);
 
+
 HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 //refer to utisDisplay.h for the complete list of foreground colors
@@ -18,18 +19,29 @@ int main(){
 
     DWORD color = 1;
 
+    std::string load = "          ";
+
+    short pos = 0;
 
     //main menu loop
     while(1){
+
+        load[pos] = '>';
+
         gotoXY(0,0);
         
-        logoDisplay(RED);
+        logoDisplay(color);
 
         color++;
 
-        if(color == 10){
-            //color = 1;
+        if(color == 15){
+            color = 0;
         }
+
+        std::cout << "\n\n" << load << std::endl;
+
+        pos++;
+
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
