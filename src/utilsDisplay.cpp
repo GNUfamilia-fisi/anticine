@@ -21,8 +21,8 @@ COORD cursorPosition;
 
 
 HANDLE consoleWinHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-
+//
+//
 void gotoXY(int x, int y){
     cursorPosition = {x,y};
     SetConsoleCursorPosition(consoleWinHandle, cursorPosition);
@@ -70,4 +70,13 @@ void cleanLine(){
     for (int i = 0; i < getConsoleRectSize().x; i++){
         std::cout << " ";
     }
+}
+
+void ShowConsoleCursor(bool showFlag){
+
+    CONSOLE_CURSOR_INFO cursorInfo;
+
+    GetConsoleCursorInfo(consoleWinHandle, &cursorInfo);
+    cursorInfo.bVisible = showFlag;
+    SetConsoleCursorInfo(consoleWinHandle, &cursorInfo);
 }

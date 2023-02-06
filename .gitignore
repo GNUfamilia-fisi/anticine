@@ -1,3 +1,4 @@
 .vscode
 tests
 *.exe # ignorar todos los ejecutables
+*/**/*.exe
