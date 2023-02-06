@@ -21,8 +21,8 @@ COORD cursorPosition;
 
 
 HANDLE consoleWinHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-
+//
+//
 void gotoXY(int x, int y){
     cursorPosition = {x,y};
     SetConsoleCursorPosition(consoleWinHandle, cursorPosition);
