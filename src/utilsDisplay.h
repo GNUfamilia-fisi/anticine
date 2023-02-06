@@ -38,6 +38,8 @@ consoleSize getConsoleRectSize();
 
 void cleanLine();
 
+void ShowConsoleCursor(bool showFlag);
+
 
 enum ForegroundColors {
     BLACK = 0,

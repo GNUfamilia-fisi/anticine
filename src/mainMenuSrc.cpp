@@ -1,50 +1,29 @@
 #include "utilsDisplay.h"
 #include "json.hpp"
 
+using json = nlohmann::json;
+
 void logoDisplay(DWORD color);
 
 void cinemaDisplay(json closeData);
 
-using json = nlohmann::json;
-
 HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-int cinemaID;
+std::string cinemaID;
+
+json closeCineData = fetch("https://a195-181-66-156-128.sa.ngrok.io/cines/cercanos");
 
 //refer to utisDisplay.h for the complete list of foreground colors
-
 
 
 int main(){
 
     short currentCine = 0;
 
-    json closeCineData = fetch("https://a195-181-66-156-128.sa.ngrok.io/cines/cercanos");
-    /*
-    json closeCineData = json::parse(R"(
-    {
-        "city": "Lima",
-        "cinemas": [
-            {
-                "cinema_id": "2705",
-                "name": "CiNEXT Gamarra",
-                "city": "Lima"
-            },
-            {
-                "cinema_id": "2705",
-                "name": "CiNEXT Gamarra 2",
-                "city": "Lima"
-            }
-        ],
-        "nearest_id": "2705",
-        "code": 200,
-        "error": null
-    })");
-    */
-
     DWORD color = 0;
     
     system("cls");
+    ShowConsoleCursor(false);
 
     //main menu loop
     while(1){
@@ -61,8 +40,10 @@ int main(){
 
         std::cout << std::endl;
 
-        if (GetAsyncKeyState(VK_RIGHT) && currentCine < closeCineData["cinemas"].size()){
-            currentCine++;
+        if (GetAsyncKeyState(VK_RIGHT)){
+            if(currentCine < closeCineData["cinemas"].size() - 1){
+                currentCine++;
+            }
         }
 
         else if(GetAsyncKeyState(VK_LEFT) && currentCine > 0){
@@ -70,13 +51,14 @@ int main(){
         }
 
         else if(GetAsyncKeyState(VK_RETURN)){
-            //cinemaID = stoi(closeCineData["cinemas"][currentCine]["cinema_id"]);
+            cinemaID = closeCineData["cinemas"][currentCine]["cinema_id"].get<std::string>();
         }
 
         cinemaDisplay(closeCineData["cinemas"][currentCine]["name"]);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
+
     return 0;
 }
 
@@ -100,13 +82,15 @@ void logoDisplay(DWORD color){
 void cinemaDisplay(json closeData){
     SetConsoleTextAttribute(consoleHandle, WHITE);
 
-    gotoXY(getConsoleRectSize().x / 3, 12);
+    std::string displayed = "> " + closeData.get<std::string>() + " <";
 
+    int Xpos = (getConsoleRectSize().x / 2) - (displayed.length() / 2);
+
+    gotoXY(0, 12);
     cleanLine();
 
-    gotoXY(getConsoleRectSize().x / 3, 12);
+    gotoXY(Xpos, 12);
+    std::cout << displayed;
 
-    std::cout << "< " << nlohmann::to_string(closeData) << " >";
-
-    gotoXY(getConsoleRectSize().x / 3 + 3, 12);
+    gotoXY(Xpos + 3, 12);
 }

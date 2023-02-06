@@ -61,3 +61,12 @@ void cleanLine(){
         std::cout << " ";
     }
 }
+
+void ShowConsoleCursor(bool showFlag){
+
+    CONSOLE_CURSOR_INFO cursorInfo;
+
+    GetConsoleCursorInfo(consoleWinHandle, &cursorInfo);
+    cursorInfo.bVisible = showFlag;
+    SetConsoleCursorInfo(consoleWinHandle, &cursorInfo);
+}
