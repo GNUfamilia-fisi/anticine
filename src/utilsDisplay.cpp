@@ -70,3 +70,34 @@ void ShowConsoleCursor(bool showFlag){
     cursorInfo.bVisible = showFlag;
     SetConsoleCursorInfo(consoleWinHandle, &cursorInfo);
 }
+
+void logoDisplay3D(DWORD color){
+    SetConsoleTextAttribute(consoleWinHandle, color);
+
+    std::cout << R"(
+         $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\ 
+        $$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
+        $$ /  \__|$$\ $$$$\ $$ |$$ |      \$$\ $$  |   $$ |   
+        $$ |      $$ |$$ $$\$$ |$$$$$\     \$$$$  /    $$ |   
+        $$ |      $$ |$$ \$$$$ |$$  __|    $$  $$<     $$ |   
+        $$ |  $$\ $$ |$$ |\$$$ |$$ |      $$  /\$$\    $$ |   
+        \$$$$$$  |$$ |$$ | \$$ |$$$$$$$$\ $$ /  $$ |   $$ |   
+         \______/ \__|\__|  \__|\________|\__|  \__|   \__|   
+    )" << std::endl;
+}
+
+
+void logoDisplay2D(DWORD color){    
+    SetConsoleTextAttribute(consoleWinHandle, color);
+
+    std::cout << R"(
+       _______ _   _________  ________
+      / ____(_/ | / / ____| |/ /_  __/
+     / /   / /  |/ / __/  |   / / /   
+    / /___/ / /|  / /___ /   | / /    
+    \____/_/_/ |_/_____//_/|_|/_/     
+                                  
+    )" << std::endl;
+}
+
+

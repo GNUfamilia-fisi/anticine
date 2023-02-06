@@ -3,44 +3,82 @@
 
 using json = nlohmann::json;
 
-void logoDisplay(DWORD color);
+void logoDisplay3D(DWORD color);
 
-void cinemaDisplay(json closeData, int current, int namePos);
+void logoDisplay2D(DWORD color);    
+
+void cinemaListDisplay(json closeData, int current, int namePos, int showSize);
 
 void colorLine(DWORD color, int y);
 
+
+//================= menu prototypes ====================
+void chooseCinema();
+void carteleraFecha();
+
+
+
+
+//==================== globals ==================
 HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 std::string cinemaID;
 
-json closeCineData = fetch("https://27a0-181-66-156-128.sa.ngrok.io/cines/cercanos");
+std::string baseApi = "https://27a0-181-66-156-128.sa.ngrok.io";
+
+json closeCineData = fetch(baseApi + "/cines/cercanos");
+
+
 
 //refer to utisDisplay.h for the complete list of foreground colors
 
 
-int main(){
-
-    int currentCine = 0;
-    int nameCursorPos = 0;
-
-    DWORD color = 0;
-
-    char lock = 0;
-    
-    system("cls");
+int main(int argc, char const *argv[])
+{
     ShowConsoleCursor(false);
 
+    carteleraFecha();
+
+    system("cls");
+
+
+
+    return 0;
+}
+
+
+void carteleraFecha(){
+    
+}
+
+
+
+void chooseCinema(){
+    
+    int currentCine = 0;
+    
+    int nameCursorPos = 0;
+
+    int listSize = 5;
+
+    DWORD color = 1;
+
+    bool lock = true;
+    
+    system("cls");
+
     //main menu loop
-    while(1){
+    while(lock){
 
         gotoXY(getConsoleRectSize().x / 2,0);
         
-        logoDisplay(color);
+        //Display the logo
+        logoDisplay3D(color);
 
         color++;
 
         if(color == 15){
-            color = 0;
+            color = 1;
         }
 
         std::cout << std::endl;
@@ -50,12 +88,12 @@ int main(){
                 currentCine++;    
             }
 
-            if (nameCursorPos < 4){
+            if (nameCursorPos < listSize - 1){
                 nameCursorPos++;
             }
 
             else{
-                nameCursorPos = 4;
+                nameCursorPos = listSize - 1;
             }
         }
         
@@ -65,40 +103,27 @@ int main(){
             }
         }
 
-        if(GetAsyncKeyState(VK_RETURN)){
+        if(GetAsyncKeyState(VK_SPACE)){
             cinemaID = closeCineData["cinemas"][currentCine]["cinema_id"].get<std::string>();
+            lock = false;
         }
 
-        cinemaDisplay(closeCineData["cinemas"], currentCine, nameCursorPos);
+        cinemaListDisplay(closeCineData["cinemas"], currentCine, nameCursorPos, listSize);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
-
-    return 0;
 }
 
-
-void logoDisplay(DWORD color){
-    SetConsoleTextAttribute(consoleHandle, color);
-
-    std::cout << R"(
-         $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\ 
-        $$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
-        $$ /  \__|$$\ $$$$\ $$ |$$ |      \$$\ $$  |   $$ |   
-        $$ |      $$ |$$ $$\$$ |$$$$$\     \$$$$  /    $$ |   
-        $$ |      $$ |$$ \$$$$ |$$  __|    $$  $$<     $$ |   
-        $$ |  $$\ $$ |$$ |\$$$ |$$ |      $$  /\$$\    $$ |   
-        \$$$$$$  |$$ |$$ | \$$ |$$$$$$$$\ $$ /  $$ |   $$ |   
-         \______/ \__|\__|  \__|\________|\__|  \__|   \__|   
-    )" << std::endl;
-}
-
-
-void cinemaDisplay(json closeData, int current, int namePos){
+void cinemaListDisplay(json closeData, int current, int namePos, int showSize){
     SetConsoleTextAttribute(consoleHandle, WHITE);
 
-    int showSize = 5;
     int indic = namePos;
+
+
+    if(closeData.size() < showSize){
+        showSize = closeData.size();
+    }
+
 
     if(current < showSize){
         indic = current;
