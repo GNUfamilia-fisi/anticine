@@ -1,6 +1,20 @@
 #ifndef GRANDPARENT_H
 #define GRANDPARENT_H
 
+#include <iostream>
+#include <windows.h>
+#include <thread>
+#include <chrono>
+#include <conio.h>
+#include <string.h>
+#include <iostream>
+#include <fstream>
+#include <cstdio>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
+#include <windows.h>
 #include "json.hpp"
 
 using json = nlohmann::json;
