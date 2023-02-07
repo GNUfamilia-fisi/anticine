@@ -26,7 +26,7 @@ HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 std::string cinemaID = "740";
 
-std::string baseApi = "https://27a0-181-66-156-128.sa.ngrok.io";
+std::string baseApi = "https://api.cinext.up.railway.app";
 
 
 
