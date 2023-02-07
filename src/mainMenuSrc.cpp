@@ -5,7 +5,7 @@ using json = nlohmann::json;
 
 void logoDisplay3D(DWORD color);
 void logoDisplay2D(DWORD color);
-void cinemaListDisplay(json closeData, int current, int namePos, int showSize);
+void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize);
 void colorLine(DWORD color, int y); // no implementado aún
 void displayDate(std::string day, std::string month, std::string year, short opt);
 
@@ -49,33 +49,22 @@ void carteleraFecha() {
     std::string year = std::to_string(1900 + date->tm_year);
     std::string format = year + "-" + month + "-" + day;
 
-    json moviesList;
-
-    for (auto cinemaDay : carteleraData["days"]) {
-        if (cinemaDay["date"] == format) {
-            moviesList = cinemaDay["movies"];
-        }
-    }
+    // json moviesList;
+    std::vector<json> moviesList;
 
     bool lock = true;
 
     int currentDay = date->tm_mday;
-    int currentPos = 0;
+    size_t currentPos = 0;
 
     short optSelection = 0;
 
     std::string currentString;
 
     while (lock) {
-
-        moviesList = json::parse(R"(
-        [
-        ]
-        )");
-
         for (auto cinemaDay : carteleraData["days"]) {
-            if (cinemaDay["date"] == year + "-" + month + "-" + day) {
-                moviesList = cinemaDay["movies"];
+            if (cinemaDay["date"].get<std::string>() == format) {
+                moviesList = cinemaDay["movies"].get<std::vector<json>>();
             }
         }
 
@@ -171,7 +160,7 @@ void displayDate(std::string day, std::string month, std::string year, short opt
 
 void chooseCinema() {
     json closeCineData = fetch(baseApi + "/cines/cercanos");
-    int currentCine = 0;
+    size_t currentCine = 0;
     int nameCursorPos = 0;
     int listSize = 5;
     DWORD color = 1;
@@ -218,10 +207,10 @@ void chooseCinema() {
     }
 }
 
-void cinemaListDisplay(json closeData, int current, int namePos, int showSize) {
+void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize) {
     SetConsoleTextAttribute(consoleHandle, WHITE);
 
-    int indic = namePos;
+    size_t indic = namePos;
 
     if (closeData.size() < showSize) {
         showSize = closeData.size();
@@ -233,21 +222,21 @@ void cinemaListDisplay(json closeData, int current, int namePos, int showSize) {
     std::string names[showSize];
 
     if (current < showSize) {
-        for (int i = 0; i < showSize; i++) {
+        for (size_t i = 0; i < showSize; i++) {
             names[i] = closeData[i]["name"].get<std::string>();
         }
     }
     else {
-        for (int i = 0; i < showSize; i++) {
+        for (size_t i = 0; i < showSize; i++) {
             names[i] = closeData[i + current - showSize + 1]["name"].get<std::string>();
         }
     }
     // cleaner
-    for (int i = 0; i < showSize; i++) {
+    for (size_t i = 0; i < showSize; i++) {
         gotoXY(0, 12 + i);
         cleanLine();
     }
-    for (int i = 0; i < showSize; i++) {
+    for (size_t i = 0; i < showSize; i++) {
 
         if (i == indic) {
             gotoXY(

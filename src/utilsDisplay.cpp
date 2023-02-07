@@ -8,8 +8,8 @@ COORD cursorPosition;
 HANDLE consoleWinHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 //
 //
-void gotoXY(int x, int y) {
-    cursorPosition = { x, y};
+void gotoXY(short x, short y) {
+    cursorPosition = { x, y };
     SetConsoleCursorPosition(consoleWinHandle, cursorPosition);
 }
 
@@ -62,7 +62,7 @@ void ShowConsoleCursor(bool showFlag) {
 void logoDisplay3D(DWORD color) {
     SetConsoleTextAttribute(consoleWinHandle, color);
     std::cout << R"(
-         $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\ 
+         $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\
         $$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
         $$ /  \__|$$\ $$$$\ $$ |$$ |      \$$\ $$  |   $$ |   
         $$ |      $$ |$$ $$\$$ |$$$$$\     \$$$$  /    $$ |   

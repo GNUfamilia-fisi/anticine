@@ -22,7 +22,7 @@ typedef struct {
     int y;
 } consoleSize;
 
-void gotoXY(int x, int y);
+void gotoXY(short x, short y);
 json fetch(std::string f);
 std::string exec(const char* cmd);
 unsigned int get_term_width();
