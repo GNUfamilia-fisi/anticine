@@ -6,15 +6,13 @@
 #include <thread>
 #include <chrono>
 #include <conio.h>
-#include <string.h>
-#include <iostream>
 #include <fstream>
 #include <cstdio>
 #include <memory>
 #include <stdexcept>
-#include <string>
 #include <array>
-#include <windows.h>
+#include <ctime>
+#include <numeric>
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -24,7 +22,6 @@ typedef struct {
     int x;
     int y;
 } consoleSize;
-
 
 void gotoXY(int x, int y);
 

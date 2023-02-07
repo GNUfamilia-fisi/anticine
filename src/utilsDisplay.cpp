@@ -37,7 +37,6 @@ json fetch(std::string f){
 
     std::string fetchedString = exec(ToFetch.c_str());
 
-
     json data = json::parse(fetchedString);
 
     return data;
