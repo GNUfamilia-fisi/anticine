@@ -23,7 +23,7 @@ typedef struct {
 } consoleSize;
 
 void gotoXY(short x, short y);
-json fetch(std::string f);
+json fetch(std::string url);
 std::string exec(const char* cmd);
 unsigned int get_term_width();
 consoleSize getConsoleRectSize();
@@ -50,4 +50,22 @@ enum ForegroundColors {
     LIGHTMAGENTA = 13,
     YELLOW = 14,
     WHITE = 15
+};
+
+// códigos de teclas para _getch()
+enum KeyCode {
+    Up = 72,
+    Down = 80,
+    Left = 75,
+    Right = 77,
+
+    a = 97,
+    w = 119,
+    s = 115,
+    d = 100,
+
+    EnterKey = 13,
+    ExitKey = 27,
+    Space = 32, // player awsd
+    Enter = 13  // player arrows
 };

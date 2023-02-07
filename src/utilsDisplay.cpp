@@ -6,13 +6,15 @@ using namespace nlohmann::literals;
 
 COORD cursorPosition;
 HANDLE consoleWinHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-//
-//
+
+// Posiciona el cursor en { x, y } de la consola (y invertida)
 void gotoXY(short x, short y) {
     cursorPosition = { x, y };
     SetConsoleCursorPosition(consoleWinHandle, cursorPosition);
 }
 
+// Ejecuta un comando de shell de forma síncrona
+// y devuelve su stdout como string
 std::string exec(const char *cmd) {
     std::array<char, 128> buffer;
     std::string result;
@@ -26,10 +28,18 @@ std::string exec(const char *cmd) {
     return result;
 }
 
-json fetch(std::string f) {
-    std::string ToFetch = "curl -s " + f;
-    std::string fetchedString = exec(ToFetch.c_str());
-    json data = json::parse(fetchedString);
+// HTTP GET de 
+json fetch(std::string url) {
+    std::string command = "curl -s " + url;
+    std::string fetchResult = exec(command.c_str());
+
+    json data;
+    try {
+        data = json::parse(fetchResult);
+    }
+    catch (std::exception e) {
+        throw std::runtime_error("Error de fetching a " + url);
+    }
 
     return data;
 }

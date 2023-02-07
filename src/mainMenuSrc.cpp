@@ -7,7 +7,7 @@ void logoDisplay3D(DWORD color);
 void logoDisplay2D(DWORD color);
 void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize);
 void colorLine(DWORD color, int y); // no implementado aún
-void displayDate(std::string day, std::string month, std::string year, short opt);
+void displayDate(std::string fulldate, short opt);
 
 //================= menu prototypes ====================
 
@@ -36,92 +36,44 @@ void carteleraFecha() {
 
     logoDisplay2D(WHITE);
 
-    json carteleraData = fetch(baseApi + "/cines/" + cinemaID + "/cartelera");
-
-    std::time_t raw = std::time(nullptr);
-    std::tm *date = localtime(&raw);
-    std::string day;
-    std::string month;
-
-    day = (date->tm_mday < 10) ? ("0" + std::to_string(date->tm_mday)) : std::to_string(date->tm_mday);
-    month = (date->tm_mon < 9) ? ("0" + std::to_string(date->tm_mon + 1)) : std::to_string(date->tm_mon + 1);
-
-    std::string year = std::to_string(1900 + date->tm_year);
-    std::string format = year + "-" + month + "-" + day;
+    json billboardDays = fetch(baseApi + "/cines/" + cinemaID + "/cartelera");
 
     // json moviesList;
-    std::vector<json> moviesList;
+    std::vector<json> billboardsByDate;
+    json currentBillboard;
+    size_t currentMovie_i = 0;
+    std::vector<std::string> availableDates;
+
+    for (auto billboard : billboardDays["days"].get<std::vector<json>>()) {
+        availableDates.push_back(billboard["date"].get<std::string>());
+    }
 
     bool lock = true;
-
-    int currentDay = date->tm_mday;
-    size_t currentPos = 0;
-
+    int currentDay = 0;
     short optSelection = 0;
 
     std::string currentString;
 
     while (lock) {
-        for (auto cinemaDay : carteleraData["days"]) {
-            if (cinemaDay["date"].get<std::string>() == format) {
-                moviesList = cinemaDay["movies"].get<std::vector<json>>();
-            }
-        }
-
-        displayDate(day, month, year, optSelection);
-
-        day = (currentDay < 10) ? ("0" + std::to_string(currentDay)) : std::to_string(currentDay);
-
-        if (GetAsyncKeyState(VK_DOWN) && optSelection < 1) {
-            optSelection++;
-        }
-
-        if (GetAsyncKeyState(VK_UP) && optSelection > 0) {
-            optSelection--;
-        }
-
-        if (GetAsyncKeyState(VK_RIGHT)) {
-            if (std::stoi(day) < 31 && optSelection == 0) {
-                currentDay++;
-                currentPos = 0;
-            }
-            if (moviesList.size() != 0 && currentPos < moviesList.size() - 1 && optSelection == 1) {
-                currentPos++;
-            }
-        }
-
-        if (GetAsyncKeyState(VK_LEFT)) {
-            if (std::stoi(day) > 1 && optSelection == 0) {
-                currentDay--;
-                currentPos = 0;
-            }
-            if (currentPos > 0 && optSelection == 1) {
-                currentPos--;
-            }
-        }
-
-        if (moviesList.size() != 0) {
-            currentString = moviesList[currentPos]["title"].get<std::string>();
-        }
-        else {
-            currentString = "No movies";
-        }
+        // guarda la película actual
+        billboardsByDate = billboardDays["days"].get<std::vector<json>>();
+        currentBillboard = billboardsByDate[currentDay].get<json>();
+        currentString = currentBillboard["movies"][currentMovie_i]["title"].get<std::string>();
 
         gotoXY(0, 15);
         cleanLine();
+        displayDate(availableDates[currentDay], optSelection);
 
         gotoXY(
-            (getConsoleRectSize().x / 2) - (currentString.length() / 2),
-            15);
+            (getConsoleRectSize().x / 2) - (currentString.length() / 2), 15
+        );
 
         if (optSelection == 0) {
             SetConsoleTextAttribute(consoleHandle, WHITE);
         }
-
         if (optSelection == 1) {
             SetConsoleTextAttribute(consoleHandle, LIGHTGREEN);
         }
-
         std::cout << "> " << currentString << " <";
 
         gotoXY(0, 16);
@@ -130,19 +82,63 @@ void carteleraFecha() {
         gotoXY(
             (getConsoleRectSize().x / 2) + (currentString.length() / 2), 16
         );
-        std::cout << currentPos + 1 << "/" << moviesList.size();
+        std::cout << currentMovie_i + 1 << "/" << currentBillboard["movies"].size();
 
         SetConsoleTextAttribute(consoleHandle, WHITE);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        // Check input
+        if (_kbhit()) {
+            char hit = _getch();
+            switch (hit) {
+            case KeyCode::Up: {
+                if (optSelection > 0) optSelection--;
+                break;
+            }
+            case KeyCode::Down: {
+                if (optSelection < 1) {
+                    optSelection++;
+                }
+                break;
+            }
+            case KeyCode::Left: {
+                if (optSelection == 0) {
+                    if (currentDay > 0) {
+                        currentDay--;
+                    }
+                    currentMovie_i = 0;
+                }
+                if (optSelection == 1) {
+                    if (currentMovie_i > 0) currentMovie_i--;
+                }
+                break;
+            }
+            case KeyCode::Right: {
+                if (optSelection == 0) {
+                    if (currentDay + 1 < availableDates.size()) {
+                        currentDay++;
+                    }
+                    currentMovie_i = 0; // reiniciarlo a la opción 0
+                }
+                if (optSelection == 1) {
+                    if (currentMovie_i + 1 < currentBillboard["movies"].size()) {
+                        currentMovie_i++;
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 
-void displayDate(std::string day, std::string month, std::string year, short opt) {
+void displayDate(std::string fulldate, short opt) {
     gotoXY(
         (getConsoleRectSize().x / 2) - 5, 12
     );
-    std::cout << year + "-" + month + "-" << day;
+    std::cout << fulldate;
 
     gotoXY(
         (getConsoleRectSize().x / 2) + 3, 13
@@ -173,11 +169,8 @@ void chooseCinema() {
         gotoXY(getConsoleRectSize().x / 2, 0);
         // Display the logo
         logoDisplay3D(color);
-        color++;
-
-        if (color == 15) {
-            color = 1;
-        }
+        color %= 15;
+        color ++;
 
         std::cout << std::endl;
 
