@@ -21,6 +21,7 @@ void carteleraFecha();
 
 
 
+
 //==================== globals ==================
 HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
