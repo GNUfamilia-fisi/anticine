@@ -94,3 +94,37 @@ void logoDisplay2D(DWORD color) {
                                   
     )" << std::endl;
 }
+
+void cargandoDisplay() {
+    DWORD color = 5;
+
+    SetConsoleTextAttribute(consoleWinHandle, color);
+    char cargando = '#';
+    char inicio = '|';
+    std::cout<< R"(
+                                                 .___      
+      ____ _____ _______  _________    ____    __| _/____  
+    _/ ___\\__  \\_  __ \/ ___\__  \  /    \  / __ |/  _ \
+    \  \___ / __ \|  | \/ /_/  > __ \|   |  \/ /_/ (  <_> )
+     \___  >____  /__|  \___  (____  /___|  /\____ |\____/ 
+         \/     \/     /_____/     \/     \/      \/       
+    )"<<"\n";
+    
+    gotoXY(
+        (getConsoleRectSize().x / 2) - (33 / 2),
+        15
+    );
+    
+    std::cout << inicio;
+    
+    for (int i = 0 ; i < 32 ; i++){
+        std::cout<<cargando;
+        Sleep(20);
+    }
+    
+    std::cout<<inicio;
+    
+    Sleep(400);
+
+    system("cls");
+}

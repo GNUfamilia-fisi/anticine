@@ -32,6 +32,7 @@ void cleanLine();
 void ShowConsoleCursor(bool showFlag);
 void logoDisplay3D(DWORD color);
 void logoDisplay2D(DWORD color);
+void cargandoDisplay();
 
 enum ForegroundColors {
     BLACK = 0,

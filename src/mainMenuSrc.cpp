@@ -23,7 +23,9 @@ std::string baseApi = "https://api.cinext.up.railway.app";
 // refer to utisDisplay.h for the complete list of foreground colors
 
 int main(void) {
+    system("cls");
     ShowConsoleCursor(false);
+    cargandoDisplay();
 
     chooseCinema();
     carteleraFecha();
@@ -33,7 +35,6 @@ int main(void) {
 
 void carteleraFecha() {
     system("cls");
-
     logoDisplay2D(WHITE);
 
     json billboardDays = fetch(baseApi + "/cines/" + cinemaID + "/cartelera");
@@ -41,7 +42,6 @@ void carteleraFecha() {
     // json moviesList;
     std::vector<json> billboardsByDate;
     json currentBillboard;
-    size_t currentMovie_i = 0;
     std::vector<std::string> availableDates;
 
     for (auto billboard : billboardDays["days"].get<std::vector<json>>()) {
@@ -49,23 +49,24 @@ void carteleraFecha() {
     }
 
     bool lock = true;
-    int currentDay = 0;
+    size_t currentDay = 0;
     short optSelection = 0;
 
-    std::string currentString;
+    json currentMovie;
+    size_t currentMovie_i = 0;
 
     while (lock) {
         // guarda la película actual
         billboardsByDate = billboardDays["days"].get<std::vector<json>>();
         currentBillboard = billboardsByDate[currentDay].get<json>();
-        currentString = currentBillboard["movies"][currentMovie_i]["title"].get<std::string>();
+        currentMovie = currentBillboard["movies"][currentMovie_i].get<json>();
 
         gotoXY(0, 15);
         cleanLine();
         displayDate(availableDates[currentDay], optSelection);
 
         gotoXY(
-            (getConsoleRectSize().x / 2) - (currentString.length() / 2), 15
+            (getConsoleRectSize().x / 2) - (currentMovie["title"].size() / 2), 15
         );
 
         if (optSelection == 0) {
@@ -74,13 +75,13 @@ void carteleraFecha() {
         if (optSelection == 1) {
             SetConsoleTextAttribute(consoleHandle, LIGHTGREEN);
         }
-        std::cout << "> " << currentString << " <";
+        std::cout << "> " << currentMovie["title"] << " <";
 
         gotoXY(0, 16);
         cleanLine();
 
         gotoXY(
-            (getConsoleRectSize().x / 2) + (currentString.length() / 2), 16
+            (getConsoleRectSize().x / 2) + (currentMovie["title"].size() / 2), 16
         );
         std::cout << currentMovie_i + 1 << "/" << currentBillboard["movies"].size();
 
