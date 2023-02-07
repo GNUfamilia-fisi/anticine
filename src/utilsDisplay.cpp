@@ -1,24 +1,19 @@
 #include "json.hpp"
 #include "utilsDisplay.h"
 
-
 using json = nlohmann::json;
 using namespace nlohmann::literals;
 
-
-
 COORD cursorPosition;
-
-
 HANDLE consoleWinHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 //
 //
-void gotoXY(int x, int y){
-    cursorPosition = {x,y};
+void gotoXY(int x, int y) {
+    cursorPosition = { x, y};
     SetConsoleCursorPosition(consoleWinHandle, cursorPosition);
 }
 
-std::string exec(const char* cmd){
+std::string exec(const char *cmd) {
     std::array<char, 128> buffer;
     std::string result;
     std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
@@ -31,20 +26,16 @@ std::string exec(const char* cmd){
     return result;
 }
 
-json fetch(std::string f){
-
+json fetch(std::string f) {
     std::string ToFetch = "curl -s " + f;
-
     std::string fetchedString = exec(ToFetch.c_str());
-
     json data = json::parse(fetchedString);
 
     return data;
 }
 
-consoleSize getConsoleRectSize(){
+consoleSize getConsoleRectSize() {
     CONSOLE_SCREEN_BUFFER_INFO BufferInfo;
-
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &BufferInfo);
 
     consoleSize obj = {
@@ -55,24 +46,21 @@ consoleSize getConsoleRectSize(){
     return obj;
 }
 
-void cleanLine(){
-    for (int i = 0; i < getConsoleRectSize().x; i++){
+void cleanLine() {
+    for (int i = 0; i < getConsoleRectSize().x; i++) {
         std::cout << " ";
     }
 }
 
-void ShowConsoleCursor(bool showFlag){
-
+void ShowConsoleCursor(bool showFlag) {
     CONSOLE_CURSOR_INFO cursorInfo;
-
     GetConsoleCursorInfo(consoleWinHandle, &cursorInfo);
     cursorInfo.bVisible = showFlag;
     SetConsoleCursorInfo(consoleWinHandle, &cursorInfo);
 }
 
-void logoDisplay3D(DWORD color){
+void logoDisplay3D(DWORD color) {
     SetConsoleTextAttribute(consoleWinHandle, color);
-
     std::cout << R"(
          $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\ 
         $$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
@@ -85,10 +73,8 @@ void logoDisplay3D(DWORD color){
     )" << std::endl;
 }
 
-
-void logoDisplay2D(DWORD color){    
+void logoDisplay2D(DWORD color) {
     SetConsoleTextAttribute(consoleWinHandle, color);
-
     std::cout << R"(
        _______ _   _________  ________
       / ____(_/ | / / ____| |/ /_  __/
@@ -98,5 +84,3 @@ void logoDisplay2D(DWORD color){
                                   
     )" << std::endl;
 }
-
-

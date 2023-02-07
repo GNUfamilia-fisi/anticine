@@ -1,5 +1,4 @@
-#ifndef GRANDPARENT_H
-#define GRANDPARENT_H
+#pragma once
 
 #include <iostream>
 #include <windows.h>
@@ -24,21 +23,14 @@ typedef struct {
 } consoleSize;
 
 void gotoXY(int x, int y);
-
 json fetch(std::string f);
-
 std::string exec(const char* cmd);
-
 unsigned int get_term_width();
-
 consoleSize getConsoleRectSize();
 
 void cleanLine();
-
 void ShowConsoleCursor(bool showFlag);
-
 void logoDisplay3D(DWORD color);
-
 void logoDisplay2D(DWORD color);
 
 enum ForegroundColors {
@@ -59,6 +51,3 @@ enum ForegroundColors {
     YELLOW = 14,
     WHITE = 15
 };
-
-
-#endif
