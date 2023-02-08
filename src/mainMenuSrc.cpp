@@ -25,8 +25,8 @@ std::string baseApi = "https://api.cinext.up.railway.app";
 int main(void) {
     system("cls");
     ShowConsoleCursor(false);
-    cargandoDisplay();
 
+    cargandoDisplay();
     chooseCinema();
     carteleraFecha();
 
@@ -53,6 +53,7 @@ void carteleraFecha() {
     short optSelection = 0;
 
     json currentMovie;
+    std::string currentMovieName;
     size_t currentMovie_i = 0;
 
     while (lock) {
@@ -60,13 +61,14 @@ void carteleraFecha() {
         billboardsByDate = billboardDays["days"].get<std::vector<json>>();
         currentBillboard = billboardsByDate[currentDay].get<json>();
         currentMovie = currentBillboard["movies"][currentMovie_i].get<json>();
+        currentMovieName = currentMovie["title"].get<std::string>();
 
         gotoXY(0, 15);
         cleanLine();
         displayDate(availableDates[currentDay], optSelection);
 
         gotoXY(
-            (getConsoleRectSize().x / 2) - (currentMovie["title"].size() / 2), 15
+            (getConsoleRectSize().x / 2) - (currentMovieName.size() / 2) - 2, 15
         );
 
         if (optSelection == 0) {
@@ -75,13 +77,13 @@ void carteleraFecha() {
         if (optSelection == 1) {
             SetConsoleTextAttribute(consoleHandle, LIGHTGREEN);
         }
-        std::cout << "> " << currentMovie["title"] << " <";
+        std::cout << "> " << currentMovieName << " <";
 
         gotoXY(0, 16);
         cleanLine();
 
         gotoXY(
-            (getConsoleRectSize().x / 2) + (currentMovie["title"].size() / 2), 16
+            (getConsoleRectSize().x / 2) + (currentMovieName.size() / 2), 16
         );
         std::cout << currentMovie_i + 1 << "/" << currentBillboard["movies"].size();
 
@@ -156,14 +158,17 @@ void displayDate(std::string fulldate, short opt) {
 }
 
 void chooseCinema() {
-    json closeCineData = fetch(baseApi + "/cines/cercanos");
+    system("cls");
+
+    // Retorna una lista de cines ordenados según la geolocalización
+    // del usuario, el primero siempre es el más cercano.
+    // Dependiendo de 
+    json nearCinemasData = fetch(baseApi + "/cines/cercanos");
     size_t currentCine = 0;
     int nameCursorPos = 0;
-    int listSize = 5;
+    int listFixedSize = 5;
     DWORD color = 1;
     bool lock = true;
-
-    system("cls");
 
     // main menu loop
     while (lock) {
@@ -171,33 +176,44 @@ void chooseCinema() {
         // Display the logo
         logoDisplay3D(color);
         color %= 15;
-        color ++;
+        color++;
 
         std::cout << std::endl;
 
-        if (GetAsyncKeyState(VK_DOWN)) {
-            if (currentCine < closeCineData["cinemas"].size() - 1) {
-                currentCine++;
-            }
-            if (nameCursorPos < listSize - 1) {
-                nameCursorPos++;
-            }
-            else {
-                nameCursorPos = listSize - 1;
-            }
-        }
-        if (GetAsyncKeyState(VK_UP)) {
-            if (currentCine > 0) {
-                currentCine--;
+        if (_kbhit()) {
+            char hit = _getch();
+            switch (hit) {
+            case KeyCode::Down:
+                if (currentCine < nearCinemasData["cinemas"].size() - 1) {
+                    currentCine++;
+                }
+                if (nameCursorPos < listFixedSize - 1) {
+                    nameCursorPos++;
+                }
+                else {
+                    nameCursorPos = listFixedSize - 1;
+                }
+                break;
+            case KeyCode::Up:
+                if (currentCine > 0) {
+                    currentCine--;
+                }
+                break;
+            case KeyCode::Enter:
+                cinemaID = nearCinemasData["cinemas"][currentCine]["cinema_id"].get<std::string>();
+                lock = false;
+                break;
+            default:
+                break;
             }
         }
         if (GetAsyncKeyState(VK_SPACE)) {
-            cinemaID = closeCineData["cinemas"][currentCine]["cinema_id"].get<std::string>();
+            cinemaID = nearCinemasData["cinemas"][currentCine]["cinema_id"].get<std::string>();
             lock = false;
         }
 
-        cinemaListDisplay(closeCineData["cinemas"], currentCine, nameCursorPos, listSize);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        cinemaListDisplay(nearCinemasData["cinemas"], currentCine, nameCursorPos, listFixedSize);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 

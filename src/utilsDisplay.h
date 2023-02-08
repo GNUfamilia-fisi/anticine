@@ -65,8 +65,7 @@ enum KeyCode {
     s = 115,
     d = 100,
 
-    EnterKey = 13,
     ExitKey = 27,
-    Space = 32, // player awsd
-    Enter = 13  // player arrows
+    Space = 32,
+    Enter = 13
 };
