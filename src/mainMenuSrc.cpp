@@ -53,6 +53,7 @@ void carteleraFecha() {
     short optSelection = 0;
 
     json currentMovie;
+    std::string currentMovieName;
     size_t currentMovie_i = 0;
 
     while (lock) {
@@ -60,28 +61,29 @@ void carteleraFecha() {
         billboardsByDate = billboardDays["days"].get<std::vector<json>>();
         currentBillboard = billboardsByDate[currentDay].get<json>();
         currentMovie = currentBillboard["movies"][currentMovie_i].get<json>();
+        currentMovieName = currentMovie["title"].get<std::string>();
 
         gotoXY(0, 15);
         cleanLine();
         displayDate(availableDates[currentDay], optSelection);
 
         gotoXY(
-            (getConsoleRectSize().x / 2) - (currentMovie["title"].size() / 2), 15
+            (getConsoleRectSize().x / 2) - (currentMovieName.size() / 2) - 2, 15
         );
 
         if (optSelection == 0) {
-            SetConsoleTextAttribute(consoleHandle, LIGHTGREEN);
+            SetConsoleTextAttribute(consoleHandle, WHITE);
         }
         if (optSelection == 1) {
             SetConsoleTextAttribute(consoleHandle, LIGHTGREEN);
         }
-        std::cout << "> " << currentMovie["title"] << " <";
+        std::cout << "> " << currentMovieName << " <";
 
         gotoXY(0, 16);
         cleanLine();
 
         gotoXY(
-            (getConsoleRectSize().x / 2) + (currentMovie["title"].size() / 2), 16
+            (getConsoleRectSize().x / 2) + (currentMovieName.size() / 2), 16
         );
         std::cout << currentMovie_i + 1 << "/" << currentBillboard["movies"].size();
 
