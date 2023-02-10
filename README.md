@@ -4,7 +4,21 @@ Anticine™ was born as a school project for the "Algorithmics I" assignment. It
 
 
 
-### Utils documentation
+## Documentation
+
+### Compilación
+
+Para compilar el proyecto, ejecuta cualquiera de estos dos comandos dependiendo de tu compilador (g++ es el deseado).
+
+```bash
+# con g++
+g++ -Iinclude src/*.cpp src/menus/*.cpp
+
+# conf clang
+clang -Iinclude src/*.cpp src/menus/*.cpp
+```
+
+### Utilidades
 
 ###### consoleSize
 
