@@ -14,7 +14,7 @@ Para compilar el proyecto, ejecuta cualquiera de estos dos comandos dependiendo 
 # con g++
 g++ -Iinclude src/*.cpp src/menus/*.cpp
 
-# conf clang
+# con clang
 clang -Iinclude src/*.cpp src/menus/*.cpp
 ```
 
