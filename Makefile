@@ -1,5 +1,5 @@
 main:
-	g++ -Wall src/mainMenuSrc.cpp src/utilsDisplay.cpp
+	g++ -Iinclude src/*.cpp src/menus/*.cpp
 
 clanger:
-	clang -Wall src/mainMenuSrc.cpp src/utilsDisplay.cpp
+	clang -Iinclude src/*.cpp src/menus/*.cpp
