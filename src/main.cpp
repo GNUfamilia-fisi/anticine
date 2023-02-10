@@ -4,9 +4,10 @@
 int main(void) {
     gnu::setCursorVisible(false);
 
-    gnu::cargandoDisplay();
-    gnu::chooseCinema();
-    gnu::carteleraFecha();
+    gnu::loadingScreen();
+    gnu::chooseCinemaScreen();
+    gnu::carteleraFechaScreen();
 
+    gnu::setCursorVisible(true);
     return 0;
 }

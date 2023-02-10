@@ -2,8 +2,6 @@
 
 Anticine™ was born as a school project for the "Algorithmics I" assignment. It implements a fully console-based UI to provide the user a whole virtual cinema experience.
 
-
-
 ## Documentation
 
 ### Compilación
@@ -12,10 +10,10 @@ Para compilar el proyecto, ejecuta cualquiera de estos dos comandos dependiendo 
 
 ```bash
 # con g++
-g++ -Iinclude src/*.cpp src/menus/*.cpp
+g++ -Iinclude main.cpp
 
 # con clang
-clang -Iinclude src/*.cpp src/menus/*.cpp
+clang -Iinclude main.cpp
 ```
 
 ### Utilidades
@@ -108,7 +106,8 @@ std::string exec(const char* cmd) {
         while (fgets(buffer, sizeof buffer, pipe) != NULL) {
             result += buffer;
         }
-    } catch (...) {
+    }
+    catch (...) {
         pclose(pipe);
         throw;
     }
@@ -132,16 +131,16 @@ De la misma forma que `exec` "ejecuta" un subproceso y devuelve la respuesta, fe
 ```cpp
 json fetch(std::string url) {
     std::string command = "curl -s " + url;
-    std::string fetchResult = exec(command.c_str());
+    std::string fetchResult = gnu::exec(command);
 
     json data;
+
     try {
         data = json::parse(fetchResult);
     }
-    catch (std::exception e) {
-        throw std::runtime_error("Error de fetching a " + url);
+    catch (...) {
+        throw std::runtime_error("Error al intentar hacer fetch a " + url);
     }
-
     return data;
 }
 ```
