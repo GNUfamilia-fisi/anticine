@@ -16,10 +16,16 @@ namespace gnu {
 // Esta variable no debería ser usada directamente, sino a través de funciones
 HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-typedef struct {
-    int x;
-    int y;
-} vec2d;
+struct vec2d {
+    short x;
+    short y;
+    bool operator == (const vec2d& vec) {
+        return (x == vec.x && y == vec.y);
+    }
+    bool operator != (const vec2d& vec) {
+        return !(*this == vec);
+    }
+};
 
 // Para acceder al código de un color escribe
 //  gnu::color::BLACK, por ejemplo
@@ -60,9 +66,19 @@ enum key {
     Enter = 13
 };
 
-// Posiciona el cursor en { x, y } de la consola ("y" invertida)
+// gotoXY: Posiciona el cursor en { x, y } de la consola ("y" invertida)
+// He hecho tres definiciones de gotoXY, una que usa short, otra que usa int
+// y la última que utiliza los recomendados gnu::vect2d
 void gotoXY(short x, short y) {
     COORD cursorPosition = { x, y };
+    SetConsoleCursorPosition(consoleHandle, cursorPosition);
+}
+void gotoXY(int x, int y) {
+    COORD cursorPosition = { (short)x, (short)y };
+    SetConsoleCursorPosition(consoleHandle, cursorPosition);
+}
+void gotoXY(gnu::vec2d pos) {
+    COORD cursorPosition = { pos.x, pos.y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 }
 
@@ -111,7 +127,7 @@ void setCursorVisible(bool isVisible) {
     SetConsoleCursorInfo(consoleHandle, &cursorInfo);
 }
 
-void setColor(gnu::color color) {
+void setConsoleColor(gnu::color color) {
     SetConsoleTextAttribute(consoleHandle, color);
 }
 

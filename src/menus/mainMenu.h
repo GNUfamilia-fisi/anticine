@@ -61,10 +61,10 @@ void carteleraFechaScreen() {
         );
 
         if (optSelection == 0) {
-            gnu::setColor(gnu::color::WHITE);
+            gnu::setConsoleColor(gnu::color::WHITE);
         }
         if (optSelection == 1) {
-            gnu::setColor(gnu::color::LIGHTGREEN);
+            gnu::setConsoleColor(gnu::color::LIGHTGREEN);
         }
         std::cout << "> " << currentMovieName << " <";
 
@@ -76,7 +76,7 @@ void carteleraFechaScreen() {
         );
         std::cout << currentMovie_i + 1 << "/" << currentBillboard["movies"].size();
 
-        gnu::setColor(gnu::color::WHITE);
+        gnu::setConsoleColor(gnu::color::WHITE);
 
         // Check input
         if (_kbhit()) {
@@ -137,9 +137,9 @@ void displayDate(std::string fulldate, short opt) {
     );
 
     if (opt == 0) {
-        gnu::setColor(gnu::color::LIGHTGREEN);
+        gnu::setConsoleColor(gnu::color::LIGHTGREEN);
         std::cout << "^^";
-        gnu::setColor(gnu::color::WHITE);
+        gnu::setConsoleColor(gnu::color::WHITE);
     }
     else {
         gnu::cleanLine();
@@ -205,7 +205,7 @@ void chooseCinemaScreen() {
 }
 
 void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize) {
-    gnu::setColor(gnu::color::WHITE);
+    gnu::setConsoleColor(gnu::color::WHITE);
 
     size_t indic = namePos;
 
@@ -230,23 +230,23 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
         }
     }
     // cleaner
-    for (size_t i = 0; i < showSize; i++) {
+    for (short i = 0; i < showSize; i++) {
         gnu::gotoXY(0, 12 + i);
         gnu::cleanLine();
     }
-    for (size_t i = 0; i < showSize; i++) {
+    for (short i = 0; i < showSize; i++) {
 
         if (i == indic) {
             gnu::gotoXY(
                 (gnu::getConsoleSize().x / 2) - names[i].length() - 1, 12 + i
             );
 
-            gnu::setColor(gnu::LIGHTGREEN);
+            gnu::setConsoleColor(gnu::LIGHTGREEN);
 
             std::cout << ">>";
         }
         else {
-            gnu::setColor(gnu::WHITE);
+            gnu::setConsoleColor(gnu::WHITE);
         }
         gnu::gotoXY(
             (gnu::getConsoleSize().x / 2) - (names[i].length() / 2), 12 + i
@@ -257,7 +257,7 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
 
 
 void logoDisplay3D(gnu::color color) {
-    gnu::setColor(color);
+    gnu::setConsoleColor(color);
     std::cout << R"(
         $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\
         $$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
@@ -271,7 +271,7 @@ void logoDisplay3D(gnu::color color) {
 }
 
 void displayLogo2D(gnu::color color) {
-    gnu::setColor(color);
+    gnu::setConsoleColor(color);
     std::cout << R"(
     _______ _   _________  ________
     / ____(_/ | / / ____| |/ /_  __/
@@ -283,7 +283,7 @@ void displayLogo2D(gnu::color color) {
 }
 
 void loadingScreen() {
-    gnu::setColor(gnu::color::LIGHTCYAN);
+    gnu::setConsoleColor(gnu::color::LIGHTCYAN);
     char cargando = '#';
     char inicio = '|';
     std::cout<< R"(
