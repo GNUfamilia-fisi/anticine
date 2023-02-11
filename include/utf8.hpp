@@ -53,9 +53,10 @@ std::size_t str_length(std::string &str) {
 
 #if defined(UTF8_STRICT_COUNT)
     size_t character_count = 0;
-    int i = 0;
+    short i = 0;
+    // Iterando sobre los code units (de 1 en 1 byte)
     while (i < str.length()) {
-        int char_length = 0;
+        short char_length = 0;
         byte c = str[i];
         // single-byte character
         if ((c & 0x80) == 0) char_length = 1;
@@ -72,20 +73,25 @@ std::size_t str_length(std::string &str) {
     return character_count;
 #else
     std::size_t len = 0;
+    // std::string -> char*
     char* s = str.data();
 
     while (*s) {
-        len += (*s++ & 0xc0) != 0x80;
+        if ((*s & 0xc0) != 0x80) len++;
     }
     return len;
 #endif
 }
 
-std::vector<std::string> iterate(std::string str) {
-    std::vector<std::string> utf_8_vector;
+
+std::vector<utf8_char_t> iterate(std::string str) {
+    std::vector<utf8_char_t> utf8_string;
     for (std::string::const_iterator it = str.begin(); it != str.end();) {
+        // single-byte code unit
+        // La misma idea que la función str_length, pero
+        // en vez de contar, vamos guardando los caracteres
         byte c = *it;
-        int char_len = 0;
+        short char_len = 0;
         if ((c & 0b10000000) == 0b00000000) {
             char_len = 1;
         }
@@ -99,14 +105,17 @@ std::vector<std::string> iterate(std::string str) {
             char_len = 4;
         }
 
-        std::string char_str;
-        for (int i = 0; i < char_len; i++) {
-            char_str += *it++;
+        // Ahora que sabemos la longitud del caracter,
+        // podemos guardar los code units
+        utf8_char_t utf8_char;
+        for (short i = 0; i < char_len; i++) {
+            utf8_char += *it++; // empujamos el code unit
         }
 
-        utf_8_vector.push_back(char_str);
+        // Y por último, guardamos el caracter utf8
+        utf8_string.push_back(utf8_char);
     }
-    return utf_8_vector;
+    return utf8_string;
 }
 
 } // namespace utf8
