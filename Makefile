@@ -1,5 +1,5 @@
 main:
-	g++ -Iinclude src/*.cpp src/menus/*.cpp
+	g++ -Iinclude main.cpp
 
 clanger:
-	clang -Iinclude src/*.cpp src/menus/*.cpp
+	clang -Iinclude main.cpp
