@@ -24,7 +24,7 @@ void loadingScreen();
 std::string cinemaID;
 
 void carteleraFechaScreen() {
-    system("cls");
+    gnu::cls();
     gnu::displayLogo2D(gnu::color::RED);
 
     json billboardDays = gnu::apifetch("/cines/" + cinemaID + "/cartelera");
@@ -150,7 +150,7 @@ void displayDate(std::string fulldate, short opt) {
 }
 
 void chooseCinemaScreen() {
-    system("cls");
+    gnu::cls();
 
     // Retorna una lista de cines ordenados según la geolocalización
     // del usuario, el primero siempre es el más cercano.
@@ -328,7 +328,7 @@ void loadingScreen() {
     
     gnu::sleep(400);
 
-    system("cls");
+    gnu::cls();
 }
 
 } // namespace gnu

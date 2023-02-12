@@ -146,7 +146,8 @@ class Box {
                 gnu::print(gnu::repeat("█", this->size.x - start_row - len));
             }
         }
-        gnu::resetColor();
+        style::reset_foreground();
+        style::reset_background();
         this->drawBorder();
     }
 

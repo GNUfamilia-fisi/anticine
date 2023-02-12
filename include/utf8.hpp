@@ -41,6 +41,8 @@ typedef std::vector<utf8_char_t> utf8_string_t;
 // los code units de un caracter UTF-8
 typedef unsigned char byte;
 
+#define UTF8_STRICT_COUNT
+
 /**
  * Esta función devuelve la longitud de un std::string
  * que contiene caracteres codificados en UTF-8
@@ -50,6 +52,7 @@ typedef unsigned char byte;
  * utf8::str_length(str); // 9
 */
 std::size_t str_length(std::string &str) {
+    if (str.empty()) return 0;
 
 #if defined(UTF8_STRICT_COUNT)
     size_t character_count = 0;

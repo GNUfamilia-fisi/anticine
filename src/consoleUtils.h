@@ -134,52 +134,12 @@ void setCursorVisible(bool isVisible) {
     SetConsoleCursorInfo(consoleHandle, &cursorInfo);
 }
 
-// Para acceder al código de un color escribe
-//  gnu::color::BLACK, por ejemplo
-// Estos pueden ser usados en funciones como
-enum color : unsigned short {
-    BLACK = 0,
-    BLUE = 1,
-    GREEN = 2,
-    CYAN = 3,
-    RED = 4,
-    MAGENTA = 5,
-    BROWN = 6,
-    LIGHTGRAY = 7,
-    GRAY = 8,
-    LIGHTBLUE = 9,
-    LIGHTGREEN = 10,
-    LIGHTCYAN = 11,
-    LIGHTRED = 12,
-    LIGHTMAGENTA = 13,
-    YELLOW = 14,
-    WHITE = 15
-};
-
-struct rgb {
-    unsigned char r = 255;
-    unsigned char g = 255;
-    unsigned char b = 255;
-};
-
-void setConsoleColor(gnu::color color) {
-    SetConsoleTextAttribute(consoleHandle, color);
-}
-void setFgRGBColor(gnu::rgb color) {
-    std::string txt = "\x1B[38;2;" + std::to_string(color.r) + ";" + std::to_string(color.g) + ";" + std::to_string(color.b) + "m";
-    gnu::print(txt.c_str());
-}
-void setBgRGBColor(gnu::rgb color) {
-    std::string txt = "\x1B[48;2;" + std::to_string(color.r) + ";" + std::to_string(color.g) + ";" + std::to_string(color.b) + "m";
-    gnu::print(txt.c_str());
-}
-void resetColor() {
-    std::cout << "\x1B[0m";
-}
-
 // Pausa el proceso por una cierta cantidad de milisegundos
 void sleep(int ms) {
     std::this_thread::sleep_for(std::chrono::microseconds(ms));
+}
+void cls() {
+    system("cls");
 }
 
 /**
@@ -214,6 +174,12 @@ void print(const char* str) {
     WriteConsole(consoleHandle, str, strlen(str), NULL, NULL);
 }
 
+// Imprime una línea centrada en la consola
+void printLineCentered(std::string line) {
+    gnu::gotoX((short)((gnu::getConsoleSize().x - utf8::str_length(line)) / 2));
+    gnu::print(line);
+}
+
 //Prints multiline raw text at the center of the screen (without padding)
 void printRawCenter(std::string raw) {
     std::vector<std::string> subStringsList;
@@ -231,12 +197,10 @@ void printRawCenter(std::string raw) {
         }
     }
 
-    int padding = (getConsoleSize().x / 2) - (utf8::str_length(subStringsList[0]) / 2);
+    int offset = (getConsoleSize().x / 2) - (utf8::str_length(subStringsList[0]) / 2);
 
     for (size_t i = 0; i < subStringsList.size(); i++){
-        for (int j = 0; j < padding; j++){
-            std::cout << " ";
-        }
+        gnu::gotoX(offset);
         std::cout << subStringsList[i] << std::endl;
     }
 }
