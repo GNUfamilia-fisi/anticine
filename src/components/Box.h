@@ -69,7 +69,6 @@ class Box {
         // Para iterarlo apropiadamente, usamos las utilidades de utf8
         size_t total_len = utf8::str_length(this->content);
         utf8::utf8_string_t utf_8str = utf8::iterate(this->content);
-        std::cout << "total_len: " << total_len << "\tutf_8str.size(): " << utf_8str.size() << std::endl;
 
         // Iteramos sobre cada caracter (utf8)
         short i = 0;
