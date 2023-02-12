@@ -16,6 +16,9 @@ namespace gnu {
 // Esta variable no debería ser usada directamente, sino a través de funciones
 HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
+// Prototipos
+void print(char* str);
+
 struct vec2d {
     short x;
     short y;
@@ -25,28 +28,6 @@ struct vec2d {
     bool operator != (const vec2d& vec) {
         return !(*this == vec);
     }
-};
-
-// Para acceder al código de un color escribe
-//  gnu::color::BLACK, por ejemplo
-// Estos pueden ser usados en funciones como
-enum color : unsigned short {
-    BLACK = 0,
-    BLUE = 1,
-    GREEN = 2,
-    CYAN = 3,
-    RED = 4,
-    MAGENTA = 5,
-    BROWN = 6,
-    LIGHTGRAY = 7,
-    GRAY = 8,
-    LIGHTBLUE = 9,
-    LIGHTGREEN = 10,
-    LIGHTCYAN = 11,
-    LIGHTRED = 12,
-    LIGHTMAGENTA = 13,
-    YELLOW = 14,
-    WHITE = 15
 };
 
 // códigos de teclas para _getch()
@@ -127,13 +108,81 @@ void setCursorVisible(bool isVisible) {
     SetConsoleCursorInfo(consoleHandle, &cursorInfo);
 }
 
+// Para acceder al código de un color escribe
+//  gnu::color::BLACK, por ejemplo
+// Estos pueden ser usados en funciones como
+enum color : unsigned short {
+    BLACK = 0,
+    BLUE = 1,
+    GREEN = 2,
+    CYAN = 3,
+    RED = 4,
+    MAGENTA = 5,
+    BROWN = 6,
+    LIGHTGRAY = 7,
+    GRAY = 8,
+    LIGHTBLUE = 9,
+    LIGHTGREEN = 10,
+    LIGHTCYAN = 11,
+    LIGHTRED = 12,
+    LIGHTMAGENTA = 13,
+    YELLOW = 14,
+    WHITE = 15
+};
+
+struct rgb {
+    unsigned char r = 255;
+    unsigned char g = 255;
+    unsigned char b = 255;
+};
+
 void setConsoleColor(gnu::color color) {
     SetConsoleTextAttribute(consoleHandle, color);
+}
+void setFgRGBColor(gnu::rgb color) {
+    std::string txt = "\x1B[38;2;" + std::to_string(color.r) + ";" + std::to_string(color.g) + ";" + std::to_string(color.b) + "m";
+    gnu::print(txt.c_str());
+}
+void setBgRGBColor(gnu::rgb color) {
+    std::string txt = "\x1B[48;2;" + std::to_string(color.r) + ";" + std::to_string(color.g) + ";" + std::to_string(color.b) + "m";
+    gnu::print(txt.c_str());
+}
+void resetColor() {
+    std::cout << "\x1B[0m";
 }
 
 // Pausa el proceso por una cierta cantidad de milisegundos
 void sleep(int ms) {
     std::this_thread::sleep_for(std::chrono::microseconds(ms));
+}
+
+/**
+ * Repite un string una cierta cantidad de veces
+ * 
+ * @example
+ * repeat("hola", 3) -> "holaholahola"
+*/
+std::string repeat(std::string str, int times) {
+    std::string result = "";
+    for (int i = 0; i < times; i++) {
+        result += str;
+    }
+    return result;
+}
+std::string repeat(const char* str, int times) {
+    std::string result = "";
+    for (int i = 0; i < times; i++) {
+        result += str;
+    }
+    return result;
+}
+
+// Para imprimir cosas a la velocidad de la luz
+void print(std::string str) {
+    WriteConsole(consoleHandle, str.c_str(), str.length(), NULL, NULL);
+}
+void print(char* str) {
+    WriteConsole(consoleHandle, str, strlen(str), NULL, NULL);
 }
 
 } // namespace gnu
