@@ -88,17 +88,25 @@ void setBg(colors::rgb color) {
 // ANSI scape codes
 // https://github.com/mvorbrodt/blog/blob/master/src/ansi_escape_code.hpp
 
+// Para usarlos, solo deben llamarse por su nombre definido
+// colors::bold();
+// colors::underline();
+// colors::blink();
+// etc.
+
 ANSI_ESCAPE_CODE(reset, 0)
 ANSI_ESCAPE_CODE(bold, 1)
-ANSI_ESCAPE_CODE(faint, 2) // font weight
+// ANSI_ESCAPE_CODE(faint, 2) // font weight (no soportado, usar bold)
 ANSI_ESCAPE_CODE(italic, 3)
 ANSI_ESCAPE_CODE(underline, 4)
-ANSI_ESCAPE_CODE(slow_blink, 5)
-// ANSI_ESCAPE_CODE(rapid_blink, 6)
+ANSI_ESCAPE_CODE(blink, 5)
+// ANSI_ESCAPE_CODE(fast_blink, 6)
 ANSI_ESCAPE_CODE(inverse, 7)
 // ANSI_ESCAPE_CODE(conceal, 8)
 // ANSI_ESCAPE_CODE(crossed_out, 9)
 ANSI_ESCAPE_CODE(underline_off, 24)
 ANSI_ESCAPE_CODE(blink_off, 25)
+ANSI_ESCAPE_CODE(reset_foreground, 39)
+ANSI_ESCAPE_CODE(reset_background, 49)
 
 } // namespace colors
