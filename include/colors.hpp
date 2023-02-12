@@ -80,9 +80,9 @@ void setBg(colors::rgb color) {
 // Para definir una serie de códigos ANSI
 
 #define ANSI_ESCAPE_CODE(name, code) \
-	void name##() \
+	void name() \
 	{ \
-		print("\x1B["#code"m"); \
+		print("\x1B[" #code "m"); \
 	} \
 
 // ANSI scape codes
