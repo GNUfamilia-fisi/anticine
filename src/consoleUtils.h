@@ -2,11 +2,15 @@
 
 #include <json.hpp>
 #include <iostream>
+#include <iomanip>
+#include <cmath>
 #include <windows.h>
 #include <thread>
 #include <chrono>
 #include <conio.h>
 #include <cstdio>
+
+#include <utf8.hpp>
 
 using json = nlohmann::json;
 
@@ -97,7 +101,8 @@ gnu::vec2d getConsoleSize() {
 }
 
 // Sobreescribe toda una línea entera de la consola con espacios en blanco
-void cleanLine() {
+void cleanLine(short y) {
+    gotoXY(0, y);
     for (int i = 0; i < gnu::getConsoleSize().x; i++) {
         std::cout << " ";
     }
@@ -118,6 +123,33 @@ void setColor(gnu::color color) {
 // Pausa el proceso por una cierta cantidad de milisegundos
 void sleep(int ms) {
     std::this_thread::sleep_for(std::chrono::microseconds(ms));
+}
+
+//Prints multiline raw text at the center of the screen (without padding)
+void printRawCenter(std::string raw) {
+    std::vector<std::string> subStringsList;
+    std::string buffer = "";
+
+    for (size_t i = 0; i < raw.length(); i++){
+        if (raw[i] != '\n' && i != raw.length() - 1){
+            buffer += raw[i];
+        }
+        else{
+            if (buffer.empty()) continue;
+            if (i == raw.length() - 1) buffer += raw[i];
+            subStringsList.push_back(buffer);
+            buffer = "";
+        }
+    }
+
+    int padding = (getConsoleSize().x / 2) - (utf8::str_length(subStringsList[0]) / 2);
+
+    for (size_t i = 0; i < subStringsList.size(); i++){
+        for (int j = 0; j < padding; j++){
+            std::cout << " ";
+        }
+        std::cout << subStringsList[i] << std::endl;
+    }
 }
 
 } // namespace gnu

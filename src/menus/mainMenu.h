@@ -53,7 +53,6 @@ void carteleraFechaScreen() {
         currentMovieName = currentMovie["title"].get<std::string>();
 
         gnu::gotoXY(0, 15);
-        gnu::cleanLine();
         gnu::displayDate(availableDates[currentDay], optSelection);
 
         gnu::gotoXY(
@@ -68,9 +67,6 @@ void carteleraFechaScreen() {
         }
         std::cout << "> " << currentMovieName << " <";
 
-        gnu::gotoXY(0, 16);
-        gnu::cleanLine();
-
         gnu::gotoXY(
             (gnu::getConsoleSize().x / 2) + (currentMovieName.size() / 2), 16
         );
@@ -81,9 +77,16 @@ void carteleraFechaScreen() {
         // Check input
         if (_kbhit()) {
             char hit = _getch();
+            
+            gnu::cleanLine(15);
+            gnu::cleanLine(16);
+
             switch (hit) {
             case gnu::key::Up: {
-                if (optSelection > 0) optSelection--;
+                if (optSelection > 0){
+                    optSelection--;
+                }
+
                 break;
             }
             case gnu::key::Down: {
@@ -142,7 +145,7 @@ void displayDate(std::string fulldate, short opt) {
         gnu::setColor(gnu::color::WHITE);
     }
     else {
-        gnu::cleanLine();
+        gnu::cleanLine(13);
     }
 }
 
@@ -161,7 +164,7 @@ void chooseCinemaScreen() {
 
     // main menu loop
     while (lock) {
-        gnu::gotoXY(gnu::getConsoleSize().x / 2, 0);
+        gnu::gotoXY(0, 1);
         // Display the logo
         gnu::logoDisplay3D((gnu::color)color);
         color %= 15;
@@ -173,6 +176,11 @@ void chooseCinemaScreen() {
             char hit = _getch();
             switch (hit) {
             case gnu::key::Down:
+
+                for (size_t i = 0; i < listLength; i++) {
+                    gnu::cleanLine(12+i);
+                }
+
                 if (currentCine < nearCinemasData["cinemas"].size() - 1) {
                     currentCine++;
                 }
@@ -184,6 +192,11 @@ void chooseCinemaScreen() {
                 }
                 break;
             case gnu::key::Up:
+                
+                for (size_t i = 0; i < listLength; i++) {
+                    gnu::cleanLine(12+i);
+                }
+
                 if (currentCine > 0) {
                     currentCine--;
                 }
@@ -209,6 +222,8 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
 
     size_t indic = namePos;
 
+    std::string displayName;
+
     if (closeData.size() < showSize) {
         showSize = closeData.size();
     }
@@ -229,11 +244,7 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
             names[i] = closeData[i + current - showSize + 1]["name"].get<std::string>();
         }
     }
-    // cleaner
-    for (size_t i = 0; i < showSize; i++) {
-        gnu::gotoXY(0, 12 + i);
-        gnu::cleanLine();
-    }
+
     for (size_t i = 0; i < showSize; i++) {
 
         if (i == indic) {
@@ -251,6 +262,7 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
         gnu::gotoXY(
             (gnu::getConsoleSize().x / 2) - (names[i].length() / 2), 12 + i
         );
+
         std::cout << names[i];
     }
 }
@@ -258,28 +270,31 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
 
 void logoDisplay3D(gnu::color color) {
     gnu::setColor(color);
-    std::cout << R"(
-        $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\
-        $$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
-        $$ /  \__|$$\ $$$$\ $$ |$$ |      \$$\ $$  |   $$ |   
-        $$ |      $$ |$$ $$\$$ |$$$$$\     \$$$$  /    $$ |   
-        $$ |      $$ |$$ \$$$$ |$$  __|    $$  $$<     $$ |   
-        $$ |  $$\ $$ |$$ |\$$$ |$$ |      $$  /\$$\    $$ |   
-        \$$$$$$  |$$ |$$ | \$$ |$$$$$$$$\ $$ /  $$ |   $$ |   
-        \______/ \__|\__|  \__|\________|\__|  \__|   \__|   
-    )" << std::endl;
+    std::string cinext1 = R"(
+ $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\
+$$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
+$$ /  \__|$$\ $$$$\ $$ |$$ |      \$$\ $$  |   $$ |   
+$$ |      $$ |$$ $$\$$ |$$$$$\     \$$$$  /    $$ |   
+$$ |      $$ |$$ \$$$$ |$$  __|    $$  $$<     $$ |   
+$$ |  $$\ $$ |$$ |\$$$ |$$ |      $$  /\$$\    $$ |   
+\$$$$$$  |$$ |$$ | \$$ |$$$$$$$$\ $$ /  $$ |   $$ |   
+ \______/ \__|\__|  \__|\________|\__|  \__|   \__|   
+)";
+
+    gnu::printRawCenter(cinext1);
 }
 
 void displayLogo2D(gnu::color color) {
     gnu::setColor(color);
-    std::cout << R"(
-    _______ _   _________  ________
-    / ____(_/ | / / ____| |/ /_  __/
-    / /   / /  |/ / __/  |   / / /   
-    / /___/ / /|  / /___ /   | / /    
-    \____/_/_/ |_/_____//_/|_|/_/     
-                                
-    )" << std::endl;
+    std::string cinext2 = R"(
+   _______ _   _________  ________
+  / ____(_/ | / / ____| |/ /_  __/
+ / /   / /  |/ / __/  |   / / /   
+/ /___/ / /|  / /___ /   | / /    
+\____/_/_/ |_/_____//_/|_|/_/     
+)";
+
+    gnu::printRawCenter(cinext2);
 }
 
 void loadingScreen() {
@@ -287,12 +302,12 @@ void loadingScreen() {
     char cargando = '#';
     char inicio = '|';
     std::cout<< R"(
-                                                .___
-    ____ _____ _______  _________    ____    __| _/____  
+                                                 .___
+      ____ _____ _______  _________    ____    __| _/____  
     _/ ___\\__  \\_  __ \/ ___\__  \  /    \  / __ |/  _ \
     \  \___ / __ \|  | \/ /_/  > __ \|   |  \/ /_/ (  <_> )
-    \___  >____  /__|  \___  (____  /___|  /\____ |\____/ 
-        \/     \/     /_____/     \/     \/      \/       
+     \___  >____  /__|  \___  (____  /___|  /\____ |\____/ 
+         \/     \/     /_____/     \/     \/      \/       
     )"<<"\n";
     
     gnu::gotoXY(
