@@ -77,7 +77,7 @@ std::size_t str_length(std::string &str) {
     char* s = (char*)str.data();
 
     while (*s) {
-        if ((*s & 0xc0) != 0x80) len++;
+        len += (*s++ & 0xc0) != 0x80;
     }
     return len;
 #endif
