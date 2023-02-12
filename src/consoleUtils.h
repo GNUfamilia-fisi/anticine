@@ -30,7 +30,15 @@ struct vec2d {
     bool operator != (const vec2d& vec) {
         return !(*this == vec);
     }
+    vec2d operator + (const vec2d& vec) {
+        return { (short)(x + vec.x), (short)(y + vec.y) };
+    }
+    vec2d operator - (const vec2d& vec) {
+        return { (short)(x - vec.x), (short)(y - vec.y) };
+    }
 };
+vec2d getConsoleSize();
+vec2d getCursorPos();
 
 // códigos de teclas para _getch()
 enum key {
@@ -64,6 +72,14 @@ void gotoXY(gnu::vec2d pos) {
     COORD cursorPosition = { pos.x, pos.y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 }
+void gotoX(short x) {
+    COORD cursorPosition = { x, gnu::getCursorPos().y };
+    SetConsoleCursorPosition(consoleHandle, cursorPosition);
+}
+void gotoY(short y) {
+    COORD cursorPosition = { gnu::getCursorPos().x, y };
+    SetConsoleCursorPosition(consoleHandle, cursorPosition);
+}
 
 // Ejecuta un comando de shell (consola) y devuelve su resultado (stdout)
 // como string (texto plano)
@@ -92,6 +108,13 @@ gnu::vec2d getConsoleSize() {
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &BufferInfo);
 
     gnu::vec2d coords = { BufferInfo.dwSize.X, BufferInfo.dwSize.Y };
+    return coords;
+}
+gnu::vec2d getCursorPos() {
+    CONSOLE_SCREEN_BUFFER_INFO BufferInfo;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &BufferInfo);
+
+    gnu::vec2d coords = { BufferInfo.dwCursorPosition.X, BufferInfo.dwCursorPosition.Y };
     return coords;
 }
 

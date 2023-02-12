@@ -47,8 +47,7 @@ typedef unsigned char byte;
  * 
  * @example
  * std::string str = "áéíóú 🙀👌👌";
- * str.length(); // 23         (incorrecto)
- * utf8::str_length(str); // 9 (correcto)
+ * utf8::str_length(str); // 9
 */
 std::size_t str_length(std::string &str) {
 
@@ -77,7 +76,9 @@ std::size_t str_length(std::string &str) {
     // std::string -> char*
     char* s = (char*)str.data();
 
-    while (*s) len += (*s++ & 0xc0) != 0x80;
+    while (*s) {
+        len += (*s++ & 0xc0) != 0x80;
+    }
     return len;
 #endif
 }

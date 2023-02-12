@@ -3,7 +3,7 @@
 #include <string>
 #include <Windows.h>
 
-namespace colors {
+namespace style {
 
 HANDLE colorConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -43,19 +43,20 @@ struct rgb {
  * Solo colores predefinidos por Windows.h
  * 
  * @example
- * setColor(colors::color::RED);
- * setColor(colors::color::LIGHTRED);
+ * setColor(style::color::RED);
+ * setColor(style::color::LIGHTRED);
 */
-void setColor(colors::color color) {
+
+void setColor(style::color color) {
     SetConsoleTextAttribute(colorConsoleHandle, color);
 }
 /**
  * Colores RGB para los caracteres
  * 
  * @example
- * colors::setFg({255, 0, 0}); // Rojo
+ * style::setFg({255, 0, 0}); // Rojo
 */
-void setFg(colors::rgb color) {
+void setFg(style::rgb color) {
     std::string txt = "\x1B[38;2;" +
 		std::to_string(color.r) + ";" +
 		std::to_string(color.g) + ";" +
@@ -66,10 +67,10 @@ void setFg(colors::rgb color) {
  * Colores RGB para el fondo de los caracteres
  * 
  * @example
- * colors::setBg({255, 0, 0}); // Rojo
- * colors::setBg({ 127, 215, 84 }); // Verde
+ * style::setBg({255, 0, 0}); // Rojo
+ * style::setBg({ 127, 215, 84 }); // Verde
 */
-void setBg(colors::rgb color) {
+void setBg(style::rgb color) {
     std::string txt = "\x1B[48;2;" +
 		std::to_string(color.r) + ";" +
 		std::to_string(color.g) + ";" +
@@ -88,17 +89,25 @@ void setBg(colors::rgb color) {
 // ANSI scape codes
 // https://github.com/mvorbrodt/blog/blob/master/src/ansi_escape_code.hpp
 
+// Para usarlos, solo deben llamarse por su nombre definido
+// style::bold();
+// style::underline();
+// style::blink();
+// etc.
+
 ANSI_ESCAPE_CODE(reset, 0)
 ANSI_ESCAPE_CODE(bold, 1)
-ANSI_ESCAPE_CODE(faint, 2) // font weight
+// ANSI_ESCAPE_CODE(faint, 2) // font weight (no soportado, usar bold)
 ANSI_ESCAPE_CODE(italic, 3)
 ANSI_ESCAPE_CODE(underline, 4)
-ANSI_ESCAPE_CODE(slow_blink, 5)
-// ANSI_ESCAPE_CODE(rapid_blink, 6)
+ANSI_ESCAPE_CODE(blink, 5)
+// ANSI_ESCAPE_CODE(fast_blink, 6)
 ANSI_ESCAPE_CODE(inverse, 7)
 // ANSI_ESCAPE_CODE(conceal, 8)
 // ANSI_ESCAPE_CODE(crossed_out, 9)
 ANSI_ESCAPE_CODE(underline_off, 24)
 ANSI_ESCAPE_CODE(blink_off, 25)
+ANSI_ESCAPE_CODE(reset_foreground, 39)
+ANSI_ESCAPE_CODE(reset_background, 49)
 
 } // namespace colors

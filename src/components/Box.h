@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <utf8.hpp>
-#include <colors.hpp>
+#include <style.hpp>
 #include "../consoleUtils.h"
 
 namespace gnu {
@@ -12,45 +12,81 @@ class Box {
   public:
     std::string content;
     bool transparent = true;
+    bool showBorder = true;
 
-    gnu::rgb rgb_color;
-    gnu::rgb text_rgb_color = { 0, 0, 0 };
-    gnu::vec2d size;
-    gnu::vec2d position;
+    style::rgb box_color = { 255, 255, 255 };
+    style::rgb text_color = { 0, 0, 0 };
+    gnu::vec2d size = { 5, 5 };
+    gnu::vec2d position = { 0, 0 };
 
     Box(gnu::vec2d size) {
         this->size = size;
-        this->position = { 0, 0 };
-    }
-    Box() {
-        this->size = { 5, 5 };
-        this->position = { 0, 0 };
     }
     void setPosition(gnu::vec2d position) {
         this->position = position;
     }
-    void setColor(gnu::rgb rgb_color) {
-        this->rgb_color = rgb_color;
+    void setBoxColor(style::rgb rgb_color) {
+        this->box_color = rgb_color;
         this->transparent = false;
     }
-    void setFontColor(gnu::rgb font_color) {
-        this->text_rgb_color = font_color;
+    void setFontColor(style::rgb font_color) {
+        this->text_color = font_color;
     }
+    void drawBorder() {
+        // Dibujamos el marco
+        style::setFg(this->box_color);
+        gnu::gotoXY(this->position.x - 1, this->position.y - 1);
+        std::cout << "┌";
+        for (short i = 0; i < this->size.x; i++) {
+            std::cout << "─";
+        }
+        std::cout << "┐";
+        for (short i = 0; i < this->size.y; i++) {
+            gnu::gotoXY({ (short)(this->position.x - 1), (short)(this->position.y + i) });
+            std::cout << "│";
+            gnu::gotoXY({ (short)(this->position.x + this->size.x), (short)(this->position.y + i) });
+            std::cout << "│";
+        }
+        gnu::gotoXY({ (short)(this->position.x - 1), (short)(this->position.y + this->size.y) });
+        std::cout << "└";
+        for (short i = 0; i < this->size.x; i++) {
+            std::cout << "─";
+        }
+        std::cout << "┘";
+        style::reset_foreground();
+        style::reset_background();
+    }
+
     void draw() {
+        // Para dibujar, primero rompemos el contenido en varias
+        // líneas, de modo que no se desborde de la caja
+
+        // Variables de seguimiento:
         short last_space = 0;
         short last_break = 0;
-        short i = 0;
-        // std::vector<utf8::utf8_string_t> lines;
+        // Array de líneas
         std::vector<std::string> lines;
+        // Para iterarlo apropiadamente, usamos las utilidades de utf8
         size_t total_len = utf8::str_length(this->content);
         utf8::utf8_string_t utf_8str = utf8::iterate(this->content);
 
+        // Iteramos sobre cada caracter (utf8)
+        short i = 0;
         for (const auto &ch : utf_8str) {
-            // hacemos seguimiento de los espacios
             if (ch == " ") {
+                // hacemos seguimiento de los espacios
                 last_space = i;
             }
-            
+            if (ch == "\n") {
+                // Si encontramos un salto de línea, cortamos
+                // hasta donde estemos (sin incluir el salto de línea)
+                std::string line;
+                for (int j = last_break; j < i; j++) {
+                    line += utf_8str[j];
+                }
+                lines.push_back(line);
+                last_break = i + 1; // +1 para saltar el salto de línea
+            }
             if (i - last_break >= this->size.x) {
                 // Si esto se cumple es porque llegamos al límite
                 // pero no hemos encontrado un espacio en donde cortar
@@ -85,10 +121,10 @@ class Box {
         short start_col = (this->size.y - lines.size()) / 2;
         if (start_col < 0) start_col = 0;
 
-        gnu::setFgRGBColor(this->rgb_color);
+        style::setFg(this->box_color);
         for (short y = 0; y < this->size.y; ) {
             if (y != start_col) {
-                gnu::gotoXY(position.x, (short)(position.y + y));
+                gnu::gotoXY(this->position.x, (short)(this->position.y + y));
                 gnu::print(emptyRow);
                 y++;
                 continue;
@@ -97,20 +133,28 @@ class Box {
                 size_t len = utf8::str_length(line);
                 int start_row = (this->size.x - len) / 2;
 
-                gnu::gotoXY(position.x, (short)(position.y + y++));
+                gnu::gotoXY(this->position.x, (short)(this->position.y + y++));
                 // padding left
                 gnu::print(gnu::repeat("█", start_row));
 
-                gnu::setBgRGBColor(this->rgb_color);
-                gnu::setFgRGBColor(this->text_rgb_color);
+                style::setBg(this->box_color);
+                style::setFg(this->text_color);
                 gnu::print(line);
 
                 // padding right
-                gnu::setFgRGBColor(this->rgb_color);
+                style::setFg(this->box_color);
                 gnu::print(gnu::repeat("█", this->size.x - start_row - len));
             }
         }
         gnu::resetColor();
+        this->drawBorder();
+    }
+
+    void centerHorizontal() {
+        this->position.x = (short)((gnu::getConsoleSize().x - this->size.x) / 2);
+    }
+    void centerVertical() {
+        this->position.y = (short)((gnu::getConsoleSize().y - this->size.y) / 2);
     }
 };
 
