@@ -1,5 +1,5 @@
 main:
-	g++ -Iinclude main.cpp
+	g++ -Iinclude src/main.cpp
 
 clanger:
-	clang -Iinclude main.cpp
+	clang -Iinclude src/main.cpp
