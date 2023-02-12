@@ -102,4 +102,3 @@ ANSI_ESCAPE_CODE(underline_off, 24)
 ANSI_ESCAPE_CODE(blink_off, 25)
 
 } // namespace colors
-
