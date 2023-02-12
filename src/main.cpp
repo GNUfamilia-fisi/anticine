@@ -35,19 +35,25 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 
     gnu::Box textBox({ 70, 8 });
     textBox.content = "Luego del éxito de taquilla de Asu Mare 1, 2 y 3 una nueva aventura está por empezar. Los recordados amigos de Cachin están de regreso: El Culi, Lechuga, El Chato y Poroto nos demostrarán que la amistad lo puede todo. Después de superar muchas adversidades, una herencia los pondrá a prueba, enfrentándose en divertidas situaciones y a oscuros personajes que     intentarán boicotear uno de sus más grandes sueños. ¡La apertura del nuevo restaurante Asu Mare!";
-    textBox.setBoxColor({ 0, 0, 0 });
+    textBox.setBoxColor({ 100, 100, 100 });
     textBox.setFontColor({ 220, 220, 220 });
     textBox.position.y = 33;
+    textBox.transparent = true;
+    textBox.showBorder = false;
 
     gnu::Box buttonLeft({ 6, gnu::getConsoleSize().y });
-    buttonLeft.setBoxColor({ 100, 100, 100 });
+    buttonLeft.setBoxColor({ 35, 35, 35 });
     buttonLeft.position.x = 0;
-    buttonLeft.content = "←";
+    buttonLeft.content = "<-";
+    buttonLeft.showBorder = false;
+    buttonLeft.setFontColor({ 150, 150, 150 });
 
     gnu::Box buttonRight({ 6, gnu::getConsoleSize().y });
-    buttonRight.setBoxColor({ 100, 100, 100 });
+    buttonRight.setBoxColor({ 35, 35, 35 });
     buttonRight.position.x = gnu::getConsoleSize().x - 6;
-    buttonRight.content = "→";
+    buttonRight.content = "->";
+    buttonRight.showBorder = false;
+    buttonRight.setFontColor({ 150, 150, 150 });
     char input = '\0';
 
     while (true) {
@@ -79,8 +85,8 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
         textBox.centerHorizontal();
         textBox.draw();
 
-        buttonLeft.size.y = gnu::getConsoleSize().y - 2;
-        buttonRight.size.y = gnu::getConsoleSize().y - 2;
+        buttonLeft.size.y = gnu::getConsoleSize().y;
+        buttonRight.size.y = gnu::getConsoleSize().y;
         buttonRight.position.x = gnu::getConsoleSize().x - 7;
         buttonLeft.draw();
         buttonRight.draw();

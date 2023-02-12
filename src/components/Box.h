@@ -13,11 +13,13 @@ class Box {
     std::string content;
     bool transparent = true;
     bool showBorder = true;
+    std::string fill = "█";
 
     style::rgb box_color = { 255, 255, 255 };
     style::rgb text_color = { 0, 0, 0 };
     gnu::vec2d size = { 5, 5 };
     gnu::vec2d position = { 0, 0 };
+    short padding = 1;
 
     Box(gnu::vec2d size) {
         this->size = size;
@@ -58,6 +60,8 @@ class Box {
     }
 
     void draw() {
+        style::reset_foreground();
+        style::reset_background();
         // Para dibujar, primero rompemos el contenido en varias
         // líneas, de modo que no se desborde de la caja
 
@@ -87,7 +91,7 @@ class Box {
                 lines.push_back(line);
                 last_break = i + 1; // +1 para saltar el salto de línea
             }
-            if (i - last_break >= this->size.x) {
+            if (i - last_break >= this->size.x - this->padding * 2) {
                 // Si esto se cumple es porque llegamos al límite
                 // pero no hemos encontrado un espacio en donde cortar
                 if (last_space <= last_break) {
@@ -114,14 +118,20 @@ class Box {
         }
 
         std::string emptyRow;
+
+        // Si es transparente, utilizamos relleno con espacios y color de fondo negro
+        // (hacemos una copia para no modificar los valores originales)
+        char* filling = (char*)(this->transparent ? " " : this->fill.c_str());
+        style::rgb fill_color = this->transparent ? style::rgb({ 0, 0, 0 }) : this->box_color;
+
         for (int i = 0; i < this->size.x; i++) {
-            emptyRow += "█";
+            emptyRow += filling;
         }
 
         short start_col = (this->size.y - lines.size()) / 2;
         if (start_col < 0) start_col = 0;
 
-        style::setFg(this->box_color);
+        style::setFg(fill_color);
         for (short y = 0; y < this->size.y; ) {
             if (y != start_col || lines.size() == 0) {
                 gnu::gotoXY(this->position.x, this->position.y + y);
@@ -129,26 +139,32 @@ class Box {
                 y++;
                 continue;
             }
+            // Dibujamos las líneas
             for (auto &line : lines) {
                 size_t len = utf8::str_length(line);
                 int start_row = (this->size.x - len) / 2;
-
                 gnu::gotoXY(this->position.x, this->position.y + y++);
-                // padding left
-                gnu::print(gnu::repeat("█", start_row));
 
-                style::setBg(this->box_color);
+                // padding left
+                // style::setFg(this->box_color); (establecido arriba)
+                gnu::print(gnu::repeat(filling, start_row));
+
+                // text
+                style::setBg(fill_color);
                 style::setFg(this->text_color);
                 gnu::print(line);
 
                 // padding right
-                style::setFg(this->box_color);
-                gnu::print(gnu::repeat("█", this->size.x - start_row - len));
+                style::reset_background();
+                style::setFg(fill_color);
+                gnu::print(gnu::repeat(filling, this->size.x - start_row - len));
             }
         }
         style::reset_foreground();
         style::reset_background();
-        this->drawBorder();
+        if (this->showBorder) {
+            this->drawBorder();
+        }
     }
 
     void centerHorizontal() {
