@@ -249,7 +249,8 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
 
         if (i == indic) {
             gnu::gotoXY(
-                (gnu::getConsoleSize().x / 2) - names[i].length() - 1, (short)(12 + i)
+                (gnu::getConsoleSize().x / 2) - names[i].length() - 1,
+                12 + i
             );
 
             gnu::setConsoleColor(gnu::LIGHTGREEN);
@@ -260,7 +261,8 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
             gnu::setConsoleColor(gnu::WHITE);
         }
         gnu::gotoXY(
-            (gnu::getConsoleSize().x / 2) - (names[i].length() / 2), (short)(12 + i)
+            (gnu::getConsoleSize().x / 2) - (names[i].length() / 2),
+            12 + i
         );
 
         std::cout << names[i];

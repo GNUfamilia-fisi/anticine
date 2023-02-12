@@ -37,19 +37,19 @@ class Box {
         style::setFg(this->box_color);
         gnu::gotoXY(this->position.x - 1, this->position.y - 1);
         std::cout << "┌";
-        for (short i = 0; i < this->size.x; i++) {
+        for (int i = 0; i < this->size.x; i++) {
             std::cout << "─";
         }
         std::cout << "┐";
-        for (short i = 0; i < this->size.y; i++) {
-            gnu::gotoXY({ (short)(this->position.x - 1), (short)(this->position.y + i) });
+        for (int i = 0; i < this->size.y; i++) {
+            gnu::gotoXY( this->position.x - 1, this->position.y + i);
             std::cout << "│";
-            gnu::gotoXY({ (short)(this->position.x + this->size.x), (short)(this->position.y + i) });
+            gnu::gotoXY(this->position.x + this->size.x, this->position.y + i);
             std::cout << "│";
         }
-        gnu::gotoXY({ (short)(this->position.x - 1), (short)(this->position.y + this->size.y) });
+        gnu::gotoXY(this->position.x - 1, this->position.y + this->size.y);
         std::cout << "└";
-        for (short i = 0; i < this->size.x; i++) {
+        for (int i = 0; i < this->size.x; i++) {
             std::cout << "─";
         }
         std::cout << "┘";
@@ -124,7 +124,7 @@ class Box {
         style::setFg(this->box_color);
         for (short y = 0; y < this->size.y; ) {
             if (y != start_col) {
-                gnu::gotoXY(this->position.x, (short)(this->position.y + y));
+                gnu::gotoXY(this->position.x, this->position.y + y);
                 gnu::print(emptyRow);
                 y++;
                 continue;
@@ -133,7 +133,7 @@ class Box {
                 size_t len = utf8::str_length(line);
                 int start_row = (this->size.x - len) / 2;
 
-                gnu::gotoXY(this->position.x, (short)(this->position.y + y++));
+                gnu::gotoXY(this->position.x, this->position.y + y++);
                 // padding left
                 gnu::print(gnu::repeat("█", start_row));
 
@@ -151,10 +151,10 @@ class Box {
     }
 
     void centerHorizontal() {
-        this->position.x = (short)((gnu::getConsoleSize().x - this->size.x) / 2);
+        this->position.x = (gnu::getConsoleSize().x - this->size.x) / 2;
     }
     void centerVertical() {
-        this->position.y = (short)((gnu::getConsoleSize().y - this->size.y) / 2);
+        this->position.y = (gnu::getConsoleSize().y - this->size.y) / 2;
     }
 };
 

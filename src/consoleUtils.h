@@ -64,10 +64,6 @@ enum key {
 // gotoXY: Posiciona el cursor en { x, y } de la consola ("y" invertida)
 // He hecho tres definiciones de gotoXY, una que usa short, otra que usa int
 // y la última que utiliza los recomendados gnu::vect2d
-void gotoXY(short x, short y) {
-    COORD cursorPosition = { x, y };
-    SetConsoleCursorPosition(consoleHandle, cursorPosition);
-}
 void gotoXY(int x, int y) {
     COORD cursorPosition = { (short)x, (short)y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
@@ -124,7 +120,7 @@ gnu::vec2d getCursorPos() {
 
 // Sobreescribe toda una línea entera de la consola con espacios en blanco
 void cleanLine(short y) {
-    gnu::gotoXY((short)0, y);
+    gnu::gotoXY(0, y);
     for (int i = 0; i < gnu::getConsoleSize().x; i++) {
         std::cout << " ";
     }
