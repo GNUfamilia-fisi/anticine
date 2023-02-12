@@ -1,12 +1,12 @@
 #pragma once
 
-#include <json.hpp>
 #include <iostream>
-#include <windows.h>
 #include <thread>
 #include <chrono>
-#include <conio.h>
 #include <cstdio>
+#include <windows.h>
+#include <conio.h>
+#include <json.hpp>
 
 using json = nlohmann::json;
 
@@ -18,6 +18,8 @@ HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 // Prototipos
 void print(char* str);
+void print(const char* str);
+void print(std::string str);
 
 struct vec2d {
     short x;
@@ -182,6 +184,9 @@ void print(std::string str) {
     WriteConsole(consoleHandle, str.c_str(), str.length(), NULL, NULL);
 }
 void print(char* str) {
+    WriteConsole(consoleHandle, str, strlen(str), NULL, NULL);
+}
+void print(const char* str) {
     WriteConsole(consoleHandle, str, strlen(str), NULL, NULL);
 }
 

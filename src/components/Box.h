@@ -2,9 +2,9 @@
 
 #include <string>
 #include <vector>
+#include <utf8.hpp>
+#include <colors.hpp>
 #include "../consoleUtils.h"
-#include "utf8.hpp"
-#include "colors.hpp"
 
 namespace gnu {
 
