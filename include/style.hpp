@@ -107,7 +107,7 @@ ANSI_ESCAPE_CODE(inverse, 7)
 // ANSI_ESCAPE_CODE(crossed_out, 9)
 ANSI_ESCAPE_CODE(underline_off, 24)
 ANSI_ESCAPE_CODE(blink_off, 25)
-ANSI_ESCAPE_CODE(reset_foreground, 39)
-ANSI_ESCAPE_CODE(reset_background, 49)
+ANSI_ESCAPE_CODE(reset_fg, 39)
+ANSI_ESCAPE_CODE(reset_bg, 49)
 
 } // namespace colors

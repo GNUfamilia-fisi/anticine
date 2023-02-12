@@ -55,13 +55,13 @@ class Box {
             std::cout << "─";
         }
         std::cout << "┘";
-        style::reset_foreground();
-        style::reset_background();
+        style::reset_fg();
+        style::reset_bg();
     }
 
     void draw() {
-        style::reset_foreground();
-        style::reset_background();
+        style::reset_fg();
+        style::reset_bg();
         // Para dibujar, primero rompemos el contenido en varias
         // líneas, de modo que no se desborde de la caja
 
@@ -155,13 +155,13 @@ class Box {
                 gnu::print(line);
 
                 // padding right
-                style::reset_background();
+                style::reset_bg();
                 style::setFg(fill_color);
                 gnu::print(gnu::repeat(filling, this->size.x - start_row - len));
             }
         }
-        style::reset_foreground();
-        style::reset_background();
+        style::reset_fg();
+        style::reset_bg();
         if (this->showBorder) {
             this->drawBorder();
         }
