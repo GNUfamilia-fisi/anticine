@@ -63,6 +63,11 @@ void setFg(style::rgb color) {
 		std::to_string(color.b) + "m";
     print(txt.c_str());
 }
+
+void setDefaultFg() {
+    std::string txt = "\x1B[0m";
+    print(txt.c_str());
+}
 /**
  * Colores RGB para el fondo de los caracteres
  * 

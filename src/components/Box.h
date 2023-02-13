@@ -13,6 +13,8 @@ class Box {
     std::string content;
     bool transparent = true;
     bool showBorder = true;
+    bool alreadyFlushed = false;
+    bool defaultFontColor = true;
     std::string fill = "█";
 
     style::rgb box_color = { 255, 255, 255 };
@@ -59,9 +61,47 @@ class Box {
         style::reset_bg();
     }
 
+    void flushBorders (){
+        style::setFg(this->box_color);
+        gnu::gotoXY(this->position.x - 1, this->position.y - 1);
+        std::cout << " ";
+        for (int i = 0; i < this->size.x; i++) {
+            std::cout << " ";
+        }
+        std::cout << " ";
+        for (int i = 0; i < this->size.y; i++) {
+            gnu::gotoXY( this->position.x - 1, this->position.y + i);
+            std::cout << " ";
+            gnu::gotoXY(this->position.x + this->size.x, this->position.y + i);
+            std::cout << " ";
+        }
+        gnu::gotoXY(this->position.x - 1, this->position.y + this->size.y);
+        std::cout << " ";
+        for (int i = 0; i < this->size.x; i++) {
+            std::cout << " ";
+        }
+        std::cout << " ";
+        style::reset_fg();
+        style::reset_bg();        
+    }
+
+    void setBordersVisible(bool flag) {
+        if (!flag){
+            if (this->alreadyFlushed) return;
+
+            flushBorders();
+            this->alreadyFlushed = true;
+            this->showBorder = false;
+        }
+        else {
+            this->alreadyFlushed = false;
+            this->showBorder = true;
+        }
+    }
+
     void draw() {
         style::reset_fg();
-        style::reset_bg();
+        //style::reset_bg();
         // Para dibujar, primero rompemos el contenido en varias
         // líneas, de modo que no se desborde de la caja
 
@@ -150,8 +190,14 @@ class Box {
                 gnu::print(gnu::repeat(filling, start_row));
 
                 // text
-                style::setBg(fill_color);
-                style::setFg(this->text_color);
+                if (this->transparent) {
+                    if (defaultFontColor) style::setDefaultFg();
+                    else style::setFg(this->text_color);
+                }
+                else {
+                    style::setFg(this->text_color);
+                    style::setBg(fill_color);
+                }
                 gnu::print(line);
 
                 // padding right
@@ -172,6 +218,14 @@ class Box {
     }
     void centerVertical() {
         this->position.y = (gnu::getConsoleSize().y - this->size.y) / 2;
+    }
+    bool isInside(POINT dot) {
+        if (dot.x >= this->position.x && dot.x <= this->position.x + this->size.x) {
+            if (dot.y - 30 >= this->position.y && dot.y - 50 <= this->position.y + this->size.y) {
+                return true;
+            }
+        }
+        return false;
     }
 };
 
