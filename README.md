@@ -1,5 +1,5 @@
 <p align="center">
-    <img title="" width="670" src="./media/Anticine.png">
+    <img title="" src="./media/Anticine.png">
 </p>
 Anticine™ was born as a school project for the "Algorithmics I" assignment. It implements a fully console-based UI virtual cinema experience.
 
