@@ -35,6 +35,7 @@ class Box {
     }
     void setFontColor(style::rgb font_color) {
         this->text_color = font_color;
+        this->defaultFontColor = false;
     }
     void drawBorder() {
         // Dibujamos el marco

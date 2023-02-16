@@ -1,7 +1,8 @@
 #pragma once
 
-#include <string>
 #include <Windows.h>
+#include <string>
+#include <cmath>
 #include <fstream>
 #include <json.hpp>
 #include <cstdlib>
@@ -24,6 +25,8 @@ void loadingScreen();
 
 std::string menuCarteleraFinal();
 std::string chooseCinemaScreen();
+std::string menuDetalles();
+
 
 // Variables globales
 std::string cineID;
@@ -31,20 +34,107 @@ std::string movieID;
 
 
 void menuSelector() {
-    std::string menuID;
+    json menuRawData = gnu::apifetch("/cines/cercanos");
+    cineID = menuRawData["nearest_id"].get<std::string>();
 
-    menuID = menuCarteleraFinal();
-
+    std::string menuID = menuCarteleraFinal();
 
     while (true) {
-        if (menuID == "selectorCineAux"){        
+        if (menuID == "selectorCineAux") {
             menuID = chooseCinemaScreen();
         }
-
-        if (menuID == "selectorPelicula"){
+        if (menuID == "selectorPelicula") {
             menuID = menuCarteleraFinal();
         }
+        if (menuID == "menuDetalles") {
+            menuID = menuDetalles();
+        }
     }
+}
+
+
+std::string menuDetalles() {
+    gnu::cls();
+    gnu::Box header({gnu::getConsoleSize().x , 7});
+    header.showBorder = false;
+    header.setBoxColor({ 184, 155, 231 }); //RGB(220, 10, 180)
+    header.draw();
+
+    gnu::Box date({14, 1});
+    date.position = gnu::vec2d({getConsoleSize().x - 14 , 6});
+    date.content = "▶ 2023-05-12";
+    date.showBorder = false;
+    date.transparent = true;
+    date.draw();
+
+    gnu::Box poster({35, 20});
+    poster.setBoxColor({150, 180, 235});
+    poster.position = gnu::vec2d({1, 6});
+    poster.draw();
+
+    std::vector<std::string> footerDates = {"09:00am", "12:00am", "01:00pm", "02:00pm", "01:00pm"};
+    
+    gnu::Box footerTemplate({9, 1});
+    
+    std::vector<gnu::Box> footers(footerDates.size(), footerTemplate);
+
+    for (int i = 0; i < footers.size(); i++) {
+        int index = ceil((double) (230 / footers.size()) * i);
+        footers[i].content = footerDates[i];
+        footers[i].transparent = true;
+        footers[i].setFontColor({ 230 - index, 230 - index, 230 - index });
+        footers[i].position = gnu::vec2d({
+            (getConsoleSize().x / 2) - 4 + (9 * i),
+            gnu::getConsoleSize().y - 2
+        });
+        footers[i].showBorder = false;
+    }
+
+    gnu::Box emptyFooter({9, 1});
+    emptyFooter.content = "       ";
+    emptyFooter.setFontColor({ 30, 30, 30 });
+    emptyFooter.transparent = true;
+    emptyFooter.position = gnu::vec2d({
+        (getConsoleSize().x / 2) - 13,
+        gnu::getConsoleSize().y - 2
+    });
+    emptyFooter.showBorder = false;
+    footers.insert(footers.begin(), emptyFooter);
+
+    int input = '\0';
+    size_t hour_i = 0;
+    while(true) {
+        input = '\0';
+        if (_kbhit()) input = _getch();
+
+        switch (input) {
+        case gnu::key::Right:
+            if (hour_i < footers.size() - 2) hour_i++;
+            break;
+        case gnu::key::Left:
+            if (hour_i > 0) hour_i--;
+            break;
+        }
+        
+        if (1 <= hour_i) footers[0].content = footerDates[hour_i - 1];
+        else footers[0].content = "       ";
+        footers[0].draw();
+
+        for (int i = 1; i < footers.size(); i++) {
+            if (i + hour_i - 1 < footerDates.size()) footers[i].content = footerDates[i + hour_i - 1];
+            else footers[i].content = "       ";
+
+            footers[i].draw();
+        }
+
+        std::cout << std::endl;
+
+        gnu::printLineCentered("▲");
+
+        gnu::sleep(50);
+    };
+
+    return "hola";
 }
 
 
@@ -60,28 +150,18 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     
     srand(time(NULL));
 
-    FILE* indata = std::fopen("src/cartelera.json", "r");
+    json rawCarteleraData = gnu::apifetch("/cines/" + cineID + "/cartelera");
 
-    if (indata == NULL){
-        std::cout << "could not load sample";
-    }
-
-    json rawCarteleraData = json::parse(indata);
-
-
-    //TODO: get the actual cinema data
-    std::vector<json> billboard = rawCarteleraData["days"][0]["movies"].get<std::vector<json>>();
-
+    std::vector<json> billboard = rawCarteleraData["movies"].get<std::vector<json>>();
     json emptyMovie = json::parse(R"({
-        "corporate_film_id": "",
         "title": "",
-        "synopsis": "",
-        "trailer_url": "",
         "poster_url": "",
         "duration": 0,
-        "rating": ""
+        "rating": "",
+        "corporate_film_id": "",
+        "trailer_url": "",
+        "synopsis": ""
     })");
-
     billboard.insert(billboard.begin(), emptyMovie);
     billboard.insert(billboard.end(), emptyMovie);
 
@@ -108,7 +188,19 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     descriptionCard.showBorder = false;
 
     //====== box label for the current cinema we are in ==========
-    std::string cinemaLabel = "Estas en Anticine GAMARRA";
+    std::string cinemaName;
+    json cinemasListRaw = gnu::apifetch("/cines/cercanos");
+
+    std::vector<json> cinemasList = cinemasListRaw["cinemas"].get<std::vector<json>>();
+
+    for (int i = 0; i < cinemasList; i++){
+        if (cinemasList[i]["cinema_id"].get<std::string>() == cineID) {
+            cinemaName = cinemasList[i]["name"].get<std::string>();
+            break;
+        }
+    }
+
+    std::string cinemaLabel = "Estas en " + cinemaName;
     gnu::Box cinemaLabelBox({ cinemaLabel.size() + 4, 1 });
     cinemaLabelBox.content = cinemaLabel;
     cinemaLabelBox.transparent = true;
@@ -140,18 +232,7 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     std::string lastLabel = titleLabel;
     std::string titlePadding = "";
 
-    /*
-    SetConsoleTitle("uniqueWindowEverMade2");
-    gnu::sleep(40);
-    POINT hola;
-    HANDLE handlexd = GetStdHandle(STD_OUTPUT_HANDLE);
-    HWND hwndFound = FindWindow(NULL, "uniqueWindowEverMade2");
-    if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) {
-        GetCursorPos(&hola);
-        ScreenToClient(hwndFound, &hola);
-    }
-    */
-
+    //====== additionals ========
     std::string duration = std::to_string(billboard[1]["duration"].get<int>());
     std::string rating = billboard[1]["rating"].get<std::string>();
     std::string additionals = duration + " | " + rating;
@@ -181,7 +262,7 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
         case gnu::key::Enter:
             if (opt == 1) {
                 movieID = billboard[1 + panel_i]["corporate_film_id"].get<std::string>();
-                return "menu2";
+                return "menuDetalles";
             }
             else {
                 return "selectorCineAux";
@@ -255,6 +336,7 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 
         //TODO: cinemaLabel = .....
         cinemaLabelBox.centerHorizontal();
+        cinemaLabelBox.content = cinemaLabel;
         cinemaLabelBox.size.x = cinemaLabel.size() + 4;
         cinemaLabelBox.size.y = 1;
 
@@ -433,15 +515,7 @@ std::string chooseCinemaScreen() {
     // del usuario, el primero siempre es el más cercano.
     // Dependiendo de 
     
-    //json nearCinemasData = gnu::apifetch("/cines/cercanos");
-
-    FILE* indata = std::fopen("src/cercanos.json", "r");
-
-    if (indata == NULL){
-        std::cout << "could not load sample";
-    }
-
-    json nearCinemasData = json::parse(indata);
+    json nearCinemasData = gnu::apifetch("/cines/cercanos");
 
     size_t currentCine = 0;
     int nameCursorPos = 0;

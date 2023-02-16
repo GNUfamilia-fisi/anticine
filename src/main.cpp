@@ -19,7 +19,7 @@ int main(void) {
 
     gnu::setCursorVisible(false);
 
-    gnu::menuSelector();
+    gnu::menuDetalles();
 
     gnu::setCursorVisible(true);
     return 0;
