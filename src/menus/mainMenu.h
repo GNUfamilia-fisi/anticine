@@ -69,11 +69,22 @@ std::string butaca[3] ={"┌──────┐","│      │","└─'  '─
 
 std::string asientos(){
     system("cls");
+    //borde para decorar los asientos
     gnu::Box caja({ 135, 25 });
+    caja.setBoxColor({ 104,19,1 });
     caja.setFontColor({ 255, 138, 208 });
     caja.position = { 30, 5 };
     caja.showBorder = true;
     caja.draw();
+
+    //boton de seleccione el asiento
+    gnu::Box boton({ 30, 3 });
+    boton.setFontColor({ 255, 138, 208 });
+    //boton.setBoxColor({184, 155, 231});
+    boton.content="Seccione su asiento";
+    boton.position = { 80, 32 };
+    boton.showBorder = true;
+    boton.draw();
 
     int coordx=30;//ni idea por que esta wbd si pasa de 30 se loquea
     int coordy=5;//5
