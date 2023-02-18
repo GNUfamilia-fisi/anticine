@@ -171,7 +171,6 @@ std::string asientos(){
         switch (input) {
         case gnu::key::Right:
             c+=9;
-            cin.ignore();
             break;
         case gnu::key::Left:
             c-=9;
