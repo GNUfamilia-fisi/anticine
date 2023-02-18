@@ -59,25 +59,29 @@ void menuSelector() {
 }
 
 //para capturar el color o la posicion de los asientos
-std::string codigos [7][12]={{"1A","1B","1C","1D","1E","1F","1G","1H","1I","1J","1K","1L"},
-                            {"2A","2B","2C","2D","2E","2F","2G","2H","2I","2J","2k","2L"},
-                            {"3A","3B","3C","3D","3E","3F","3G","3H","3I","3J","3k","3L"},
-                            {"4A","4B","4C","4D","4E","4F","4G","4H","4I","4J","4k","4L"},
-                            {"5A","5B","5C","5D","5E","5F","5G","5H","5I","5J","5k","5L"},
-                            {"6A","6B","6C","6D","6E","6F","6G","6H","6I","6J","6k","6L"},
-                            {"7A","7B","7C","7D","7E","7F","7G","7H","7I","7J","7k","7L"}} ;   //wstring,
+std::string codigos [5][15]={{"1A","1B","1C","1D","1E","1F","1G","1H","1I","1J","1K","1L","1M","1N","1P"},
+                            {"2A","2B","2C","2D","2E","2F","2G","2H","2I","2J","2k","2L","2M","2N","2P"},
+                            {"3A","3B","3C","3D","3E","3F","3G","3H","3I","3J","3k","3L","3M","3N","3P"},
+                            {"4A","4B","4C","4D","4E","4F","4G","4H","4I","4J","4k","4L","4M","4N","4P"},
+                            {"5A","5B","5C","5D","5E","5F","5G","5H","5I","5J","5k","5L","5M","5N","5P"}} ;   //wstring,
 //forma de la butaca
 std::string butaca[3] ={"┌──────┐","│      │","└─'  '─┘"};  
 
 std::string asientos(){
     system("cls");
+    gnu::Box caja({ 135, 25 });
+    caja.setFontColor({ 255, 138, 208 });
+    caja.position = { 30, 5 };
+    caja.showBorder = true;
+    caja.draw();
+
     int coordx=30;//ni idea por que esta wbd si pasa de 30 se loquea
     int coordy=5;//5
     int a=0,b=0;
     
     int sup=3;
-    for(int k=coordy;k<35+coordy;k+=5){//5 espacios
-        for(int j=coordx;j<108+coordx;j+=9){//9 espacios
+    for(int k=coordy;k<25+coordy;k+=5){//5 espacios
+        for(int j=coordx;j<135+coordx;j+=9){//9 espacios
             gotoXY(j,k);
             for(int i=0;i<sup;i++){
                 gotoXY(j,i+k);
@@ -89,8 +93,9 @@ std::string asientos(){
 
 
     while (true){
-    for(int k=coordy;k<35+coordy;k+=5){//5 espacios
-        for(int j=coordx;j<108+coordx;j+=9){//9 espacios
+
+    for(int k=coordy;k<25+coordy;k+=5){//5 espacios
+        for(int j=coordx;j<135+coordx;j+=9){//9 espacios
             gotoXY(j+3,k+2);
             std::cout<<codigos[b][a];//ya tenemos posicion en la que deben estar
                 a++;
@@ -103,8 +108,8 @@ std::string asientos(){
         b=0;
         a=0;
 
-        for(int k=coordy;k<35+coordy;k+=5){//5 espacios
-            for(int j=coordx;j<108+coordx;j+=9){//9 espacios
+        for(int k=coordy;k<25+coordy;k+=5){//5 espacios
+            for(int j=coordx;j<135+coordx;j+=9){//9 espacios
                 gotoXY(j+3,k+2);
                 std::cout<<codigos[b][a];//ya tenemos posicion en la que deben estar
                 a++;
