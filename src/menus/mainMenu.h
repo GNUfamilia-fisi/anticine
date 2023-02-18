@@ -73,18 +73,18 @@ std::string asientos(){
     gnu::Box pantalla({135,2});
     pantalla.setBoxColor({ 20, 156, 178});
     //sin palabras en la pantalla que se ve feazo
-    //pantalla.setFontColor({ 110, 0, 87});
-    //pantalla.content="PANTALLA";
 
+    //hacer fondo mas grande para que parezcan pasillos
     pantalla.position={30,1};
     pantalla.showBorder=false;
     pantalla.draw();
     //borde para decorar los asientos
-    gnu::Box caja({ 135, 25 });
+    gnu::Box caja({ 146, 25 });
     caja.setBoxColor({ 104,19,1 });
     caja.setFontColor({ 255, 138, 208 });
-    caja.position = { 30, 5 };
+    caja.position = { 23, 7 };//30,5
     caja.showBorder = true;
+    caja.transparent=true;
     caja.draw();
 
     //boton de seleccione el asiento
@@ -92,29 +92,55 @@ std::string asientos(){
     boton.setFontColor({ 255, 138, 208 });
     //boton.setBoxColor({184, 155, 231});
     boton.content="Seccione su asiento";
-    boton.position = { 80, 32 };
+    boton.position = { 80, 34 };
     boton.showBorder = true;
     boton.draw();
+    //caja para seleccionar asientos
+    //dependiendo de esto hago esta vaina con colores sino sale
+    
+    //seleccionar las cajas
+    gnu::Box seleccion ({7,3});
+    seleccion.setBoxColor({  0, 29, 158 });
+    seleccion.transparent=false;
+    seleccion.showBorder=true;
+    seleccion.position ={30,7};
+    
+
     //no puedo hugo, ya quedo zzz
     int coordx=30;//ni idea por que esta wbd si pasa de 30 se loquea
-    int coordy=5;//5
+    int coordy=7;//5
     int a=0,b=0;
     
+    //avanzar de nuevo
+    //azul = disponible
+    //rojo ocupado
+    //verde=seleccionado
+    //crear nueva caja para seleccionar
+    gnu:: Box opciones ({7,3});
+    opciones.setBoxColor({  0, 29, 158 });
+    opciones.setFontColor({255,255,255});
+
     int sup=3;
-    for(int k=coordy;k<25+coordy;k+=5){//5 espacios
-        for(int j=coordx;j<135+coordx;j+=9){//9 espacios
-            gotoXY(j,k);
+    for(short k=coordy;k<25+coordy;k+=5){//5 espacios
+        for(short j=coordx;j<135+coordx;j+=9){//9 espacios
+            opciones.position= {j,k};
+            opciones.content=codigos[b][a];
+            opciones.draw();
+            //gotoXY(j,k);
+            /*
             for(int i=0;i<sup;i++){
                 gotoXY(j,i+k);
                 std::cout<<butaca[i];
-            }    
+            } */
+         a++;      
         }
-
+        a=0;
+    b++;
     }
+    b=0;
 
 
-    while (true){
-
+/*
     for(int k=coordy;k<25+coordy;k+=5){//5 espacios
         for(int j=coordx;j<135+coordx;j+=9){//9 espacios
             gotoXY(j+3,k+2);
@@ -128,18 +154,36 @@ std::string asientos(){
         Sleep(10);
         b=0;
         a=0;
-
-        for(int k=coordy;k<25+coordy;k+=5){//5 espacios
-            for(int j=coordx;j<135+coordx;j+=9){//9 espacios
-                gotoXY(j+3,k+2);
-                std::cout<<codigos[b][a];//ya tenemos posicion en la que deben estar
-                a++;
-                Sleep(100);   
-            }
-            a=0;
-            b++;
+        */
+    short c=30;
+    short d=7;
+    int input = '\0';
+    while (true){
+        seleccion.position={c,d};
+        seleccion.setBoxColor({  0, 29, 158 });
+        seleccion.draw();
+        Sleep(100);
+        seleccion.setBoxColor({   28, 209, 61 });
+        seleccion.draw();
+        Sleep(100);
+        
+        if (_kbhit()) input = _getch();
+        switch (input) {
+        case gnu::key::Right:
+            c+=9;
+            cin.ignore();
+            break;
+        case gnu::key::Left:
+            c-=9;
+            break;
+        case gnu::key::Up:
+            d-=5;
+            break;
+        case gnu::key::Down:
+            d+=5;
+            break;
         }
-        a=0;b=0;
+
     }
 
 }
