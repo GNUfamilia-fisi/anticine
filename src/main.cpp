@@ -18,9 +18,9 @@ int main(void) {
     //SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ENABLE_MOUSE_INPUT);
 
     gnu::setCursorVisible(false);
-
-    gnu::menuDetalles();
-
+    gnu::menuSelector();
+    gnu::asientos();
     gnu::setCursorVisible(true);
+
     return 0;
 }

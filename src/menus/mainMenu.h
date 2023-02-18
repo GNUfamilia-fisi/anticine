@@ -15,6 +15,8 @@ using json = nlohmann::json;
 
 namespace gnu {
 
+std::string fecha;
+
 // Prototipos
 void carteleraFechaScreen();
 void displayDate(std::string fulldate, short opt);
@@ -26,6 +28,7 @@ void loadingScreen();
 std::string menuCarteleraFinal();
 std::string chooseCinemaScreen();
 std::string menuDetalles();
+std::string asientos();
 
 
 // Variables globales
@@ -41,16 +44,80 @@ void menuSelector() {
 
     while (true) {
         if (menuID == "selectorCineAux") {
-            menuID = chooseCinemaScreen();
+            menuID = chooseCinemaScreen();//elejir cines
         }
         if (menuID == "selectorPelicula") {
             menuID = menuCarteleraFinal();
         }
         if (menuID == "menuDetalles") {
-            menuID = menuDetalles();
+            menuID = menuDetalles();//seleccionar horario
+        }
+        if(menuID=="Asientos"){
+            menuID= asientos();
         }
     }
 }
+
+//para capturar el color o la posicion de los asientos
+std::string codigos [7][12]={{"1A","1B","1C","1D","1E","1F","1G","1H","1I","1J","1K","1L"},
+                            {"2A","2B","2C","2D","2E","2F","2G","2H","2I","2J","2k","2L"},
+                            {"3A","3B","3C","3D","3E","3F","3G","3H","3I","3J","3k","3L"},
+                            {"4A","4B","4C","4D","4E","4F","4G","4H","4I","4J","4k","4L"},
+                            {"5A","5B","5C","5D","5E","5F","5G","5H","5I","5J","5k","5L"},
+                            {"6A","6B","6C","6D","6E","6F","6G","6H","6I","6J","6k","6L"},
+                            {"7A","7B","7C","7D","7E","7F","7G","7H","7I","7J","7k","7L"}} ;   //wstring,
+//forma de la butaca
+std::string butaca[3] ={"┌──────┐","│      │","└─'  '─┘"};  
+
+std::string asientos(){
+    system("cls");
+    int coordx=30;//ni idea por que esta wbd si pasa de 30 se loquea
+    int coordy=5;//5
+    int a=0,b=0;
+    
+    int sup=3;
+    for(int k=coordy;k<35+coordy;k+=5){//5 espacios
+        for(int j=coordx;j<108+coordx;j+=9){//9 espacios
+            gotoXY(j,k);
+            for(int i=0;i<sup;i++){
+                gotoXY(j,i+k);
+                std::cout<<butaca[i];
+            }    
+        }
+
+    }
+
+
+    while (true){
+    for(int k=coordy;k<35+coordy;k+=5){//5 espacios
+        for(int j=coordx;j<108+coordx;j+=9){//9 espacios
+            gotoXY(j+3,k+2);
+            std::cout<<codigos[b][a];//ya tenemos posicion en la que deben estar
+                a++;
+                Sleep(10);    
+            }
+            a=0;
+            b++;
+        }
+        Sleep(10);
+        b=0;
+        a=0;
+
+        for(int k=coordy;k<35+coordy;k+=5){//5 espacios
+            for(int j=coordx;j<108+coordx;j+=9){//9 espacios
+                gotoXY(j+3,k+2);
+                std::cout<<codigos[b][a];//ya tenemos posicion en la que deben estar
+                a++;
+                Sleep(100);   
+            }
+            a=0;
+            b++;
+        }
+        a=0;b=0;
+    }
+
+}
+
 
 
 std::string menuDetalles() {
@@ -72,7 +139,7 @@ std::string menuDetalles() {
     poster.position = gnu::vec2d({1, 6});
     poster.draw();
 
-    std::vector<std::string> footerDates = {"09:00am", "12:00am", "01:00pm", "02:00pm", "01:00pm"};
+    std::vector<std::string> footerDates = {"09:00am", "12:00am", "01:00pm", "02:00pm", "01:00pm","03:45pm","05:30pm","07:00pm"};
     
     gnu::Box footerTemplate({9, 1});
     
@@ -113,6 +180,10 @@ std::string menuDetalles() {
             break;
         case gnu::key::Left:
             if (hour_i > 0) hour_i--;
+            break;
+        case gnu::key::Enter:
+            fecha = footerDates[hour_i];
+            return "Asientos";
             break;
         }
         
