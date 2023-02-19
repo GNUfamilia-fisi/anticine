@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Windows.h>
 #include <string>
 #include <cmath>
 #include <fstream>
@@ -18,10 +17,8 @@ namespace gnu {
 std::string fecha;
 
 // Prototipos
-void carteleraFechaScreen();
 void displayDate(std::string fulldate, short opt);
 void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize);
-void logoDisplay3D(style::color color);
 void displayLogo2D(style::color color);
 void loadingScreen();
 
@@ -44,7 +41,7 @@ void menuSelector() {
 
     while (true) {
         if (menuID == "selectorCineAux") {
-            menuID = chooseCinemaScreen();//elejir cines
+            menuID = chooseCinemaScreen();//elegir cines
         }
         if (menuID == "selectorPelicula") {
             menuID = menuCarteleraFinal();
@@ -68,7 +65,7 @@ std::string codigos [5][15]={{"1A","1B","1C","1D","1E","1F","1G","1H","1I","1J",
 std::string butaca[3] ={"┌──────┐","│      │","└─'  '─┘"};  
 
 std::string asientos(){
-    system("cls");
+    gnu::cls();
     //pantalla
     gnu::Box pantalla({135,2});
     pantalla.setBoxColor({ 20, 156, 178});
@@ -130,7 +127,7 @@ std::string asientos(){
             /*
             for(int i=0;i<sup;i++){
                 gotoXY(j,i+k);
-                std::cout<<butaca[i];
+                gnu::print(butaca[i]);
             } */
          a++;      
         }
@@ -144,7 +141,7 @@ std::string asientos(){
     for(int k=coordy;k<25+coordy;k+=5){//5 espacios
         for(int j=coordx;j<135+coordx;j+=9){//9 espacios
             gotoXY(j+3,k+2);
-            std::cout<<codigos[b][a];//ya tenemos posicion en la que deben estar
+            gnu::print(codigos[b][a]);//ya tenemos posicion en la que deben estar
                 a++;
                 Sleep(10);    
             }
@@ -157,32 +154,35 @@ std::string asientos(){
         */
     short c=30;
     short d=7;
-    int input = '\0';
+    int input;
     while (true){
         seleccion.position={c,d};
         seleccion.setBoxColor({  0, 29, 158 });
         seleccion.draw();
-        Sleep(100);
+        gnu::sleep(100);
         seleccion.setBoxColor({   28, 209, 61 });
         seleccion.draw();
-        Sleep(100);
+        gnu::sleep(100);
         
-        if (_kbhit()) input = _getch();
-        switch (input) {
-        case gnu::key::Right:
-            c+=9;
-            break;
-        case gnu::key::Left:
-            c-=9;
-            break;
-        case gnu::key::Up:
-            d-=5;
-            break;
-        case gnu::key::Down:
-            d+=5;
-            break;
-        }
+        // if (_kbhit()) input = _getch();
+        input = getch();
 
+        if (input != ERR) {
+            switch (input) {
+            case gnu::key::Right:
+                c+=9;
+                break;
+            case gnu::key::Left:
+                c-=9;
+                break;
+            case gnu::key::Up:
+                d-=5;
+                break;
+            case gnu::key::Down:
+                d+=5;
+                break;
+            }
+        }
     }
 
 }
@@ -218,7 +218,7 @@ std::string menuDetalles() {
         int index = ceil((double) (230 / footers.size()) * i);
         footers[i].content = footerDates[i];
         footers[i].transparent = true;
-        footers[i].setFontColor({ 230 - index, 230 - index, 230 - index });
+        footers[i].setFontColor(230 - index, 230 - index, 230 - index);
         footers[i].position = gnu::vec2d({
             (getConsoleSize().x / 2) - 4 + (9 * i),
             gnu::getConsoleSize().y - 2
@@ -237,23 +237,24 @@ std::string menuDetalles() {
     emptyFooter.showBorder = false;
     footers.insert(footers.begin(), emptyFooter);
 
-    int input = '\0';
+    int input;
     size_t hour_i = 0;
     while(true) {
-        input = '\0';
-        if (_kbhit()) input = _getch();
-
-        switch (input) {
-        case gnu::key::Right:
-            if (hour_i < footers.size() - 2) hour_i++;
-            break;
-        case gnu::key::Left:
-            if (hour_i > 0) hour_i--;
-            break;
-        case gnu::key::Enter:
-            fecha = footerDates[hour_i];
-            return "Asientos";
-            break;
+        input = getch();
+        // if (_kbhit()) input = _getch();
+        if (input != ERR) {
+            switch (input) {
+            case gnu::key::Right:
+                if (hour_i < footers.size() - 2) hour_i++;
+                break;
+            case gnu::key::Left:
+                if (hour_i > 0) hour_i--;
+                break;
+            case gnu::key::Enter:
+                fecha = footerDates[hour_i];
+                return "Asientos";
+                break;
+            }
         }
         
         if (1 <= hour_i) footers[0].content = footerDates[hour_i - 1];
@@ -267,10 +268,8 @@ std::string menuDetalles() {
             footers[i].draw();
         }
 
-        std::cout << std::endl;
-
+        gnu::print('\n');
         gnu::printLineCentered("▲");
-
         gnu::sleep(50);
     };
 
@@ -288,7 +287,7 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 /_/  |_/_/ /_/\__/ /_/  \___/ /_/  /_/ /_/\___/ 
 )";
     
-    srand(time(NULL));
+    std::srand(std::time(nullptr));
 
     json rawCarteleraData = gnu::apifetch("/cines/" + cineID + "/cartelera");
 
@@ -383,31 +382,32 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     
     while (true) {
         // ---- Receive input ----
-        char input = '\0';
-        if (_kbhit()) input = _getch();
-
-        switch(input){
-        case gnu::key::Right:
-            if (panel_i < billboard.size() - 3 && opt == 1) panel_i++;
-            break;
-        case gnu::key::Left:
-            if (panel_i > 0 && opt == 1) panel_i--;
-            break;
-        case gnu::key::Up:
-            if (opt > 0) opt--;
-            break;
-        case gnu::key::Down:
-            if (opt < 1) opt++;
-            break;
-        case gnu::key::Enter:
-            if (opt == 1) {
-                movieID = billboard[1 + panel_i]["corporate_film_id"].get<std::string>();
-                return "menuDetalles";
+        int input = getch();
+        // if (_kbhit()) input = _getch();
+        if (input != ERR) {
+            switch (input) {
+                case gnu::key::Right:
+                    if (panel_i < billboard.size() - 3 && opt == 1) panel_i++;
+                    break;
+                case gnu::key::Left:
+                    if (panel_i > 0 && opt == 1) panel_i--;
+                    break;
+                case gnu::key::Up:
+                    if (opt > 0) opt--;
+                    break;
+                case gnu::key::Down:
+                    if (opt < 1) opt++;
+                    break;
+                case gnu::key::Enter:
+                    if (opt == 1) {
+                        movieID = billboard[1 + panel_i]["corporate_film_id"].get<std::string>();
+                        return "menuDetalles";
+                    }
+                    else {
+                        return "selectorCineAux";
+                    }
+                    break;
             }
-            else {
-                return "selectorCineAux";
-            }
-            break;
         }
 
         card1.reconsider(billboard[0 + panel_i]);
@@ -423,8 +423,8 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
         style::setFg({ 222, 197, 153 });
 
         card2.centerHorizontal();
-        card1.setPosition( card2.position + gnu::vec2d{ (short)(-card1.size.x - 10), 1 } );
-        card3.setPosition( card2.position + gnu::vec2d{ (short)(card2.size.x + 10), 1 } );
+        card1.setPosition( card2.position + gnu::vec2d{ -card1.size.x - 10, 1 } );
+        card3.setPosition( card2.position + gnu::vec2d{ card2.size.x + 10, 1 } );
 
         card1.draw();
         card2.draw();
@@ -521,118 +521,11 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     }
 }
 
-
-void carteleraFechaScreen() {
-    system("cls");
-    gnu::displayLogo2D(style::color::RED);
-
-    json billboardDays = gnu::apifetch("/cines/" + cineID + "/cartelera");
-
-    std::vector<json> billboardsByDate;
-    json currentBillboard;
-    std::vector<std::string> availableDates;
-
-    for (auto billboard : billboardDays["days"].get<std::vector<json>>()) {
-        availableDates.push_back(billboard["date"].get<std::string>());
-    }
-
-    bool lock = true;
-    size_t currentDay = 0;
-    short optSelection = 0;
-
-    json currentMovie;
-    std::string currentMovieName;
-    size_t currentMovie_i = 0;
-
-    while (lock) {
-        // guarda la película actual
-        billboardsByDate = billboardDays["days"].get<std::vector<json>>();
-        currentBillboard = billboardsByDate[currentDay].get<json>();
-        currentMovie = currentBillboard["movies"][currentMovie_i].get<json>();
-        currentMovieName = currentMovie["title"].get<std::string>();
-
-        gnu::gotoXY(0, 15);
-        gnu::displayDate(availableDates[currentDay], optSelection);
-
-        gnu::gotoXY(
-            (gnu::getConsoleSize().x / 2) - (currentMovieName.size() / 2) - 2, 15
-        );
-
-        if (optSelection == 0) {
-            style::setColor(style::color::WHITE);
-        }
-        if (optSelection == 1) {
-            style::setColor(style::color::LIGHTGREEN);
-        }
-        std::cout << "> " << currentMovieName << " <";
-
-        gnu::gotoXY(
-            (gnu::getConsoleSize().x / 2) + (currentMovieName.size() / 2), 16
-        );
-        std::cout << currentMovie_i + 1 << "/" << currentBillboard["movies"].size();
-
-        style::setColor(style::color::WHITE);
-
-        // Check input
-        if (_kbhit()) {
-            char hit = _getch();
-            
-            gnu::cleanLine(15);
-            gnu::cleanLine(16);
-
-            switch (hit) {
-            case gnu::key::Up: {
-                if (optSelection > 0){
-                    optSelection--;
-                }
-
-                break;
-            }
-            case gnu::key::Down: {
-                if (optSelection < 1) {
-                    optSelection++;
-                }
-                break;
-            }
-            case gnu::key::Left: {
-                if (optSelection == 0) {
-                    if (currentDay > 0) {
-                        currentDay--;
-                    }
-                    currentMovie_i = 0;
-                }
-                if (optSelection == 1) {
-                    if (currentMovie_i > 0) currentMovie_i--;
-                }
-                break;
-            }
-            case gnu::key::Right: {
-                if (optSelection == 0) {
-                    if (currentDay + 1 < availableDates.size()) {
-                        currentDay++;
-                    }
-                    currentMovie_i = 0; // reiniciarlo a la opción 0
-                }
-                if (optSelection == 1) {
-                    if (currentMovie_i + 1 < currentBillboard["movies"].size()) {
-                        currentMovie_i++;
-                    }
-                }
-                break;
-            }
-            default:
-                break;
-            }
-        }
-        gnu::sleep(5);
-    }
-}
-
 void displayDate(std::string fulldate, short opt) {
     gnu::gotoXY(
         (gnu::getConsoleSize().x / 2) - 5, 12
     );
-    std::cout << fulldate;
+    gnu::print(fulldate);
 
     gnu::gotoXY(
         (gnu::getConsoleSize().x / 2) + 3, 13
@@ -640,7 +533,7 @@ void displayDate(std::string fulldate, short opt) {
 
     if (opt == 0) {
         style::setColor(style::color::LIGHTGREEN);
-        std::cout << "^^";
+        gnu::print("^^");
         style::setColor(style::color::WHITE);
     }
     else {
@@ -649,7 +542,7 @@ void displayDate(std::string fulldate, short opt) {
 }
 
 std::string chooseCinemaScreen() {
-    system("cls");
+    gnu::cls();
 
     // Retorna una lista de cines ordenados según la geolocalización
     // del usuario, el primero siempre es el más cercano.
@@ -686,17 +579,18 @@ std::string chooseCinemaScreen() {
     // main menu loop
     while (lock) {
         gnu::gotoXY(0, 1);
-        std::cout << std::endl;
+        gnu::print('\n');
 
-        if (_kbhit()) {
-            char hit = _getch();
+        int hit = getch();
+        printw("%d", hit);
+        // if (_kbhit()) {
+        if (hit != ERR) {
+            // char hit = _getch();
             switch (hit) {
             case gnu::key::Down:
-
                 for (size_t i = 0; i < listLength; i++) {
                     gnu::cleanLine(20+i);
                 }
-
                 if (currentCine < nearCinemasData["cinemas"].size() - 1) {
                     currentCine++;
                 }
@@ -773,7 +667,7 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
 
             style::setColor(style::LIGHTGREEN);
 
-            std::cout << ">>";
+            gnu::print(">>");
         }
         else {
             style::setColor(style::WHITE);
@@ -783,25 +677,8 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
             20 + i
         );
 
-        std::cout << names[i];
+        gnu::print(names[i]);
     }
-}
-
-
-void logoDisplay3D(style::color color) {
-    style::setColor(color);
-    std::string cinext1 = R"(
- $$$$$$\  $$\ $$\   $$\ $$$$$$$$\ $$\   $$\ $$$$$$$$\
-$$  __$$\ \__|$$$\  $$ |$$  _____|$$ |  $$ |\__$$  __|
-$$ /  \__|$$\ $$$$\ $$ |$$ |      \$$\ $$  |   $$ |   
-$$ |      $$ |$$ $$\$$ |$$$$$\     \$$$$  /    $$ |   
-$$ |      $$ |$$ \$$$$ |$$  __|    $$  $$<     $$ |   
-$$ |  $$\ $$ |$$ |\$$$ |$$ |      $$  /\$$\    $$ |   
-\$$$$$$  |$$ |$$ | \$$ |$$$$$$$$\ $$ /  $$ |   $$ |   
- \______/ \__|\__|  \__|\________|\__|  \__|   \__|   
-)";
-
-    gnu::printRawCenter(cinext1);
 }
 
 void displayLogo2D(style::color color) {
@@ -821,32 +698,31 @@ void loadingScreen() {
     style::setColor(style::color::LIGHTCYAN);
     char cargando = '#';
     char inicio = '|';
-    std::cout<< R"(
+    gnu::print(R"(
                                                  .___
       ____ _____ _______  _________    ____    __| _/____  
     _/ ___\\__  \\_  __ \/ ___\__  \  /    \  / __ |/  _ \
     \  \___ / __ \|  | \/ /_/  > __ \|   |  \/ /_/ (  <_> )
      \___  >____  /__|  \___  (____  /___|  /\____ |\____/ 
          \/     \/     /_____/     \/     \/      \/       
-    )"<<"\n";
+    
+)");
     
     gnu::gotoXY(
         (gnu::getConsoleSize().x / 2) - (33 / 2),
         15
     );
     
-    std::cout << inicio;
+    gnu::print(inicio);
     
     for (int i = 0 ; i < 32 ; i++){
-        std::cout << cargando;
+        gnu::print(cargando);
         gnu::sleep(20);
     }
     
-    std::cout << inicio;
-    
+    gnu::print(inicio);
     gnu::sleep(400);
-
-    system("cls");
+    gnu::cls();
 }
 
 } // namespace gnu

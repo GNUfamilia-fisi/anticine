@@ -37,27 +37,31 @@ class Box {
         this->text_color = font_color;
         this->defaultFontColor = false;
     }
+    void setFontColor(int r, int g, int b) {
+        this->text_color = { (unsigned char)r, (unsigned char)g, (unsigned char)b };
+        this->defaultFontColor = false;
+    }
     void drawBorder() {
         // Dibujamos el marco
         style::setFg(this->box_color);
         gnu::gotoXY(this->position.x - 1, this->position.y - 1);
-        std::cout << "┌";
+        gnu::print("┌");
         for (int i = 0; i < this->size.x; i++) {
-            std::cout << "─";
+            gnu::print("─");
         }
-        std::cout << "┐";
+        gnu::print("┐");
         for (int i = 0; i < this->size.y; i++) {
             gnu::gotoXY( this->position.x - 1, this->position.y + i);
-            std::cout << "│";
+            gnu::print("│");
             gnu::gotoXY(this->position.x + this->size.x, this->position.y + i);
-            std::cout << "│";
+            gnu::print("│");
         }
         gnu::gotoXY(this->position.x - 1, this->position.y + this->size.y);
-        std::cout << "└";
+        gnu::print("└");
         for (int i = 0; i < this->size.x; i++) {
-            std::cout << "─";
+            gnu::print("─");
         }
-        std::cout << "┘";
+        gnu::print("┘");
         style::reset_fg();
         style::reset_bg();
     }
@@ -65,23 +69,23 @@ class Box {
     void flushBorders (){
         style::setFg(this->box_color);
         gnu::gotoXY(this->position.x - 1, this->position.y - 1);
-        std::cout << " ";
+        gnu::print(" ");
         for (int i = 0; i < this->size.x; i++) {
-            std::cout << " ";
+            gnu::print(" ");
         }
-        std::cout << " ";
+        gnu::print(" ");
         for (int i = 0; i < this->size.y; i++) {
             gnu::gotoXY( this->position.x - 1, this->position.y + i);
-            std::cout << " ";
+            gnu::print(" ");
             gnu::gotoXY(this->position.x + this->size.x, this->position.y + i);
-            std::cout << " ";
+            gnu::print(" ");
         }
         gnu::gotoXY(this->position.x - 1, this->position.y + this->size.y);
-        std::cout << " ";
+        gnu::print(" ");
         for (int i = 0; i < this->size.x; i++) {
-            std::cout << " ";
+            gnu::print(" ");
         }
-        std::cout << " ";
+        gnu::print(" ");
         style::reset_fg();
         style::reset_bg();        
     }
@@ -219,14 +223,6 @@ class Box {
     }
     void centerVertical() {
         this->position.y = (gnu::getConsoleSize().y - this->size.y) / 2;
-    }
-    bool isInside(POINT dot) {
-        if (dot.x >= this->position.x && dot.x <= this->position.x + this->size.x) {
-            if (dot.y - 30 >= this->position.y && dot.y - 50 <= this->position.y + this->size.y) {
-                return true;
-            }
-        }
-        return false;
     }
 };
 

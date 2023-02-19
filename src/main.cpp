@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <csignal>
 
 #include "consoleUtils.h"
 #include "components/Box.h"
@@ -12,15 +13,11 @@
 #include "menus/mainMenu.h"
 
 int main(void) {
-    std::string cinemaID;
+    gnu::initProgramConf();
 
-    SetConsoleOutputCP(65001);
-    //SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ENABLE_MOUSE_INPUT);
-
-    gnu::setCursorVisible(false);
     gnu::menuSelector();
     gnu::asientos();
-    gnu::setCursorVisible(true);
 
+    gnu::endProgram();
     return 0;
 }

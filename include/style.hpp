@@ -1,20 +1,31 @@
 #pragma once
 
 #include <string>
-#include <Windows.h>
+#ifdef _WIN32
+#   include <Windows.h>
+#endif
 
 namespace style {
 
+#ifdef _WIN32
+    // Variable global para el handle de la consola proveída por Windows.h
+    // Esta variable no debería ser usada directamente, sino a través de funciones
 HANDLE colorConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 void print(std::string str) {
     WriteConsole(colorConsoleHandle, str.c_str(), str.length(), NULL, NULL);
 }
+#else
+void print(std::string str) {
+    
+}
+#endif
 
 // Para acceder al código de un color escribe
 //  color::BLACK, por ejemplo
 // Estos pueden ser usados en funciones como
 enum color : unsigned short {
+#ifdef _WIN32
     BLACK = 0,
     BLUE = 1,
     GREEN = 2,
@@ -31,6 +42,24 @@ enum color : unsigned short {
     LIGHTMAGENTA = 13,
     YELLOW = 14,
     WHITE = 15
+#else
+    BLACK = 30,
+    BLUE = 32,
+    GREEN = 32,
+    CYAN = 36,
+    RED = 31,
+    MAGENTA = 35,
+    BROWN = 33,
+    LIGHTGRAY = 37,
+    GRAY = 30,
+    LIGHTBLUE = 34,
+    LIGHTGREEN = 32,
+    LIGHTCYAN = 36,
+    LIGHTRED = 31,
+    LIGHTMAGENTA = 35,
+    YELLOW = 33,
+    WHITE = 37
+#endif
 };
 
 struct rgb {
@@ -48,7 +77,12 @@ struct rgb {
 */
 
 void setColor(style::color color) {
+#ifdef _WIN32
     SetConsoleTextAttribute(colorConsoleHandle, color);
+#else
+    std::string txt = "\x1B[" + std::to_string(color) + "m";
+    print(txt.c_str());
+#endif
 }
 /**
  * Colores RGB para los caracteres
