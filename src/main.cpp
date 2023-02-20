@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 int main(void) {
-    gnu::initProgramConf();
+    gnu::initProgram();
     gnu::menuSelector();
 
     return 0;

@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 namespace gnu {
 
-std::string fecha;
+std::string fechaSeleccionada; // variable global (no usada)
 
 // Prototipos
 void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize);
@@ -183,7 +183,7 @@ std::string menuDetalles() {
     gnu::cls();
     gnu::Box header({gnu::getConsoleSize().x , 7});
     header.showBorder = false;
-    header.setBoxColor({ 184, 155, 231 }); //RGB(220, 10, 180)
+    header.setBoxColor({ 184, 155, 231 });
     header.draw();
 
     gnu::Box date({14, 1});
@@ -198,8 +198,10 @@ std::string menuDetalles() {
     poster.position = gnu::vec2d({1, 6});
     poster.draw();
 
-    std::vector<std::string> footerDates = {"09:00am", "12:00am", "01:00pm", "02:00pm", "01:00pm","03:45pm","05:30pm","07:00pm"};
-    
+    std::vector<std::string> footerDates = {
+        "09:00am", "12:00am", "01:00pm", "02:00pm", "01:00pm", "03:45pm", "05:30pm", "07:00pm"
+    };
+
     gnu::Box footerTemplate({9, 1});
     
     std::vector<gnu::Box> footers(footerDates.size(), footerTemplate);
@@ -216,21 +218,23 @@ std::string menuDetalles() {
         footers[i].showBorder = false;
     }
 
-    gnu::Box emptyFooter({9, 1});
+    gnu::Box emptyFooter({ 9, 1 });
     emptyFooter.content = "       ";
     emptyFooter.setFontColor({ 30, 30, 30 });
     emptyFooter.transparent = true;
     emptyFooter.position = gnu::vec2d({
-        (getConsoleSize().x / 2) - 13,
+        (gnu::getConsoleSize().x / 2) - 13,
         gnu::getConsoleSize().y - 2
     });
     emptyFooter.showBorder = false;
     footers.insert(footers.begin(), emptyFooter);
-
-    int input;
+    
     size_t hour_i = 0;
+    int input;
+
     while(true) {
         input = gnu::getch();
+
         if (input) {
             switch (input) {
             case gnu::key::Right:
@@ -240,20 +244,23 @@ std::string menuDetalles() {
                 if (hour_i > 0) hour_i--;
                 break;
             case gnu::key::Enter:
-                fecha = footerDates[hour_i];
+                fechaSeleccionada = footerDates[hour_i];
                 return "Asientos";
-                break;
             }
         }
-        
-        if (1 <= hour_i) footers[0].content = footerDates[hour_i - 1];
-        else footers[0].content = "       ";
+
+        // Footer
+        if (1 <= hour_i) {
+            footers[0].content = footerDates[hour_i - 1];
+        }
+        else {
+            footers[0].content = "       ";
+        }
         footers[0].draw();
 
         for (size_t i = 1; i < footers.size(); i++) {
             if (i + hour_i - 1 < footerDates.size()) footers[i].content = footerDates[i + hour_i - 1];
             else footers[i].content = "       ";
-
             footers[i].draw();
         }
 
@@ -261,7 +268,6 @@ std::string menuDetalles() {
         gnu::printLineCentered("▲");
         gnu::sleep(50);
     };
-
     return "hola";
 }
 
@@ -274,9 +280,6 @@ __  /| |_  __ \  __/_  /_  ___/_  /__  __ \  _ \
 _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 /_/  |_/_/ /_/\__/ /_/  \___/ /_/  /_/ /_/\___/ 
 )";
-    
-    std::srand(std::time(nullptr));
-
     json rawCarteleraData = gnu::apifetch("/cines/" + cineID + "/cartelera");
 
     std::vector<json> billboard = rawCarteleraData["movies"].get<std::vector<json>>();
@@ -624,7 +627,6 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
             );
 
             style::setColor(style::LIGHTGREEN);
-
             gnu::print(">>");
         }
         else {

@@ -6,6 +6,8 @@
 #include <thread>
 #include <chrono>
 #include <cstdio>
+#include <json.hpp>
+#include <utf8.hpp>
 #if defined(_WIN32)
 #   include <windows.h>
 #   include <conio.h>
@@ -14,18 +16,15 @@
 #   define ANTICINE_WINDOWS
 #elif defined(__unix__)
 #   include <termios.h>
-#   include <sys/ioctl.h>
-// #   include <unistd.h>
-#   include <poll.h>
+#   include <sys/ioctl.h> // ioctl
+#   include <unistd.h>    // write/read
+#   include <poll.h>      // polling
 #   define POPEN popen
 #   define PCLOSE pclose
 #   define ANTICINE_UNIX
 #else
-#   error "Unsupported platform"
+#   error "Sistema operativo no soportado"
 #endif
-
-#include <json.hpp>
-#include <utf8.hpp>
 
 using json = nlohmann::json;
 
@@ -36,6 +35,9 @@ namespace gnu {
     // Esta variable no debería ser usada directamente, sino a través de funciones
     HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 #else
+    // Variables globales para el manejo de la consola en UNIX
+    // Guardan el estado inicial y el estado actual de la consola
+    // El estado inicial es restaurado al final del programa
     struct termios initial_state;
     struct termios term_state;
 #endif
@@ -47,28 +49,23 @@ void print(const char* str);
 void print(std::string str);
 void setCursorVisible(bool isVisible);
 
+/* --- Utilidades --- */
+
 struct vec2d {
     int x;
     int y;
-    bool operator == (const vec2d& vec) {
-        return (x == vec.x && y == vec.y);
-    }
-    bool operator != (const vec2d& vec) {
-        return !(*this == vec);
-    }
-    vec2d operator + (const vec2d& vec) {
-        return { x + vec.x, y + vec.y };
-    }
-    vec2d operator - (const vec2d& vec) {
-        return { x - vec.x, y - vec.y };
-    }
+    bool operator == (const vec2d& vec) { return (x == vec.x && y == vec.y); }
+    bool operator != (const vec2d& vec) { return !(*this == vec); }
+    vec2d operator + (const vec2d& vec) { return { x + vec.x, y + vec.y }; }
+    vec2d operator - (const vec2d& vec) { return { x - vec.x, y - vec.y }; }
 };
+
 vec2d getConsoleSize();
 vec2d getCursorPosition();
 
-// códigos de teclas para _getch()
+// códigos de teclas para usarse con gnu::getch()
 enum key {
-#ifdef _WIN32
+#if defined(ANTICINE_WINDOWS)
     Up = 72,
     Down = 80,
     Left = 75,
@@ -99,8 +96,6 @@ enum key {
 #endif
 };
 
-#include <fcntl.h>
-
 int getch() {
 #if defined(ANTICINE_WINDOWS)
     if (_kbhit()) {
@@ -111,57 +106,65 @@ int getch() {
     int wbuff = 0;
 
     struct pollfd pollstdin[1];
-    pollstdin[0].fd = STDIN_FILENO;
-    pollstdin[0].events = POLLIN;
+    pollstdin[0].fd = STDIN_FILENO; // Standard input
+    pollstdin[0].events = POLLIN;   // evento: "There is data to read"
 
-    // Poll one file descriptor (stdin) and waits 1 ms for the POLLIN event
+    // Hace un poll de 500ms para ver si hay algo en el buffer de entrada
+    // Actualmete este buffer no se está leyendo apropiadamente, es por eso
+    // que tiene 500ms de timeout. Si tuviese un timeout más corto
+    // hay probabilidades de que nunca se procese la entrada
     // https://man7.org/linux/man-pages/man2/poll.2.html
-    poll(&pollstdin[0], 1, 500);
+    poll(&pollstdin[0], 1, 1000);
 
     if (pollstdin[0].revents & POLLIN) {
         read(STDIN_FILENO, &wbuff, 4);
-
         // Ctrl+C
-        if (wbuff == 3) {
-            raise(SIGTERM);
-        }
+        if (wbuff == 3) raise(SIGTERM);
         // Ctrl+Z
-        if (wbuff == 26) {
-            raise(SIGTSTP);
-        }
+        if (wbuff == 26) raise(SIGTSTP);
+        // Entrada cualquiera
         return wbuff;
     }
     return 0;
 #endif
 }
 
-// gotoXY: Posiciona el cursor en { x, y } de la consola ("y" invertida)
-// He hecho tres definiciones de gotoXY, una que usa short, otra que usa int
-// y la última que utiliza los recomendados gnu::vect2d
+// gotoXY: Posiciona el cursor en { x, y } de la consola
+// Se hicieron tres definiciones de gotoXY: una con integers, y otra con vec2d
+// Adicionalmente se definieron gotoX y gotoY para mover el cursor en una sola dirección
 void gotoXY(int x, int y) {
 #if defined(ANTICINE_UNIX)
-    gnu::print("\x1b[" + std::to_string(y + 1) + ";" + std::to_string(x + 1) + "H");
+    gnu::print(
+        "\x1b[" + std::to_string(y + 1) + ";" + std::to_string(x + 1) + "H"
+    );
 #else
     COORD cursorPosition = { (short)x, (short)y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
+
 void gotoXY(gnu::vec2d pos) {
 #if defined(ANTICINE_UNIX)
-    gnu::print("\x1b[" + std::to_string(pos.y + 1) + ";" + std::to_string(pos.x + 1) + "H");
+    gnu::print(
+        "\x1b[" + std::to_string(pos.y + 1) + ";" + std::to_string(pos.x + 1) + "H"
+    );
 #else
     COORD cursorPosition = { pos.x, pos.y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
+
 void gotoX(short x) {
 #if defined(ANTICINE_UNIX)
-    gnu::print("\x1b[" + std::to_string(gnu::getCursorPosition().y + 1) + ";" + std::to_string(x + 1) + "H");
+    gnu::print(
+        "\x1b[" + std::to_string(gnu::getCursorPosition().y + 1) + ";" + std::to_string(x + 1) + "H"
+    );
 #else
     COORD cursorPosition = { x, gnu::getCursorPosition().y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
+
 void gotoY(short y) {
 #if defined(ANTICINE_UNIX)
     gnu::print(
@@ -173,10 +176,9 @@ void gotoY(short y) {
 #endif
 }
 
-// Ejecuta un comando de shell (consola) y devuelve su resultado (stdout)
-// como string (texto plano)
+// Ejecuta un comando de shell (consola) y devuelve su output como string
 std::string exec(std::string command) {
-    char buffer[128];
+    char buffer[256];
     std::string result = "";
     FILE* pipe = POPEN(command.c_str(), "r");
     if (!pipe) throw std::runtime_error("popen() failed!");
@@ -193,11 +195,13 @@ std::string exec(std::string command) {
     return result;
 }
 
-// Devuelve el tamaño de la consola como vector 2d { x, y }
-// El tamaño es en caracteres
+// Devuelve el tamaño de la consola (columns/filas) como vector 2d { x, y }
 gnu::vec2d getConsoleSize() {
     gnu::vec2d coords;
 #if defined(ANTICINE_UNIX)
+    // Llamada al sistema para obtener el tamaño de la consola
+    // TIOCGWINSZ: "Terminal Input/Output Get Window Size"
+    // documentado en: https://man7.org/linux/man-pages/man2/ioctl_tty.2.html
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     return { w.ws_col, w.ws_row };
@@ -208,23 +212,30 @@ gnu::vec2d getConsoleSize() {
 #endif
     return coords;
 }
+
+// Obtiene la posición absoluta del cursor en la consola
 gnu::vec2d getCursorPosition() {
     gnu::vec2d coords;
 #if defined(ANTICINE_UNIX)
-    write(STDOUT_FILENO, "\033[6n", 4);
-    // returns ESC[(y);(x)R
+    // ANSI escape sequence para obtener la posición del cursor
+    // La respuesta tiene el siguiente formato: ESC[{y};{x}R
+    // y es recibido desde la entrada estándar (stdin)
+    write(STDOUT_FILENO, "\x1b[6n", 4);
 
-    char buff[32] = {0};
+    char buff[32] = { 0 };
     unsigned long i = 0;
     char ch = 0;
 
-    for (;ch != 'R' && i < sizeof(buff) - 1; i++) {
+    // Leemos hasta encontrar el caracter 'R'
+    for (; ch != 'R' && i < sizeof(buff) - 1; i++) {
+        // Leemos "stdin" caracter por caracter
         read(STDIN_FILENO, &ch, 1);
         buff[i] = ch;
     }
     buff[i] = '\0';
 
-    sscanf(buff, "\033[%d;%dR", &coords.y, &coords.x);
+    // Parseamos el formato de respuesta
+    sscanf(buff, "\x1b[%d;%dR", &coords.y, &coords.x);
     coords.y--; coords.x--;
 #else
     CONSOLE_SCREEN_BUFFER_INFO BufferInfo;
@@ -238,67 +249,76 @@ gnu::vec2d getCursorPosition() {
 // Sobreescribe toda una línea entera de la consola con espacios en blanco
 void cleanLine(short y) {
     gnu::gotoXY(0, y);
-    for (int i = 0; i < gnu::getConsoleSize().x; i++) {
-        gnu::print(" ");
+    std::string line = "";
+    int size_x = gnu::getConsoleSize().x;
+    for (int i = 0; i < size_x; i++) {
+        line += " ";
     }
+    gnu::print(line);
 }
 
-void cleanupAnticine(void) {
-    gnu::setCursorVisible(true);
-#ifdef _WIN32
-#else
-    //clean up the alternate buffer
-	printf("\x1b[2J");
-	//switch back to the normal buffer
-	printf("\x1b[?1049l");
-	//show the cursor again
-	gnu::setCursorVisible(true);
-
-    tcsetattr(STDOUT_FILENO, TCSANOW, &initial_state);
-#endif
-}
-
+// Para invocar a la función atexit()
 void exit_with_code(int code) {
     exit(code);
 }
 
+void cleanupProgram(void) {
+    gnu::setCursorVisible(true);
+#ifdef _WIN32
+#else
+    // cleanup
+	printf("\x1b[2J");
+	// Regresa al buffer normal de la consola
+    // (al inicio se cambió al alternative buffer)
+	printf("\x1b[?1049l");
+    // Restaura la configuración inicial de la consola
+    tcsetattr(STDOUT_FILENO, TCSANOW, &initial_state);
+#endif
+}
+
 // Inicia el programa con algunas configuraciones básicas
-void initProgramConf() {
+void initProgram() {
     gnu::setCursorVisible(false);
+    std::srand(std::time(nullptr));
+
+// En UNIX, configuramos la consola en modo raw
+// De esta forma podemos recibir las teclas presionadas como
+// un stream de bytes, sin necesidad de presionar enter
 #if defined(ANTICINE_UNIX)
+    // Guardamos la configuración inicial de la consola
     tcgetattr(STDOUT_FILENO, &initial_state);
     tcgetattr(STDOUT_FILENO, &term_state);
 
+    // Configuramos la consola en modo raw
     // cfmakeraw(&term_state);
     term_state.c_lflag &= ~(ICANON);
     term_state.c_lflag &= ~(ECHO);
     tcsetattr(STDOUT_FILENO, TCSANOW, &term_state);
 
-    // Start the alternative buffer
+    // Inicia el modo "alternative buffer"
     printf("\x1b[?1049h");
     // Clenaup
-    printf("\033[2J");
-    // Hide the cursor
-
-    // Goto 0, 0 (y, x)
-    printf("\x1b[0;0H");
+    printf("\x1b[2J");
     fflush(stdout);
 
-    // Setup cleanups
-    atexit(cleanupAnticine);
-    signal(SIGINT, exit_with_code);
-    signal(SIGTERM, exit_with_code);
+    // Signals handlers
+    atexit(cleanupProgram);
+    signal(SIGINT, exit_with_code);  // Ctrl+C
+    signal(SIGTERM, exit_with_code); // kill
     signal(SIGKILL, exit_with_code); // user responsibility?
     signal(SIGTSTP, exit_with_code); // Ctrl+Z
 #else
-    // Setea la consola para que acepte UTF-8
+    // En windows, configuramos manualmente la salida de la consola
+    // para soportar UTF-8
     SetConsoleOutputCP(65001);
 #endif
+    gnu::gotoXY(0, 0);
 }
 
 // Modifica la visibilidad del cursor
 void setCursorVisible(bool isVisible) {
 #if defined(ANTICINE_UNIX)
+    // Se usan escape sequences para modificar la visibilidad del cursor
     gnu::print("\x1b[?25" + std::string(isVisible ? "h" : "l"));
 #else
     CONSOLE_CURSOR_INFO cursorInfo;
@@ -307,39 +327,13 @@ void setCursorVisible(bool isVisible) {
 #endif
 }
 
-// Pausa el proceso por una cierta cantidad de milisegundos
-void sleep(int ms) {
-    std::this_thread::sleep_for(std::chrono::microseconds(ms));
-}
-
 void cls() {
 #if defined(ANTICINE_UNIX)
-    // system("clear");
-    printf("\033[2J");
+    // Se prefirió usar el escape sequence \x1b[2J en lugar de system("clear")
+    printf("\x1b[2J");
 #else
     system("cls");
 #endif
-}
-
-/**
- * Repite un string una cierta cantidad de veces
- * 
- * @example
- * repeat("hola", 3) -> "holaholahola"
-*/
-std::string repeat(std::string str, int times) {
-    std::string result = "";
-    for (int i = 0; i < times; i++) {
-        result += str;
-    }
-    return result;
-}
-std::string repeat(const char* str, int times) {
-    std::string result = "";
-    for (int i = 0; i < times; i++) {
-        result += str;
-    }
-    return result;
 }
 
 // Para imprimir cosas a la velocidad de la luz
@@ -378,11 +372,13 @@ void print(const char* str) {
 
 // Imprime una línea centrada en la consola
 void printLineCentered(std::string line) {
-    gnu::gotoX((short)((gnu::getConsoleSize().x - utf8::str_length(line)) / 2));
+    gnu::gotoX(
+        short((gnu::getConsoleSize().x - utf8::str_length(line)) / 2)
+    );
     gnu::print(line);
 }
 
-//Prints multiline raw text at the center of the screen (without padding)
+// Imprime un texto multilinea de forma centrada en la consola
 void printRawCenter(std::string raw) {
     std::vector<std::string> subStringsList;
     std::string buffer = "";
@@ -405,6 +401,35 @@ void printRawCenter(std::string raw) {
         gnu::gotoX(offset);
         gnu::print(subStringsList[i] + "\n");
     }
+}
+
+/* ---- Utilidades adicionales ---- */
+
+/**
+ * Repite un string una cierta cantidad de veces
+ * 
+ * @example
+ * repeat("hola", 3) -> "holaholahola"
+*/
+std::string repeat(std::string str, int times) {
+    std::string result = "";
+    for (int i = 0; i < times; i++) {
+        result += str;
+    }
+    return result;
+}
+std::string repeat(const char* str, int times) {
+    std::string result = "";
+    for (int i = 0; i < times; i++) {
+        result += str;
+    }
+    return result;
+}
+
+// Pausa el proceso por una cierta cantidad de milisegundos
+// Esta función no hace efecto en UNIX. Sospecho que se debe al modo raw
+void sleep(int ms) {
+    std::this_thread::sleep_for(std::chrono::microseconds(ms));
 }
 
 } // namespace gnu

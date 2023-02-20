@@ -2,6 +2,7 @@
 
 #include <string>
 #ifdef _WIN32
+// En windows, usamos windows.h para los colores básicos definidos
 #   include <Windows.h>
 #endif
 
