@@ -158,7 +158,7 @@ void gotoX(short x) {
 #if defined(ANTICINE_UNIX)
     gnu::print("\x1b[" + std::to_string(gnu::getCursorPosition().y + 1) + ";" + std::to_string(x + 1) + "H");
 #else
-    COORD cursorPosition = { x, gnu::getCursorPos().y };
+    COORD cursorPosition = { x, gnu::getCursorPosition().y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
@@ -168,7 +168,7 @@ void gotoY(short y) {
         "\x1b[" + std::to_string(y + 1) + ";" + std::to_string(gnu::getCursorPosition().x + 1) + "H"
     );
 #else
-    COORD cursorPosition = { gnu::getCursorPos().x, y };
+    COORD cursorPosition = { gnu::getCursorPosition().x, y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
