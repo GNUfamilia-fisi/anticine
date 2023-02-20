@@ -454,7 +454,7 @@ std::string menuDetalles() {
 
             else {
                 date.showBorder = false;
-                date.flushBorders();                
+                date.flushBorders();
             }
 
             date.draw();
@@ -548,7 +548,7 @@ std::string menuDiaAux() {
     genericDateContainers[1].setFontColor({ 230, 50, 50 });
     genericDateContainers[1].showBorder = true;
 
-    char input;
+    int input;
     unsigned char opt = 0;
 
     while (true) {
@@ -662,7 +662,6 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     buttonRight.showBorder = false;
     buttonRight.setFontColor({ 255,255,255 });
 
-    char input = '\0';
     int panel_i = 0;
 
     gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
