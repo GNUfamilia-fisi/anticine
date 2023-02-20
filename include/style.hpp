@@ -17,7 +17,8 @@ void print(std::string str) {
 }
 #else
 void print(std::string str) {
-    
+    fputs(str.c_str(), stdout);
+    fflush(stdout);
 }
 #endif
 

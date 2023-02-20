@@ -17,21 +17,16 @@ namespace gnu {
 std::string fecha;
 
 // Prototipos
-void displayDate(std::string fulldate, short opt);
 void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize);
-void displayLogo2D(style::color color);
-void loadingScreen();
 
 std::string menuCarteleraFinal();
 std::string chooseCinemaScreen();
 std::string menuDetalles();
 std::string asientos();
 
-
 // Variables globales
 std::string cineID;
 std::string movieID;
-
 
 void menuSelector() {
     json menuRawData = gnu::apifetch("/cines/cercanos");
@@ -117,7 +112,6 @@ std::string asientos(){
     opciones.setBoxColor({  0, 29, 158 });
     opciones.setFontColor({255,255,255});
 
-    int sup=3;
     for(short k=coordy;k<25+coordy;k+=5){//5 espacios
         for(short j=coordx;j<135+coordx;j+=9){//9 espacios
             opciones.position= {j,k};
@@ -164,10 +158,8 @@ std::string asientos(){
         seleccion.draw();
         gnu::sleep(100);
         
-        // if (_kbhit()) input = _getch();
-        input = getch();
-
-        if (input != ERR) {
+        input = gnu::getch();
+        if (input) {
             switch (input) {
             case gnu::key::Right:
                 c+=9;
@@ -186,8 +178,6 @@ std::string asientos(){
     }
 
 }
-
-
 
 std::string menuDetalles() {
     gnu::cls();
@@ -214,13 +204,13 @@ std::string menuDetalles() {
     
     std::vector<gnu::Box> footers(footerDates.size(), footerTemplate);
 
-    for (int i = 0; i < footers.size(); i++) {
+    for (size_t i = 0; i < footers.size(); i++) {
         int index = ceil((double) (230 / footers.size()) * i);
         footers[i].content = footerDates[i];
         footers[i].transparent = true;
         footers[i].setFontColor(230 - index, 230 - index, 230 - index);
         footers[i].position = gnu::vec2d({
-            (getConsoleSize().x / 2) - 4 + (9 * i),
+            (int)((getConsoleSize().x / 2) - 4 + (9 * i)),
             gnu::getConsoleSize().y - 2
         });
         footers[i].showBorder = false;
@@ -240,9 +230,8 @@ std::string menuDetalles() {
     int input;
     size_t hour_i = 0;
     while(true) {
-        input = getch();
-        // if (_kbhit()) input = _getch();
-        if (input != ERR) {
+        input = gnu::getch();
+        if (input) {
             switch (input) {
             case gnu::key::Right:
                 if (hour_i < footers.size() - 2) hour_i++;
@@ -261,7 +250,7 @@ std::string menuDetalles() {
         else footers[0].content = "       ";
         footers[0].draw();
 
-        for (int i = 1; i < footers.size(); i++) {
+        for (size_t i = 1; i < footers.size(); i++) {
             if (i + hour_i - 1 < footerDates.size()) footers[i].content = footerDates[i + hour_i - 1];
             else footers[i].content = "       ";
 
@@ -275,7 +264,6 @@ std::string menuDetalles() {
 
     return "hola";
 }
-
 
 std::string menuCarteleraFinal() {
     gnu::cls();
@@ -340,7 +328,7 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     }
 
     std::string cinemaLabel = "Estas en " + cinemaName;
-    gnu::Box cinemaLabelBox({ cinemaLabel.size() + 4, 1 });
+    gnu::Box cinemaLabelBox({ (int)(cinemaLabel.size() + 4), 1 });
     cinemaLabelBox.content = cinemaLabel;
     cinemaLabelBox.transparent = true;
     cinemaLabelBox.showBorder = true;
@@ -363,8 +351,7 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     buttonRight.showBorder = false;
     buttonRight.setFontColor({ 255,255,255 });
 
-    char input = '\0';
-    int panel_i = 0;
+    size_t panel_i = 0;
 
     gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
     std::string titleLabel = billboard[1]["title"].get<std::string>();
@@ -379,12 +366,12 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     std::string additionalsPadding = "";
 
     char opt = 0;
-    
+    int input = 0;
+
     while (true) {
         // ---- Receive input ----
-        int input = getch();
-        // if (_kbhit()) input = _getch();
-        if (input != ERR) {
+        input = gnu::getch();
+        if (input) {
             switch (input) {
                 case gnu::key::Right:
                     if (panel_i < billboard.size() - 3 && opt == 1) panel_i++;
@@ -409,7 +396,6 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
                     break;
             }
         }
-
         card1.reconsider(billboard[0 + panel_i]);
         card2.reconsider(billboard[1 + panel_i]);
         card3.reconsider(billboard[2 + panel_i]);
@@ -418,6 +404,7 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
         descriptionCard.centerHorizontal();
 
         // ---- Update ----
+        gnu::gotoXY(0, 0);
         style::setFg({ 128, 186, 209 });
         gnu::printRawCenter(rawLogo);
         style::setFg({ 222, 197, 153 });
@@ -430,14 +417,14 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
         card2.draw();
         card3.draw();
 
-        gnu::print("\n\n\n");
+        gnu::print("\n\n");
         titleLabel = billboard[1 + panel_i]["title"].get<std::string>();
 
         if (lastLabel.size() <= titleLabel.size()) {
             gnu::printLineCentered(titleLabel);            
         }
         else {
-            for (int i = 0; i < (lastLabel.size() - titleLabel.size() + 1) / 2; i++){
+            for (size_t i = 0; i < (lastLabel.size() - titleLabel.size() + 1) / 2; i++){
                 titlePadding += " ";
             }
             gnu::printLineCentered(titlePadding + titleLabel + titlePadding);
@@ -460,13 +447,12 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
             gnu::printLineCentered(additionals);            
         }
         else {
-            for (int i = 0; i < (lastAdditionals.size() - additionals.size() + 1) / 2; i++){
+            for (size_t i = 0; i < (lastAdditionals.size() - additionals.size() + 1) / 2; i++){
                 additionalsPadding += " ";
             }
             gnu::printLineCentered(additionalsPadding + additionals + additionalsPadding);
         }
         lastAdditionals = additionals;
-
 
         descriptionCard.draw();
 
@@ -490,7 +476,6 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
             cinemaLabelBox.setFontColor({ 255, 138, 208 });
             cinemaLabelBox.setBordersVisible(true);
         }
-
         else {
             buttonRight.content = ">>";
             buttonLeft.content = "<<";
@@ -507,37 +492,13 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 
 
         // ----- Clear ----
-        gnu::gotoXY(0, 0);
-        gnu::vec2d size = gnu::getConsoleSize();
         if (gnu::getConsoleSize() != lastConsoleSize) {
             gnu::cls();
         }
-
         lastConsoleSize = gnu::getConsoleSize();
         titlePadding = "";
         additionalsPadding = "";
-
-        gnu::sleep(5);
-    }
-}
-
-void displayDate(std::string fulldate, short opt) {
-    gnu::gotoXY(
-        (gnu::getConsoleSize().x / 2) - 5, 12
-    );
-    gnu::print(fulldate);
-
-    gnu::gotoXY(
-        (gnu::getConsoleSize().x / 2) + 3, 13
-    );
-
-    if (opt == 0) {
-        style::setColor(style::color::LIGHTGREEN);
-        gnu::print("^^");
-        style::setColor(style::color::WHITE);
-    }
-    else {
-        gnu::cleanLine(13);
+        // gnu::sleep(5);
     }
 }
 
@@ -553,7 +514,6 @@ std::string chooseCinemaScreen() {
     size_t currentCine = 0;
     int nameCursorPos = 0;
     short listLength = 5;
-    unsigned short color = style::color::BLUE;
     bool lock = true;
 
     std::string elijaLocalLabel = R"(
@@ -573,7 +533,7 @@ std::string chooseCinemaScreen() {
 | || (_) || (__ | (_| || |
 |_| \___/  \___| \__,_||_|
 )";
-    
+
     gnu::printRawCenter(elijaLocalLabel);
 
     // main menu loop
@@ -581,14 +541,12 @@ std::string chooseCinemaScreen() {
         gnu::gotoXY(0, 1);
         gnu::print('\n');
 
-        int hit = getch();
-        printw("%d", hit);
-        // if (_kbhit()) {
-        if (hit != ERR) {
+        int hit = gnu::getch();
+        if (hit) {
             // char hit = _getch();
             switch (hit) {
             case gnu::key::Down:
-                for (size_t i = 0; i < listLength; i++) {
+                for (short i = 0; i < listLength; i++) {
                     gnu::cleanLine(20+i);
                 }
                 if (currentCine < nearCinemasData["cinemas"].size() - 1) {
@@ -603,7 +561,7 @@ std::string chooseCinemaScreen() {
                 break;
             case gnu::key::Up:
                 
-                for (size_t i = 0; i < listLength; i++) {
+                for (short i = 0; i < listLength; i++) {
                     gnu::cleanLine(20+i);
                 }
 
@@ -679,50 +637,6 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
 
         gnu::print(names[i]);
     }
-}
-
-void displayLogo2D(style::color color) {
-    style::setColor(color);
-    std::string cinext2 = R"(
-   _______ _   _________  ________
-  / ____(_/ | / / ____| |/ /_  __/
- / /   / /  |/ / __/  |   / / /   
-/ /___/ / /|  / /___ /   | / /    
-\____/_/_/ |_/_____//_/|_|/_/     
-)";
-
-    gnu::printRawCenter(cinext2);
-}
-
-void loadingScreen() {
-    style::setColor(style::color::LIGHTCYAN);
-    char cargando = '#';
-    char inicio = '|';
-    gnu::print(R"(
-                                                 .___
-      ____ _____ _______  _________    ____    __| _/____  
-    _/ ___\\__  \\_  __ \/ ___\__  \  /    \  / __ |/  _ \
-    \  \___ / __ \|  | \/ /_/  > __ \|   |  \/ /_/ (  <_> )
-     \___  >____  /__|  \___  (____  /___|  /\____ |\____/ 
-         \/     \/     /_____/     \/     \/      \/       
-    
-)");
-    
-    gnu::gotoXY(
-        (gnu::getConsoleSize().x / 2) - (33 / 2),
-        15
-    );
-    
-    gnu::print(inicio);
-    
-    for (int i = 0 ; i < 32 ; i++){
-        gnu::print(cargando);
-        gnu::sleep(20);
-    }
-    
-    gnu::print(inicio);
-    gnu::sleep(400);
-    gnu::cls();
 }
 
 } // namespace gnu

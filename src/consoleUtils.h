@@ -6,16 +6,22 @@
 #include <thread>
 #include <chrono>
 #include <cstdio>
-#ifdef _WIN32
+#if defined(_WIN32)
 #   include <windows.h>
 #   include <conio.h>
 #   define POPEN _popen
 #   define PCLOSE _pclose
-#else
-#   include <ncurses.h>
+#   define ANTICINE_WINDOWS
+#elif defined(__unix__)
+#   include <termios.h>
+#   include <sys/ioctl.h>
+// #   include <unistd.h>
+#   include <poll.h>
 #   define POPEN popen
 #   define PCLOSE pclose
-#   define NCURSES_ENABLED
+#   define ANTICINE_UNIX
+#else
+#   error "Unsupported platform"
 #endif
 
 #include <json.hpp>
@@ -25,10 +31,13 @@ using json = nlohmann::json;
 
 namespace gnu {
 
-#ifdef _WIN32
+#if defined(ANTICINE_WINDOWS)
     // Variable global para el handle de la consola proveída por Windows.h
     // Esta variable no debería ser usada directamente, sino a través de funciones
     HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+#else
+    struct termios initial_state;
+    struct termios term_state;
 #endif
 
 // Prototipos
@@ -55,7 +64,7 @@ struct vec2d {
     }
 };
 vec2d getConsoleSize();
-vec2d getCursorPos();
+vec2d getCursorPosition();
 
 // códigos de teclas para _getch()
 enum key {
@@ -74,52 +83,90 @@ enum key {
     Space = 32,
     Enter = 13
 #else
-    Up = 259,
-    Down = 258,
-    Left = 260,
-    Right = 261,
+    Up = 4283163,
+    Down = 4348699,
+    Left = 4479771,
+    Right = 4414235,
 
-    a = 'a',
-    w = 'w',
-    s = 's',
-    d = 'd',
+    a = 97,
+    w = 119,
+    s = 115,
+    d = 100,
 
     ExitKey = 27,
-    Space = ' ',
+    Space = 32,
     Enter = 10
 #endif
 };
+
+#include <fcntl.h>
+
+int getch() {
+#if defined(ANTICINE_WINDOWS)
+    if (_kbhit()) {
+        return _getch();
+    }
+    return 0;
+#else
+    int wbuff = 0;
+
+    struct pollfd pollstdin[1];
+    pollstdin[0].fd = STDIN_FILENO;
+    pollstdin[0].events = POLLIN;
+
+    // Poll one file descriptor (stdin) and waits 1 ms for the POLLIN event
+    // https://man7.org/linux/man-pages/man2/poll.2.html
+    poll(&pollstdin[0], 1, 500);
+
+    if (pollstdin[0].revents & POLLIN) {
+        read(STDIN_FILENO, &wbuff, 4);
+
+        // Ctrl+C
+        if (wbuff == 3) {
+            raise(SIGTERM);
+        }
+        // Ctrl+Z
+        if (wbuff == 26) {
+            raise(SIGTSTP);
+        }
+        return wbuff;
+    }
+    return 0;
+#endif
+}
 
 // gotoXY: Posiciona el cursor en { x, y } de la consola ("y" invertida)
 // He hecho tres definiciones de gotoXY, una que usa short, otra que usa int
 // y la última que utiliza los recomendados gnu::vect2d
 void gotoXY(int x, int y) {
-#ifdef NCURSES_ENABLED
-    move(y, x);
+#if defined(ANTICINE_UNIX)
+    gnu::print("\x1b[" + std::to_string(y + 1) + ";" + std::to_string(x + 1) + "H");
 #else
     COORD cursorPosition = { (short)x, (short)y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
 void gotoXY(gnu::vec2d pos) {
-#ifdef NCURSES_ENABLED
-    move((int)pos.y, (int)pos.x);
+#if defined(ANTICINE_UNIX)
+    gnu::print("\x1b[" + std::to_string(pos.y + 1) + ";" + std::to_string(pos.x + 1) + "H");
 #else
     COORD cursorPosition = { pos.x, pos.y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
 void gotoX(short x) {
-#ifdef NCURSES_ENABLED
-    move((int)gnu::getCursorPos().y, (int)x);
+#if defined(ANTICINE_UNIX)
+    gnu::print("\x1b[" + std::to_string(gnu::getCursorPosition().y + 1) + ";" + std::to_string(x + 1) + "H");
 #else
     COORD cursorPosition = { x, gnu::getCursorPos().y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
 void gotoY(short y) {
-#ifdef NCURSES_ENABLED
-    move((int)y, (int)gnu::getCursorPos().x);
+#if defined(ANTICINE_UNIX)
+    gnu::print(
+        "\x1b[" + std::to_string(y + 1) + ";" + std::to_string(gnu::getCursorPosition().x + 1) + "H"
+    );
 #else
     COORD cursorPosition = { gnu::getCursorPos().x, y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
@@ -150,19 +197,35 @@ std::string exec(std::string command) {
 // El tamaño es en caracteres
 gnu::vec2d getConsoleSize() {
     gnu::vec2d coords;
-#ifdef NCURSES_ENABLED
-    getmaxyx(stdscr, coords.y, coords.x);
+#if defined(ANTICINE_UNIX)
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    return { w.ws_col, w.ws_row };
 #else
     CONSOLE_SCREEN_BUFFER_INFO BufferInfo;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &BufferInfo);
+    GetConsoleScreenBufferInfo(consoleHandle, &BufferInfo);
     coords = { BufferInfo.dwSize.X, BufferInfo.dwSize.Y };
 #endif
     return coords;
 }
-gnu::vec2d getCursorPos() {
+gnu::vec2d getCursorPosition() {
     gnu::vec2d coords;
-#ifdef NCURSES_ENABLED
-    getyx(stdscr, coords.y, coords.x);
+#if defined(ANTICINE_UNIX)
+    write(STDOUT_FILENO, "\033[6n", 4);
+    // returns ESC[(y);(x)R
+
+    char buff[32] = {0};
+    unsigned long i = 0;
+    char ch = 0;
+
+    for (;ch != 'R' && i < sizeof(buff) - 1; i++) {
+        read(STDIN_FILENO, &ch, 1);
+        buff[i] = ch;
+    }
+    buff[i] = '\0';
+
+    sscanf(buff, "\033[%d;%dR", &coords.y, &coords.x);
+    coords.y--; coords.x--;
 #else
     CONSOLE_SCREEN_BUFFER_INFO BufferInfo;
     GetConsoleScreenBufferInfo(consoleHandle, &BufferInfo);
@@ -180,50 +243,65 @@ void cleanLine(short y) {
     }
 }
 
+void cleanupAnticine(void) {
+    gnu::setCursorVisible(true);
+#ifdef _WIN32
+#else
+    //clean up the alternate buffer
+	printf("\x1b[2J");
+	//switch back to the normal buffer
+	printf("\x1b[?1049l");
+	//show the cursor again
+	gnu::setCursorVisible(true);
+
+    tcsetattr(STDOUT_FILENO, TCSANOW, &initial_state);
+#endif
+}
+
+void exit_with_code(int code) {
+    exit(code);
+}
+
 // Inicia el programa con algunas configuraciones básicas
 void initProgramConf() {
     gnu::setCursorVisible(false);
-#ifdef NCURSES_ENABLED
-    // setlocale para que ncurses acepte UTF-8
-    setlocale(LC_ALL, "");
-    if (!initscr()) {
-        std::cout << "Fatal error: could not initialize ncurses" << std::endl;
-        exit(1);
-    }
-    // Configuración de ncurses
-    use_extended_names(true);
-    // oculta el cursor
-    curs_set(0);
-    // desactiva el buffering de teclado y el delay
-    // (permite leer teclas sin presionar enter)
-    cbreak();
-    nodelay(stdscr, true);
-    // desactiva el eco de las teclas
-    // (no se ven las teclas presionadas)
-    noecho();
-    // permite leer un set extendido de teclas
-    keypad(stdscr, TRUE);
+#if defined(ANTICINE_UNIX)
+    tcgetattr(STDOUT_FILENO, &initial_state);
+    tcgetattr(STDOUT_FILENO, &term_state);
+
+    // cfmakeraw(&term_state);
+    term_state.c_lflag &= ~(ICANON);
+    term_state.c_lflag &= ~(ECHO);
+    tcsetattr(STDOUT_FILENO, TCSANOW, &term_state);
+
+    // Start the alternative buffer
+    printf("\x1b[?1049h");
+    // Clenaup
+    printf("\033[2J");
+    // Hide the cursor
+
+    // Goto 0, 0 (y, x)
+    printf("\x1b[0;0H");
+    fflush(stdout);
+
+    // Setup cleanups
+    atexit(cleanupAnticine);
+    signal(SIGINT, exit_with_code);
+    signal(SIGTERM, exit_with_code);
+    signal(SIGKILL, exit_with_code); // user responsibility?
+    signal(SIGTSTP, exit_with_code); // Ctrl+Z
 #else
     // Setea la consola para que acepte UTF-8
     SetConsoleOutputCP(65001);
 #endif
 }
 
-void endProgram() {
-    gnu::setCursorVisible(true);
-#ifdef _WIN32
-#else
-    endwin();
-#endif
-}
-
 // Modifica la visibilidad del cursor
 void setCursorVisible(bool isVisible) {
-#ifdef NCURSES_ENABLED
-    curs_set(isVisible);
+#if defined(ANTICINE_UNIX)
+    gnu::print("\x1b[?25" + std::string(isVisible ? "h" : "l"));
 #else
     CONSOLE_CURSOR_INFO cursorInfo;
-    GetConsoleCursorInfo(consoleHandle, &cursorInfo);
     cursorInfo.bVisible = isVisible;
     SetConsoleCursorInfo(consoleHandle, &cursorInfo);
 #endif
@@ -233,9 +311,11 @@ void setCursorVisible(bool isVisible) {
 void sleep(int ms) {
     std::this_thread::sleep_for(std::chrono::microseconds(ms));
 }
+
 void cls() {
-#ifdef NCURSES_ENABLED
-    clear();
+#if defined(ANTICINE_UNIX)
+    // system("clear");
+    printf("\033[2J");
 #else
     system("cls");
 #endif
@@ -264,29 +344,33 @@ std::string repeat(const char* str, int times) {
 
 // Para imprimir cosas a la velocidad de la luz
 void print(char ch) {
-#ifdef NCURSES_ENABLED
-    printw("%c", ch);
+#if defined(ANTICINE_UNIX)
+    printf("%c", ch);
+    fflush(stdout);
 #else
     WriteConsole(consoleHandle, &ch, 1, NULL, NULL);
 #endif
 }
 void print(std::string str) {
-#ifdef NCURSES_ENABLED
-    printw(str.c_str());
+#if defined(ANTICINE_UNIX)
+    printf("%s", str.c_str());
+    fflush(stdout);
 #else
     WriteConsole(consoleHandle, str.c_str(), str.length(), NULL, NULL);
 #endif
 }
 void print(char* str) {
-#ifdef NCURSES_ENABLED
-    printw(str);
+#if defined(ANTICINE_UNIX)
+    printf("%s", str);
+    fflush(stdout);
 #else
     WriteConsole(consoleHandle, str, strlen(str), NULL, NULL);
 #endif
 }
 void print(const char* str) {
-#ifdef NCURSES_ENABLED
-    printw(str);
+#if defined(ANTICINE_UNIX)
+    printf("%s", str);
+    fflush(stdout);
 #else
     WriteConsole(consoleHandle, str, strlen(str), NULL, NULL);
 #endif
@@ -315,7 +399,7 @@ void printRawCenter(std::string raw) {
         }
     }
 
-    int offset = (getConsoleSize().x / 2) - (utf8::str_length(subStringsList[0]) / 2);
+    int offset = (gnu::getConsoleSize().x - utf8::str_length(subStringsList[0])) / 2;
 
     for (size_t i = 0; i < subStringsList.size(); i++){
         gnu::gotoX(offset);

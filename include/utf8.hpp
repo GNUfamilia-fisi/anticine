@@ -56,7 +56,7 @@ std::size_t str_length(std::string &str) {
 
 #if defined(UTF8_STRICT_COUNT)
     size_t character_count = 0;
-    short i = 0;
+    size_t i = 0;
     // Iterando sobre los code units (de 1 en 1 byte)
     while (i < str.length()) {
         short char_length = 0;

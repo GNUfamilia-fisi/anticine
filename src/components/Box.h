@@ -106,13 +106,15 @@ class Box {
 
     void draw() {
         style::reset_fg();
-        //style::reset_bg();
-        // Para dibujar, primero rompemos el contenido en varias
-        // líneas, de modo que no se desborde de la caja
+
+        /**
+         * Para dibujar, necesitamos romper el contenido de la caja en varias
+         * líneas, para ello, usamos un algoritmo de word wrap.
+         */
 
         // Variables de seguimiento:
-        short last_space = 0;
-        short last_break = 0;
+        size_t last_space = 0;
+        size_t last_break = 0;
         // Array de líneas
         std::vector<std::string> lines;
         // Para iterarlo apropiadamente, usamos las utilidades de utf8
@@ -120,7 +122,7 @@ class Box {
         utf8::utf8_string_t utf_8str = utf8::iterate(this->content);
 
         // Iteramos sobre cada caracter (utf8)
-        short i = 0;
+        size_t i = 0;
         for (const auto &ch : utf_8str) {
             if (ch == " ") {
                 // hacemos seguimiento de los espacios
@@ -130,13 +132,13 @@ class Box {
                 // Si encontramos un salto de línea, cortamos
                 // hasta donde estemos (sin incluir el salto de línea)
                 std::string line;
-                for (int j = last_break; j < i; j++) {
+                for (size_t j = last_break; j < i; j++) {
                     line += utf_8str[j];
                 }
                 lines.push_back(line);
                 last_break = i + 1; // +1 para saltar el salto de línea
             }
-            if (i - last_break >= this->size.x - this->padding * 2) {
+            if (i - last_break >= (size_t)this->size.x - this->padding * 2) {
                 // Si esto se cumple es porque llegamos al límite
                 // pero no hemos encontrado un espacio en donde cortar
                 if (last_space <= last_break) {
@@ -144,7 +146,7 @@ class Box {
                     i++; continue;
                 }
                 std::string line;
-                for (int j = last_break; j < last_space; j++) {
+                for (size_t j = last_break; j < last_space; j++) {
                     line += utf_8str[j];
                 }
                 lines.push_back(line);
@@ -154,7 +156,7 @@ class Box {
             // pusheamos el resto de caracteres
             if (i + 1 == total_len) {
                 std::string line;
-                for (int j = last_break; j < i + 1; j++) {
+                for (size_t j = last_break; j < i + 1; j++) {
                     line += utf_8str[j];
                 }
                 lines.push_back(line);
@@ -191,7 +193,6 @@ class Box {
                 gnu::gotoXY(this->position.x, this->position.y + y++);
 
                 // padding left
-                // style::setFg(this->box_color); (establecido arriba)
                 gnu::print(gnu::repeat(filling, start_row));
 
                 // text

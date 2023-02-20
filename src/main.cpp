@@ -12,12 +12,12 @@
 #include "components/Card.h"
 #include "menus/mainMenu.h"
 
+#include <iostream>
+#include <unistd.h>
+
 int main(void) {
     gnu::initProgramConf();
-
     gnu::menuSelector();
-    gnu::asientos();
 
-    gnu::endProgram();
     return 0;
 }
