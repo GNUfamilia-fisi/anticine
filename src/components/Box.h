@@ -52,25 +52,26 @@ class Box {
     }
     void drawBorder() {
         // Dibujamos el marco
-        style::setFg(this->box_color);
+        if (defaultBorderColor) style::setFg(this->box_color);
+        else style::setFg(this->border_color);
         gnu::gotoXY(this->position.x - 1, this->position.y - 1);
-        gnu::print("┌");
+        std::cout << "┌";
         for (int i = 0; i < this->size.x; i++) {
-            gnu::print("─");
+            std::cout << "─";
         }
-        gnu::print("┐");
+        std::cout << "┐";
         for (int i = 0; i < this->size.y; i++) {
             gnu::gotoXY( this->position.x - 1, this->position.y + i);
-            gnu::print("│");
+            std::cout << "│";
             gnu::gotoXY(this->position.x + this->size.x, this->position.y + i);
-            gnu::print("│");
+            std::cout << "│";
         }
         gnu::gotoXY(this->position.x - 1, this->position.y + this->size.y);
-        gnu::print("└");
+        std::cout << "└";
         for (int i = 0; i < this->size.x; i++) {
-            gnu::print("─");
+            std::cout << "─";
         }
-        gnu::print("┘");
+        std::cout << "┘";
         style::reset_fg();
         style::reset_bg();
     }
