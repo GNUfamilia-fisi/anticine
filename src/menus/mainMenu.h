@@ -284,9 +284,13 @@ std::string menuDetalles() {
     });
 
     std::vector<gnu::Box> versionBoxes(versions.size(), versionBoxTemplate);
-    
+    std::string versionTag;
+    std::string langTag;
+
     //===== type of movie label =====
-    gnu::Box typeSubBox({6, 1});
+    gnu::Box typeSubBox({15, 1});
+
+    size_t maxLabelSize = 10;
     
     //========= drawing the version boxes with their type labels =======
     for (int i = 0; i < versionBoxes.size(); i++){
@@ -297,9 +301,10 @@ std::string menuDetalles() {
         versionBoxes[i].draw();
 
         //redrawing the type label
-        if (versions[i]["movie_version_id"].get<std::string>() == "HO00005115") typeSubBox.content = "2D";
-        else if (versions[i]["movie_version_id"].get<std::string>() == "HO00005111") typeSubBox.content = "3D";
+        versionTag = versions[i]["version_tags"].get<std::string>();
+        langTag = versions[i]["language_tags"].get<std::string>();
 
+        typeSubBox.content = versionTag + " | " + langTag;
         typeSubBox.position = versionBoxes[i].position;
         typeSubBox.draw();
     }
@@ -341,7 +346,7 @@ std::string menuDetalles() {
     }
 
 
-    int input = '\0';
+    int input;
 
     gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
 
@@ -357,9 +362,7 @@ std::string menuDetalles() {
 
     //======== main loop ==============
     while(true) {
-        input = '\0';
-
-        if (_kbhit()) input = _getch();
+        input = gnu::getch();
 
         //======= input switch ======
         switch (input) {
@@ -389,6 +392,10 @@ std::string menuDetalles() {
         case gnu::key::Enter:
             if (globalOpt == 1) return "menuDiaAux";
             if (globalOpt == 0) system(std::string("start " + trailer_url).c_str());
+
+            if (globalOpt == 2) {
+                return "Asientos";
+            }
         }
 
         for (int j = 0; j < versionBoxes.size(); j++){    
@@ -428,9 +435,10 @@ std::string menuDetalles() {
                 versionBoxes[i].draw();
 
                 //redrawing the type label
-                if (versions[i]["movie_version_id"].get<std::string>() == "HO00005115") typeSubBox.content = "2D";
-                else if (versions[i]["movie_version_id"].get<std::string>() == "HO00005111") typeSubBox.content = "3D";
-        
+                versionTag = versions[i]["version_tags"].get<std::string>();
+                langTag = versions[i]["language_tags"].get<std::string>();
+
+                typeSubBox.content = versionTag + " | " + langTag;
                 typeSubBox.position = versionBoxes[i].position;
                 typeSubBox.draw();
             }
@@ -537,12 +545,14 @@ std::string menuDiaAux() {
         genericDateContainers[i].draw();
     }
 
-    char input = '\0';
+    genericDateContainers[1].setFontColor({ 230, 50, 50 });
+    genericDateContainers[1].showBorder = true;
+
+    char input;
     unsigned char opt = 0;
 
     while (true) {
-        input = '\0';
-        if(_kbhit()) input = _getch();
+        input = gnu::getch();
 
         switch (input) {
         case gnu::key::Up:
@@ -669,10 +679,11 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 
     char opt = 0;
     
+    int input;
+    
     while (true) {
         // ---- Receive input ----
-        char input = '\0';
-        if (_kbhit()) input = _getch();
+        input = gnu::getch();
 
         switch(input){
         case gnu::key::Right:
@@ -856,49 +867,50 @@ std::string chooseCinemaScreen() {
     
     gnu::printRawCenter(elijaLocalLabel);
 
+    int hit;
+    
     // main menu loop
     while (lock) {
         gnu::gotoXY(0, 1);
         std::cout << std::endl;
 
-        if (_kbhit()) {
-            char hit = _getch();
-            switch (hit) {
-            case gnu::key::Down:
+        hit = gnu::getch();
 
-                for (size_t i = 0; i < listLength; i++) {
-                    gnu::cleanLine(20+i);
-                }
+        switch (hit) {
+        case gnu::key::Down:
 
-                if (currentCine < nearCinemasData["cinemas"].size() - 1) {
-                    currentCine++;
-                }
-                if (nameCursorPos < listLength - 1) {
-                    nameCursorPos++;
-                }
-                else {
-                    nameCursorPos = listLength - 1;
-                }
-                break;
-            case gnu::key::Up:
-                
-                for (size_t i = 0; i < listLength; i++) {
-                    gnu::cleanLine(20+i);
-                }
-
-                if (currentCine > 0) {
-                    currentCine--;
-                }
-                break;
-            // Si selecciona un cine, lo guardamos en la variable global cinemaID
-            // que será usado por el siguiente menú
-            case gnu::key::Enter:
-                cineID = nearCinemasData["cinemas"][currentCine]["cinema_id"].get<std::string>();
-                lock = false;
-                break;
-            default:
-                break;
+            for (size_t i = 0; i < listLength; i++) {
+                gnu::cleanLine(20+i);
             }
+
+            if (currentCine < nearCinemasData["cinemas"].size() - 1) {
+                currentCine++;
+            }
+            if (nameCursorPos < listLength - 1) {
+                nameCursorPos++;
+            }
+            else {
+                nameCursorPos = listLength - 1;
+            }
+            break;
+        case gnu::key::Up:
+            
+            for (size_t i = 0; i < listLength; i++) {
+                gnu::cleanLine(20+i);
+            }
+
+            if (currentCine > 0) {
+                currentCine--;
+            }
+            break;
+        // Si selecciona un cine, lo guardamos en la variable global cinemaID
+        // que será usado por el siguiente menú
+        case gnu::key::Enter:
+            cineID = nearCinemasData["cinemas"][currentCine]["cinema_id"].get<std::string>();
+            lock = false;
+            break;
+        default:
+            break;
         }
 
         gnu::cinemaListDisplay(nearCinemasData["cinemas"], currentCine, nameCursorPos, listLength);
