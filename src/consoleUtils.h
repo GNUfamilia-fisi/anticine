@@ -395,7 +395,13 @@ void printRawCenter(std::string raw) {
         }
     }
 
-    int offset = (gnu::getConsoleSize().x - utf8::str_length(subStringsList[0])) / 2;
+    int biggestSlice = 0;
+
+    for (std::string substr : subStringsList) {
+        if (utf8::str_length(substr) >= biggestSlice) biggestSlice = utf8::str_length(substr);
+    }
+
+    int offset = (getConsoleSize().x / 2) - (biggestSlice / 2);
 
     for (size_t i = 0; i < subStringsList.size(); i++){
         gnu::gotoX(offset);
@@ -425,6 +431,30 @@ std::string repeat(const char* str, int times) {
     }
     return result;
 }
+
+//Prints multiline raw text at the screen (with padding)
+void printRawOffset(std::string raw, int offset) {
+    std::vector<std::string> subStringsList;
+    std::string buffer = "";
+
+    for (size_t i = 0; i < raw.length(); i++){
+        if (raw[i] != '\n' && i != raw.length() - 1){
+            buffer += raw[i];
+        }
+        else{
+            if (buffer.empty()) continue;
+            if (i == raw.length() - 1) buffer += raw[i];
+            subStringsList.push_back(buffer);
+            buffer = "";
+        }
+    }
+    
+    for (size_t i = 0; i < subStringsList.size(); i++){
+        gnu::gotoX(offset);
+        gnu::print(subStringsList[i] + "\n");
+    }
+}
+
 
 // Pausa el proceso por una cierta cantidad de milisegundos
 // Esta función no hace efecto en UNIX. Sospecho que se debe al modo raw

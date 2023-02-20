@@ -2,7 +2,7 @@
 
 namespace gnu {
 
-class Card : public Box{
+class Card : public Box {
 public:
     json insert;
     char type;
@@ -23,7 +23,7 @@ public:
         this->type = key;
     }
 
-    void reconsider(json pass){
+    void updateData(json pass){
         switch(type){
         case 0:
             this->content = pass["title"].get<std::string>();
@@ -33,7 +33,18 @@ public:
             break;
         }
     }
+
+    void cardDraw(){
+        if (this->content != "") this->draw();
+        else {
+            this->transparent = true;
+            this->showBorder = false;
+            this->flushBorders();
+            this->draw();
+        }
+    }
 };
+
 
 /*
     std::string content;

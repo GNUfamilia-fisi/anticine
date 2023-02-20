@@ -15,12 +15,17 @@ class Box {
     bool showBorder = true;
     bool alreadyFlushed = false;
     bool defaultFontColor = true;
+    bool defaultBorderColor = true;
+
     std::string fill = "█";
 
     style::rgb box_color = { 255, 255, 255 };
     style::rgb text_color = { 0, 0, 0 };
+    style::rgb border_color = { 0, 0, 0 };
+
     gnu::vec2d size = { 5, 5 };
     gnu::vec2d position = { 0, 0 };
+    
     short padding = 1;
 
     Box(gnu::vec2d size) {
@@ -40,6 +45,10 @@ class Box {
     void setFontColor(int r, int g, int b) {
         this->text_color = { (unsigned char)r, (unsigned char)g, (unsigned char)b };
         this->defaultFontColor = false;
+    }
+    void setBorderColor(style::rgb border_color) {
+        this->border_color = border_color;
+        this->defaultBorderColor = false;
     }
     void drawBorder() {
         // Dibujamos el marco

@@ -22,11 +22,15 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
 std::string menuCarteleraFinal();
 std::string chooseCinemaScreen();
 std::string menuDetalles();
+std::string menuDiaAux();
 std::string asientos();
+
 
 // Variables globales
 std::string cineID;
 std::string movieID;
+std::string selectedDate = "";
+
 
 void menuSelector() {
     json menuRawData = gnu::apifetch("/cines/cercanos");
@@ -36,19 +40,23 @@ void menuSelector() {
 
     while (true) {
         if (menuID == "selectorCineAux") {
-            menuID = chooseCinemaScreen();//elegir cines
+            menuID = chooseCinemaScreen();
         }
         if (menuID == "selectorPelicula") {
             menuID = menuCarteleraFinal();
         }
         if (menuID == "menuDetalles") {
-            menuID = menuDetalles();//seleccionar horario
+            menuID = menuDetalles();
+        }
+        if (menuID == "menuDiaAux") {
+            menuID = menuDiaAux();
         }
         if(menuID=="Asientos"){
             menuID= asientos();
         }
     }
 }
+
 
 //para capturar el color o la posicion de los asientos
 std::string codigos [5][15]={{"1A","1B","1C","1D","1E","1F","1G","1H","1I","1J","1K","1L","1M","1N","1P"},
@@ -181,95 +189,382 @@ std::string asientos(){
 
 std::string menuDetalles() {
     gnu::cls();
-    gnu::Box header({gnu::getConsoleSize().x , 7});
+
+    json movieRawData = gnu::apifetch("/cines/" + cineID + "/cartelera/" + movieID);
+    json movieData = movieRawData["movie"];
+
+    std::vector<json> castRaw = movieData["cast"].get<std::vector<json>>();
+    std::vector<json> daysRaw = movieRawData["days"].get<std::vector<json>>();
+    
+    //all the session and versions data from the first (current) day
+    json currentDayRaw = daysRaw[0];
+
+    for (json obj : daysRaw) {
+        if (obj["date"].get<std::string>() == selectedDate) currentDayRaw = obj;
+    }
+    if (selectedDate == "") currentDayRaw = daysRaw[0];
+
+    std::string director;
+    std::vector<std::string> cast;
+    std::string title = movieData["title"].get<std::string>();
+    std::string trailer_url = movieData["trailer_url"].get<std::string>();
+
+    for (json obj : castRaw){
+        if (obj["role"].get<std::string>() == "Director") director = obj["fullname"].get<std::string>();
+        else cast.push_back(obj["fullname"].get<std::string>());
+    }
+
+    gnu::Box header({gnu::getConsoleSize().x , 10});
     header.showBorder = false;
-    header.setBoxColor({ 184, 155, 231 });
+    header.setBoxColor({ 184, 155, 231 }); //RGB(184, 155, 231)
     header.draw();
 
+    //======== titulo ============
+    gnu::gotoXY({0, 7});
+    style::setBg({184, 155, 231});
+    style::setFg({0, 0, 0});
+    style::bold();
+    gnu::printRawOffset(R"(
+ /||\ |~|~  |\/| /||\ |   /||\ ||\  ~|~|_|[~  | | | /|(`|)  /\| | /|~|~| ||\/| /||\ || /|
+/-|| \| |   |  |/-|| \|  /-|| \||/   | | |[_   \|\|/-|_)|   \X|_|/-| | |_||  |/-|| \||/-|
+)", 33);
+    style::reset_bg();
+    style::setDefaultFg();
+
+    //====== director ======
+    gnu::gotoXY({33, 10});
+    style::bold();
+    style::italic();
+    gnu::print("Dirigido por " + director);
+    style::setDefaultFg();
+
+    //======= poster ======
+    gnu::Box poster({30, 20});
+    poster.setBoxColor({255, 255, 102});
+    poster.position = gnu::vec2d({1, 8});
+    poster.draw();
+
+    //====== cast ==========
+    gnu::gotoXY({1, 30});
+    style::bold();
+    style::underline();
+    gnu::print("REPARTO");
+    style::setDefaultFg();
+
+    //TODO: make it print in line until touching the border of the poster
+    short i = 0;
+    for (std::string actor : cast) {
+        gnu::gotoXY({1, 32 + i});
+        gnu::print(actor + "\n");
+        i++;
+    }
+
+    //=========== synopsis =============== || TODO: put this shit somewhere lol
+    gnu::Card synopsis(movieData, {gnu::getConsoleSize().x - 31, 5}, 1);
+    synopsis.position = gnu::vec2d({32, 10});
+    synopsis.showBorder = false;
+    //synopsis.draw();
+
+    //======= date selector =========
     gnu::Box date({14, 1});
-    date.position = gnu::vec2d({getConsoleSize().x - 14 , 6});
-    date.content = "▶ 2023-05-12";
+    date.position = gnu::vec2d({short(getConsoleSize().x - 15) , 8});
+    date.content = currentDayRaw["date"].get<std::string>();
     date.showBorder = false;
+    date.flushBorders();
     date.transparent = true;
     date.draw();
 
-    gnu::Box poster({35, 20});
-    poster.setBoxColor({150, 180, 235});
-    poster.position = gnu::vec2d({1, 6});
-    poster.draw();
-
-    std::vector<std::string> footerDates = {
-        "09:00am", "12:00am", "01:00pm", "02:00pm", "01:00pm", "03:45pm", "05:30pm", "07:00pm"
-    };
-
-    gnu::Box footerTemplate({9, 1});
+    //====== versions ========= || HO00005111 = real 3D dob || HO00005115 = 2D
+    std::vector<json> versions = currentDayRaw["movie_versions"].get<std::vector<json>>();
+    std::string currentDay = currentDayRaw["date"].get<std::string>();
     
-    std::vector<gnu::Box> footers(footerDates.size(), footerTemplate);
+    gnu::Box versionBoxTemplate({
+        gnu::getConsoleSize().x - 35,
+        3
+    });
 
-    for (size_t i = 0; i < footers.size(); i++) {
-        int index = ceil((double) (230 / footers.size()) * i);
-        footers[i].content = footerDates[i];
-        footers[i].transparent = true;
-        footers[i].setFontColor(230 - index, 230 - index, 230 - index);
-        footers[i].position = gnu::vec2d({
-            (int)((getConsoleSize().x / 2) - 4 + (9 * i)),
-            gnu::getConsoleSize().y - 2
-        });
-        footers[i].showBorder = false;
+    std::vector<gnu::Box> versionBoxes(versions.size(), versionBoxTemplate);
+    
+    //===== type of movie label =====
+    gnu::Box typeSubBox({6, 1});
+    
+    //========= drawing the version boxes with their type labels =======
+    for (int i = 0; i < versionBoxes.size(); i++){
+        if (i == 0) versionBoxes[i].setBorderColor({230,50, 50});
+        else versionBoxes[i].defaultBorderColor = true;
+
+        versionBoxes[i].position = gnu::vec2d({ 34, (14 + i * (versionBoxTemplate.size.y + 2)) });
+        versionBoxes[i].draw();
+
+        //redrawing the type label
+        if (versions[i]["movie_version_id"].get<std::string>() == "HO00005115") typeSubBox.content = "2D";
+        else if (versions[i]["movie_version_id"].get<std::string>() == "HO00005111") typeSubBox.content = "3D";
+
+        typeSubBox.position = versionBoxes[i].position;
+        typeSubBox.draw();
     }
 
-    gnu::Box emptyFooter({ 9, 1 });
-    emptyFooter.content = "       ";
-    emptyFooter.setFontColor({ 30, 30, 30 });
-    emptyFooter.transparent = true;
-    emptyFooter.position = gnu::vec2d({
-        (gnu::getConsoleSize().x / 2) - 13,
-        gnu::getConsoleSize().y - 2
-    });
-    emptyFooter.showBorder = false;
-    footers.insert(footers.begin(), emptyFooter);
-    
+    //======= hours =======
+    std::vector<std::string> hours;
+    std::vector<size_t> hourSizes; // we need the sizes to limit the input
+
+    //=========== sessions are presented as small selectable hour labes ==========
+    gnu::Box sessionTemplate({10, 1});
+    std::vector<gnu::Box> sessionBoxes(3, sessionTemplate);
+
+    sessionBoxes[0].setFontColor({ 80, 80, 80 });
+    sessionBoxes[2].setFontColor({ 80, 80, 80 });
+
+    int middleRelative = versionBoxes[0].position.x + (versionBoxes[0].size.x / 2);
+
+    for (int j = 0; j < versionBoxes.size(); j++){    
+        
+        //first we want to store the hours so we can use them later on (including both the epmty ones for scrolling)
+        hours.insert(hours.begin(), "");
+        for (json session : versions[j]["sessions"]) {
+            hours.push_back(session["hour"].get<std::string>());
+        }
+        hours.insert(hours.end(), "");
+
+        hourSizes.push_back(hours.size());
+        
+        for (int i = 0; i < sessionBoxes.size(); i++){
+            sessionBoxes[i].content = hours[i];
+            sessionBoxes[i].showBorder = false;
+            sessionBoxes[i].position.x = middleRelative - 25 + (20 * i);
+            sessionBoxes[i].position.y = versionBoxes[j].position.y + 2;
+            sessionBoxes[i].draw();
+        }
+
+        //we clean the hour vector for every box, this way we wont need vectors of vectors for the hours
+        hours.clear();
+    }
+
+
+    int input = '\0';
+
+    gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
+
     size_t hour_i = 0;
-    int input;
+    size_t session_i = 0;
+    size_t day_i = 0;
+    
+    unsigned char globalOpt = 2;
+    unsigned char opt = 0;
 
+    unsigned char lastGlobalOpt = 2;
+    unsigned char lastOpt = 0;
+
+    //======== main loop ==============
     while(true) {
-        input = gnu::getch();
+        input = '\0';
 
-        if (input) {
-            switch (input) {
-            case gnu::key::Right:
-                if (hour_i < footers.size() - 2) hour_i++;
+        if (_kbhit()) input = _getch();
+
+        //======= input switch ======
+        switch (input) {
+        case gnu::key::Right:
+            if (hour_i < hourSizes[opt] - 3 && globalOpt == 2) hour_i++;
+            break;
+        case gnu::key::Left:
+            if (hour_i > 0 && globalOpt == 2) hour_i--;
+            break;
+        case gnu::key::Up:
+            if (opt > 0 && globalOpt == 2) {
+                opt--;
+                hour_i = 0;
                 break;
-            case gnu::key::Left:
-                if (hour_i > 0) hour_i--;
-                break;
-            case gnu::key::Enter:
-                fechaSeleccionada = footerDates[hour_i];
-                return "Asientos";
             }
+
+            if (opt == 0 && globalOpt > 0) globalOpt--;
+            break;
+        case gnu::key::Down:
+            if (opt < versionBoxes.size() - 1 && globalOpt == 2) {
+                opt++;
+                hour_i = 0;
+            }
+
+            if (opt == 0 && globalOpt < 2) globalOpt++;
+            break;
+        case gnu::key::Enter:
+            if (globalOpt == 1) return "menuDiaAux";
+            if (globalOpt == 0) system(std::string("start " + trailer_url).c_str());
         }
 
-        // Footer
-        if (1 <= hour_i) {
-            footers[0].content = footerDates[hour_i - 1];
-        }
-        else {
-            footers[0].content = "       ";
-        }
-        footers[0].draw();
+        for (int j = 0; j < versionBoxes.size(); j++){    
+            
+            //first we want to store the hours so we can use them later on (including both the epmty ones for scrolling)
+            hours.insert(hours.begin(), "");
+            for (json session : versions[j]["sessions"]) {
+                hours.push_back(session["hour"].get<std::string>());
+            }
+            hours.insert(hours.end(), "");
+            
+            for (int i = 0; i < sessionBoxes.size(); i++){
+                if (opt == j) sessionBoxes[i].content = hours[i + hour_i];
+                else sessionBoxes[i].content = hours[i];
+                
+                sessionBoxes[i].showBorder = false;
+                sessionBoxes[i].position.x = middleRelative - 25 + (20 * i);
+                sessionBoxes[i].position.y = versionBoxes[j].position.y + 2;
+                sessionBoxes[i].draw();
+            }
 
-        for (size_t i = 1; i < footers.size(); i++) {
-            if (i + hour_i - 1 < footerDates.size()) footers[i].content = footerDates[i + hour_i - 1];
-            else footers[i].content = "       ";
-            footers[i].draw();
+            //we clean the hour vector for every box, this way we wont need vectors of vectors for the hours
+            hours.clear();
         }
 
-        gnu::print('\n');
-        gnu::printLineCentered("▲");
-        gnu::sleep(50);
-    };
+
+        if (lastConsoleSize != gnu::getConsoleSize() || lastOpt != opt || lastGlobalOpt != globalOpt){
+            if (lastOpt == opt) gnu::cls();
+
+            //======= drawing every session box on resize ===========
+            for (int i = 0; i < versionBoxes.size(); i++){
+                versionBoxes[i].position = gnu::vec2d({ 34, (14 + i * (versionBoxTemplate.size.y + 2)) });
+
+                if (i == opt && globalOpt == 2) versionBoxes[i].setBorderColor({230,50, 50});
+                else versionBoxes[i].defaultBorderColor = true;
+
+                versionBoxes[i].draw();
+
+                //redrawing the type label
+                if (versions[i]["movie_version_id"].get<std::string>() == "HO00005115") typeSubBox.content = "2D";
+                else if (versions[i]["movie_version_id"].get<std::string>() == "HO00005111") typeSubBox.content = "3D";
+        
+                typeSubBox.position = versionBoxes[i].position;
+                typeSubBox.draw();
+            }
+
+            //===== redrawing =====
+            header.size = gnu::vec2d({gnu::getConsoleSize().x , 10});
+            header.draw();
+            
+            if (globalOpt == 1){
+                date.showBorder = true;
+                date.setBorderColor({230, 50, 50});
+            }
+
+            else {
+                date.showBorder = false;
+                date.flushBorders();                
+            }
+
+            date.draw();
+            
+            if (globalOpt == 0) poster.setBoxColor({230, 50, 50});
+            else poster.setBoxColor({255, 255, 102});
+
+            poster.draw();
+
+            //====== director ======
+            gnu::gotoXY({33, 10});
+            style::bold();
+            style::italic();
+            gnu::print("Dirigido por " + director);
+            style::setDefaultFg();
+
+            //====== cast ==========
+            gnu::gotoXY({1, 30});
+            style::bold();
+            style::underline();
+            gnu::print("REPARTO");
+            style::setDefaultFg();
+        
+            //TODO: make it print in line until touching the border of the poster
+            short i = 0;
+            for (std::string actor : cast) {
+                gnu::gotoXY({1, 32 + i});
+                gnu::print(actor + "\n");
+                i++;
+            }
+
+            //======== titulo ============
+            gnu::gotoXY({0, 7});
+            style::setBg({184, 155, 231});
+            style::setFg({0, 0, 0});
+            style::bold();
+            gnu::printRawOffset(R"(
+ /||\ |~|~  |\/| /||\ |   /||\ ||\  ~|~|_|[~  | | | /|(`|)  /\| | /|~|~| ||\/| /||\ || /|
+/-|| \| |   |  |/-|| \|  /-|| \||/   | | |[_   \|\|/-|_)|   \X|_|/-| | |_||  |/-|| \||/-|
+)", 33);
+            style::reset_bg();
+            style::setDefaultFg();
+        }
+
+        lastConsoleSize = gnu::getConsoleSize();
+        lastOpt = opt;
+        lastGlobalOpt = globalOpt;
+
+        gnu::sleep(5);
+    }
+
     return "hola";
 }
+
+std::string menuDiaAux() {
+    gnu::cls();
+    std::string rawMessage = R"(                      
+         _             _
+ ___ ___| |___ ___ ___|_|___ ___ ___
+|_ -| -_| | -_|  _|  _| | . |   | .'|
+|___|___|_|___|_______|_|_____|_|__,|
+                ____        _
+ _ _ ___ ___   |  __|__ ___| |_ ___
+| | |   | .'|  |  _| -_|  _|   | .'|
+|___|_|_|__,|  |_| |___|___|_|_|__,|
+)";
+
+    gnu::printRawCenter(rawMessage);
+    gnu::gotoY(15);
+
+    json wholeRaw = gnu::apifetch("/cines/2705/cartelera/91074");
+    std::vector<json> daysRaw = wholeRaw["days"].get<std::vector<json>>();
+    
+    std::vector<std::string> dates;
+
+    for (json obj : daysRaw) dates.push_back(obj["date"].get<std::string>());
+    dates.insert(dates.begin(), "");
+    dates.insert(dates.end(), "");
+
+    gnu::Box dateContainer({gnu::getConsoleSize().x - 4, 1});
+    
+    std::vector<gnu::Box> genericDateContainers(3, dateContainer);
+
+    for (int i = 0; i < genericDateContainers.size(); i++) {
+        genericDateContainers[i].content = dates[i];
+        genericDateContainers[i].position = gnu::vec2d({0, 15 + 3 * i});
+        genericDateContainers[i].showBorder = false;
+        genericDateContainers[i].draw();
+    }
+
+    char input = '\0';
+    unsigned char opt = 0;
+
+    while (true) {
+        input = '\0';
+        if(_kbhit()) input = _getch();
+
+        switch (input) {
+        case gnu::key::Up:
+            if (opt > 0) opt--;
+            break;
+        case gnu::key::Down:
+            if (opt < dates.size() - 3) opt++;
+            break;
+        case gnu::key::Enter:
+            selectedDate = dates[1 + opt];
+            return "menuDetalles";
+        }
+
+        for (int i = 0; i < genericDateContainers.size(); i++) {
+            genericDateContainers[i].content = dates[i + opt];
+            genericDateContainers[i].position = gnu::vec2d({0, 15 + 3 * i});
+            genericDateContainers[i].showBorder = false;
+            genericDateContainers[i].draw();
+        }
+    }
+}
+
 
 std::string menuCarteleraFinal() {
     gnu::cls();
@@ -280,9 +575,12 @@ __  /| |_  __ \  __/_  /_  ___/_  /__  __ \  _ \
 _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 /_/  |_/_/ /_/\__/ /_/  \___/ /_/  /_/ /_/\___/ 
 )";
-    json rawCarteleraData = gnu::apifetch("/cines/" + cineID + "/cartelera");
+    
+    srand(time(NULL));
 
-    std::vector<json> billboard = rawCarteleraData["movies"].get<std::vector<json>>();
+    json rawCarteleraData = gnu::apifetch("/cines/" + cineID + "/cartelera");
+    std::vector<json> billboard = rawCarteleraData["movies"].get<std::vector<json>>();    
+    
     json emptyMovie = json::parse(R"({
         "title": "",
         "poster_url": "",
@@ -331,7 +629,7 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     }
 
     std::string cinemaLabel = "Estas en " + cinemaName;
-    gnu::Box cinemaLabelBox({ (int)(cinemaLabel.size() + 4), 1 });
+    gnu::Box cinemaLabelBox({ short(cinemaLabel.size() + 4), 1 });
     cinemaLabelBox.content = cinemaLabel;
     cinemaLabelBox.transparent = true;
     cinemaLabelBox.showBorder = true;
@@ -354,7 +652,8 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     buttonRight.showBorder = false;
     buttonRight.setFontColor({ 255,255,255 });
 
-    size_t panel_i = 0;
+    char input = '\0';
+    int panel_i = 0;
 
     gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
     std::string titleLabel = billboard[1]["title"].get<std::string>();
@@ -369,65 +668,72 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
     std::string additionalsPadding = "";
 
     char opt = 0;
-    int input = 0;
-
+    
     while (true) {
         // ---- Receive input ----
-        input = gnu::getch();
-        if (input) {
-            switch (input) {
-                case gnu::key::Right:
-                    if (panel_i < billboard.size() - 3 && opt == 1) panel_i++;
-                    break;
-                case gnu::key::Left:
-                    if (panel_i > 0 && opt == 1) panel_i--;
-                    break;
-                case gnu::key::Up:
-                    if (opt > 0) opt--;
-                    break;
-                case gnu::key::Down:
-                    if (opt < 1) opt++;
-                    break;
-                case gnu::key::Enter:
-                    if (opt == 1) {
-                        movieID = billboard[1 + panel_i]["corporate_film_id"].get<std::string>();
-                        return "menuDetalles";
-                    }
-                    else {
-                        return "selectorCineAux";
-                    }
-                    break;
-            }
-        }
-        card1.reconsider(billboard[0 + panel_i]);
-        card2.reconsider(billboard[1 + panel_i]);
-        card3.reconsider(billboard[2 + panel_i]);
+        char input = '\0';
+        if (_kbhit()) input = _getch();
 
-        descriptionCard.reconsider(billboard[1 + panel_i]);
+        switch(input){
+        case gnu::key::Right:
+            if (panel_i < billboard.size() - 3 && opt == 1) panel_i++;
+            break;
+        case gnu::key::Left:
+            if (panel_i > 0 && opt == 1) panel_i--;
+            break;
+        case gnu::key::Up:
+            if (opt > 0) opt--;
+            break;
+        case gnu::key::Down:
+            if (opt < 1) opt++;
+            break;
+        case gnu::key::Enter:
+            if (opt == 1) {
+                movieID = billboard[1 + panel_i]["corporate_film_id"].get<std::string>();
+                return "menuDetalles";
+            }
+            else {
+                return "selectorCineAux";
+            }
+            break;
+        }
+
+        card1.updateData(billboard[0 + panel_i]);
+        card2.updateData(billboard[1 + panel_i]);
+        card3.updateData(billboard[2 + panel_i]);
+
+        descriptionCard.updateData(billboard[1 + panel_i]);
         descriptionCard.centerHorizontal();
 
         // ---- Update ----
-        gnu::gotoXY(0, 0);
         style::setFg({ 128, 186, 209 });
         gnu::printRawCenter(rawLogo);
         style::setFg({ 222, 197, 153 });
 
         card2.centerHorizontal();
-        card1.setPosition( card2.position + gnu::vec2d{ -card1.size.x - 10, 1 } );
-        card3.setPosition( card2.position + gnu::vec2d{ card2.size.x + 10, 1 } );
+        card1.setPosition( card2.position + gnu::vec2d{ (short)(-card1.size.x - 10), 1 } );
+        card3.setPosition( card2.position + gnu::vec2d{ (short)(card2.size.x + 10), 1 } );
 
-        card1.draw();
-        card2.draw();
-        card3.draw();
+        card1.setBoxColor({ 209, 167, 77 });
+        card2.setBoxColor({ 102, 196, 127 });
+        card3.setBoxColor({ 189, 121, 163 });
+ 
+        card1.showBorder = true;
+        card2.showBorder = true;
+        card3.showBorder = true;
 
-        gnu::print("\n\n");
+        card1.cardDraw();
+        card2.cardDraw();
+        card3.cardDraw();
+
+        gnu::gotoY(card2.position.y + card2.size.y + 2 + 1);
         titleLabel = billboard[1 + panel_i]["title"].get<std::string>();
 
         if (lastLabel.size() <= titleLabel.size()) {
             gnu::printLineCentered(titleLabel);            
         }
         else {
-            for (size_t i = 0; i < (lastLabel.size() - titleLabel.size() + 1) / 2; i++){
+            for (int i = 0; i < (lastLabel.size() - titleLabel.size() + 1) / 2; i++){
                 titlePadding += " ";
             }
             gnu::printLineCentered(titlePadding + titleLabel + titlePadding);
@@ -436,7 +742,18 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 
         gnu::print("\n");
         //emojis
-        gnu::printLineCentered("😎 🤑 🙄");
+        std::string emojisRaw = billboard[1 + panel_i]["emojis"].get<std::string>();
+
+        utf8::utf8_string_t emojis = utf8::iterate(emojisRaw);
+
+        gnu::gotoX(gnu::getConsoleSize().x / 2 - 2);
+
+        //TODO
+        for (std::string h : emojis) {
+            if (h == std::string("♂️")) continue;
+            gnu::print(h);
+        }
+
         gnu::print("\n");
 
         //additional data
@@ -450,12 +767,13 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
             gnu::printLineCentered(additionals);            
         }
         else {
-            for (size_t i = 0; i < (lastAdditionals.size() - additionals.size() + 1) / 2; i++){
+            for (int i = 0; i < (lastAdditionals.size() - additionals.size() + 1) / 2; i++){
                 additionalsPadding += " ";
             }
             gnu::printLineCentered(additionalsPadding + additionals + additionalsPadding);
         }
         lastAdditionals = additionals;
+
 
         descriptionCard.draw();
 
@@ -479,6 +797,7 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
             cinemaLabelBox.setFontColor({ 255, 138, 208 });
             cinemaLabelBox.setBordersVisible(true);
         }
+
         else {
             buttonRight.content = ">>";
             buttonLeft.content = "<<";
@@ -495,18 +814,22 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 
 
         // ----- Clear ----
+        gnu::gotoXY(0, 0);
+        gnu::vec2d size = gnu::getConsoleSize();
         if (gnu::getConsoleSize() != lastConsoleSize) {
             gnu::cls();
         }
+
         lastConsoleSize = gnu::getConsoleSize();
         titlePadding = "";
         additionalsPadding = "";
-        // gnu::sleep(5);
+
+        gnu::sleep(5);
     }
 }
 
 std::string chooseCinemaScreen() {
-    gnu::cls();
+    system("cls");
 
     // Retorna una lista de cines ordenados según la geolocalización
     // del usuario, el primero siempre es el más cercano.
@@ -517,41 +840,36 @@ std::string chooseCinemaScreen() {
     size_t currentCine = 0;
     int nameCursorPos = 0;
     short listLength = 5;
+    unsigned short color = style::color::BLUE;
     bool lock = true;
 
     std::string elijaLocalLabel = R"(
-       _  _    _          
-  ___ | |(_)  (_)  __ _
- / _ \| || |  | | / _` |
-|  __/| || |  | || (_| |
- \___||_||_| _/ | \__,_|
-            |__/     
-         _   _  _ __ 
-        | | | || '_ \
-        | |_| || | | |
-         \__,_||_| |_|
- _                      _ 
-| |  ___    ___   __ _ | |
-| | / _ \  / __| / _` || |
-| || (_) || (__ | (_| || |
-|_| \___/  \___| \__,_||_|
+         _             _
+ ___ ___| |___ ___ ___|_|___ ___ ___
+|_ -| -_| | -_|  _|  _| | . |   | .'|
+|___|___|_|___|___|___|_|___|_|_|__,|
+               _             _
+    _ _ ___   | |___ ___ ___| |
+   | | |   |  | | . |  _| .'| |
+   |___|_|_|  |_|___|___|__,|_|
 )";
-
+    
     gnu::printRawCenter(elijaLocalLabel);
 
     // main menu loop
     while (lock) {
         gnu::gotoXY(0, 1);
-        gnu::print('\n');
+        std::cout << std::endl;
 
-        int hit = gnu::getch();
-        if (hit) {
-            // char hit = _getch();
+        if (_kbhit()) {
+            char hit = _getch();
             switch (hit) {
             case gnu::key::Down:
-                for (short i = 0; i < listLength; i++) {
+
+                for (size_t i = 0; i < listLength; i++) {
                     gnu::cleanLine(20+i);
                 }
+
                 if (currentCine < nearCinemasData["cinemas"].size() - 1) {
                     currentCine++;
                 }
@@ -564,7 +882,7 @@ std::string chooseCinemaScreen() {
                 break;
             case gnu::key::Up:
                 
-                for (short i = 0; i < listLength; i++) {
+                for (size_t i = 0; i < listLength; i++) {
                     gnu::cleanLine(20+i);
                 }
 
