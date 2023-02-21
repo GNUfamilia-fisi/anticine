@@ -395,10 +395,12 @@ void printRawCenter(std::string raw) {
         }
     }
 
-    int biggestSlice = 0;
+    size_t biggestSlice = 0;
 
     for (std::string substr : subStringsList) {
-        if (utf8::str_length(substr) >= biggestSlice) biggestSlice = utf8::str_length(substr);
+        if (utf8::str_length(substr) >= biggestSlice) {
+            biggestSlice = utf8::str_length(substr);
+        }
     }
 
     int offset = (getConsoleSize().x / 2) - (biggestSlice / 2);

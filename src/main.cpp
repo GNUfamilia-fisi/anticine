@@ -9,8 +9,8 @@
 
 #include "consoleUtils.h"
 #include "components/Box.h"
-#include "components/Card.h"
-#include "menus/mainMenu.h"
+#include "components/MovieCard.h"
+#include "menus/selectorDeMenus.h"
 
 #include <iostream>
 #include <unistd.h>
