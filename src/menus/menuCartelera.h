@@ -30,7 +30,7 @@ std::string menuCartelera() {
     
     json emptyMovie = json::parse(R"({
         "title": "",
-        "poster_url": "",
+        "<thumbnail_url>": "",
         "duration": 0,
         "rating": "",
         "corporate_film_id": "",

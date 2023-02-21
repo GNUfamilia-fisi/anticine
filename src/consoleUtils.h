@@ -114,7 +114,7 @@ int getch() {
     // que tiene 500ms de timeout. Si tuviese un timeout más corto
     // hay probabilidades de que nunca se procese la entrada
     // https://man7.org/linux/man-pages/man2/poll.2.html
-    poll(&pollstdin[0], 1, 1000);
+    poll(&pollstdin[0], 1, 500);
 
     if (pollstdin[0].revents & POLLIN) {
         read(STDIN_FILENO, &wbuff, 4);
@@ -270,7 +270,7 @@ void cleanupProgram(void) {
 	printf("\x1b[2J");
 	// Regresa al buffer normal de la consola
     // (al inicio se cambió al alternative buffer)
-	printf("\x1b[?1049l");
+	// printf("\x1b[?1049l");
     // Restaura la configuración inicial de la consola
     tcsetattr(STDOUT_FILENO, TCSANOW, &initial_state);
 #endif
@@ -296,7 +296,7 @@ void initProgram() {
     tcsetattr(STDOUT_FILENO, TCSANOW, &term_state);
 
     // Inicia el modo "alternative buffer"
-    printf("\x1b[?1049h");
+    // printf("\x1b[?1049h");
     // Clenaup
     printf("\x1b[2J");
     fflush(stdout);
@@ -411,7 +411,11 @@ void printRawCenter(std::string raw) {
     }
 }
 
-/* ---- Utilidades adicionales ---- */
+/*
+ --------------------------------
+ ---- Utilidades adicionales ----
+ --------------------------------
+*/
 
 /**
  * Repite un string una cierta cantidad de veces
@@ -434,9 +438,9 @@ std::string repeat(const char* str, int times) {
     return result;
 }
 
-//Prints multiline raw text at the screen (with padding)
+// Imprime un string multilínea con un offset en X
+// Para imprimir centrádamente, véase printRawCenter
 void printRawOffset(std::string raw, int offset) {
-    std::vector<std::string> subStringsList;
     std::string buffer = "";
 
     for (size_t i = 0; i < raw.length(); i++){
@@ -446,22 +450,27 @@ void printRawOffset(std::string raw, int offset) {
         else{
             if (buffer.empty()) continue;
             if (i == raw.length() - 1) buffer += raw[i];
-            subStringsList.push_back(buffer);
+            gnu::gotoX(offset);
+            printf("%s", (buffer + "\n").c_str());
             buffer = "";
         }
     }
-    
-    for (size_t i = 0; i < subStringsList.size(); i++){
-        gnu::gotoX(offset);
-        gnu::print(subStringsList[i] + "\n");
-    }
+    fflush(stdout);
 }
-
 
 // Pausa el proceso por una cierta cantidad de milisegundos
 // Esta función no hace efecto en UNIX. Sospecho que se debe al modo raw
 void sleep(int ms) {
     std::this_thread::sleep_for(std::chrono::microseconds(ms));
+}
+
+void openBrowser(std::string url) {
+#if defined(ANTICINE_UNIX)
+    std::string command = "xdg-open " + url;
+#else
+    std::string command = "start " + url;
+#endif
+    system(command.c_str());
 }
 
 } // namespace gnu

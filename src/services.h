@@ -25,7 +25,7 @@ std::string apiURL = "https://api.anticine.up.railway.app";
  * el comando "curl", que sirve para hacer peticiones HTTP.
  * 
  * @example
- * json response = gnu::fetch("https://api.cinext.up.railway.app/cines/cercanos")
+ * json response = gnu::fetch("https://api.anticine.up.railway.app")
  */
 json fetch(std::string url) {
     std::string command = "curl -s " + url;
