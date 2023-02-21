@@ -2,8 +2,10 @@
 
 #include <string>
 
-std::string g_fechaSeleccionada; // variable global (no usada)
-// Variables globales
+// Variables globales compartidas por todos los menús
+// (en un futuro intentaremos hacerlo más elegante, por ahora funciona)
+
+std::string g_fechaSeleccionada; // (no usada)
 std::string g_cineID;
 std::string g_movieID;
 std::string g_selectedDate = "";
