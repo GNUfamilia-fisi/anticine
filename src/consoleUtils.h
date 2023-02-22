@@ -264,13 +264,12 @@ void exit_with_code(int code) {
 
 void cleanupProgram(void) {
     gnu::setCursorVisible(true);
-#ifdef _WIN32
-#else
-    // cleanup
 	printf("\x1b[2J");
 	// Regresa al buffer normal de la consola
     // (al inicio se cambió al alternative buffer)
-	// printf("\x1b[?1049l");
+	printf("\x1b[?1049l");
+#if defined(ANTICINE_UNIX)
+    // cleanup
     // Restaura la configuración inicial de la consola
     tcsetattr(STDOUT_FILENO, TCSANOW, &initial_state);
 #endif
@@ -280,11 +279,21 @@ void cleanupProgram(void) {
 void initProgram() {
     gnu::setCursorVisible(false);
     std::srand(std::time(nullptr));
-
+    // Signals handlers
+    atexit(cleanupProgram);
+    signal(SIGINT, exit_with_code);  // Ctrl+C
+    signal(SIGTERM, exit_with_code); // kill
+    // Inicia el modo "alternative buffer"
+    printf("\x1b[?1049h");
+    // Clenaup
+    printf("\x1b[2J");
 // En UNIX, configuramos la consola en modo raw
 // De esta forma podemos recibir las teclas presionadas como
 // un stream de bytes, sin necesidad de presionar enter
 #if defined(ANTICINE_UNIX)
+    signal(SIGKILL, exit_with_code); // user responsibility?
+    signal(SIGTSTP, exit_with_code); // Ctrl+Z
+
     // Guardamos la configuración inicial de la consola
     tcgetattr(STDOUT_FILENO, &initial_state);
     tcgetattr(STDOUT_FILENO, &term_state);
@@ -294,20 +303,9 @@ void initProgram() {
     term_state.c_lflag &= ~(ICANON);
     term_state.c_lflag &= ~(ECHO);
     tcsetattr(STDOUT_FILENO, TCSANOW, &term_state);
-
-    // Inicia el modo "alternative buffer"
-    // printf("\x1b[?1049h");
-    // Clenaup
-    printf("\x1b[2J");
     fflush(stdout);
-
-    // Signals handlers
-    atexit(cleanupProgram);
-    signal(SIGINT, exit_with_code);  // Ctrl+C
-    signal(SIGTERM, exit_with_code); // kill
-    signal(SIGKILL, exit_with_code); // user responsibility?
-    signal(SIGTSTP, exit_with_code); // Ctrl+Z
 #else
+    signal(SIGABRT, exit_with_code); // user responsibility?
     // En windows, configuramos manualmente la salida de la consola
     // para soportar UTF-8
     SetConsoleOutputCP(65001);
@@ -317,14 +315,8 @@ void initProgram() {
 
 // Modifica la visibilidad del cursor
 void setCursorVisible(bool isVisible) {
-//#if defined(ANTICINE_UNIX)
     // Se usan escape sequences para modificar la visibilidad del cursor
     gnu::print("\x1b[?25" + std::string(isVisible ? "h" : "l"));
-//#else
-    //CONSOLE_CURSOR_INFO cursorInfo;
-    //cursorInfo.bVisible = isVisible;
-    //SetConsoleCursorInfo(consoleHandle, &cursorInfo);
-//#endif
 }
 
 void cls() {
