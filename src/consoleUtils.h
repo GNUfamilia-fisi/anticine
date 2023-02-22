@@ -317,14 +317,14 @@ void initProgram() {
 
 // Modifica la visibilidad del cursor
 void setCursorVisible(bool isVisible) {
-#if defined(ANTICINE_UNIX)
+//#if defined(ANTICINE_UNIX)
     // Se usan escape sequences para modificar la visibilidad del cursor
     gnu::print("\x1b[?25" + std::string(isVisible ? "h" : "l"));
-#else
-    CONSOLE_CURSOR_INFO cursorInfo;
-    cursorInfo.bVisible = isVisible;
-    SetConsoleCursorInfo(consoleHandle, &cursorInfo);
-#endif
+//#else
+    //CONSOLE_CURSOR_INFO cursorInfo;
+    //cursorInfo.bVisible = isVisible;
+    //SetConsoleCursorInfo(consoleHandle, &cursorInfo);
+//#endif
 }
 
 void cls() {

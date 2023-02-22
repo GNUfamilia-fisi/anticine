@@ -126,7 +126,7 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
                 20 + i
             );
 
-            style::setColor(style::LIGHTGREEN);
+            style::setColor(style::GREEN);
             gnu::print(">>");
         }
         else {

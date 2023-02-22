@@ -27,41 +27,15 @@ void print(std::string str) {
 //  color::BLACK, por ejemplo
 // Estos pueden ser usados en funciones como
 enum color : unsigned short {
-#ifdef _WIN32
-    BLACK = 0,
-    BLUE = 1,
-    GREEN = 2,
-    CYAN = 3,
-    RED = 4,
-    MAGENTA = 5,
-    BROWN = 6,
-    LIGHTGRAY = 7,
-    GRAY = 8,
-    LIGHTBLUE = 9,
-    LIGHTGREEN = 10,
-    LIGHTCYAN = 11,
-    LIGHTRED = 12,
-    LIGHTMAGENTA = 13,
-    YELLOW = 14,
-    WHITE = 15
-#else
-    BLACK = 30,
-    BLUE = 32,
-    GREEN = 32,
-    CYAN = 36,
-    RED = 31,
-    MAGENTA = 35,
-    BROWN = 33,
-    LIGHTGRAY = 37,
-    GRAY = 30,
-    LIGHTBLUE = 34,
-    LIGHTGREEN = 32,
-    LIGHTCYAN = 36,
-    LIGHTRED = 31,
-    LIGHTMAGENTA = 35,
-    YELLOW = 33,
-    WHITE = 37
-#endif
+    BLACK =         30,
+    GRAY =          30,
+    RED =           31,
+    GREEN =         32,
+    YELLOW =        33,
+    BLUE =          34,
+    MAGENTA =       35,
+    CYAN =          36,
+    WHITE =         37
 };
 
 struct rgb {
@@ -79,12 +53,8 @@ struct rgb {
 */
 
 void setColor(style::color color) {
-#ifdef _WIN32
-    SetConsoleTextAttribute(colorConsoleHandle, color);
-#else
     std::string txt = "\x1B[" + std::to_string(color) + "m";
     print(txt.c_str());
-#endif
 }
 /**
  * Colores RGB para los caracteres
