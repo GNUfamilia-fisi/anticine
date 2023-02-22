@@ -29,9 +29,10 @@ std::string menuAsientos(){
     pantalla.position={30,1};
     pantalla.showBorder=false;
     pantalla.draw();
+    
     //borde para decorar los asientos
     gnu::Box caja({ 146, 25 });
-    caja.setBoxColor({ 104,19,1 });
+    caja.setBoxColor({ 104,19,1 }); // RGB(104,19,1)
     caja.setFontColor({ 255, 138, 208 });
     caja.position = { 23, 7 };//30,5
     caja.showBorder = true;
@@ -49,13 +50,100 @@ std::string menuAsientos(){
     //caja para seleccionar asientos
     //dependiendo de esto hago esta vaina con colores sino sale
     
+
+
     //seleccionar las cajas
-    gnu::Box seleccion ({7,3});
-    seleccion.setBoxColor({  0, 29, 158 });
+    gnu::Box seleccion ({4,1});
+    seleccion.setBoxColor({  0, 29, 158 }); //RGB(0, 29, 158)
     seleccion.transparent=false;
     seleccion.showBorder=true;
-    seleccion.position ={30,7};
+    //seleccion.position ={30,7};
     
+    int asientos = 200;
+
+    int seatsByRow = floor(double(caja.size.x - 1) / double(seleccion.size.x + 2));
+    int rows = asientos / seatsByRow;
+
+    int sobrantes = asientos % seatsByRow;
+
+    //24, 8 es la posicion del primer cubito, aka la esquina dibujable
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < seatsByRow; j++) {
+            seleccion.position = gnu::vec2d({
+                24 + (seleccion.size.x + 2)*j,
+                8 + (seleccion.size.y + 2)*i 
+            });
+            seleccion.draw();
+        }
+    }
+
+    //si la lista no es rectangular perfecta, aca se arregla
+    if (sobrantes != 0) {
+        for (int i = 0; i < sobrantes; i++) {
+            seleccion.position = gnu::vec2d({ 24 + 6*i, 8 + 3*rows });
+            seleccion.draw();
+        }
+    }
+
+    gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
+
+    gnu::Box cursor({4, 1});
+    cursor.setBoxColor({28, 209, 61});
+    cursor.showBorder = true;
+    cursor.transparent = false;
+
+    short cursorX = 24;
+    short cursorY = 8;
+
+    gnu::vec2d lastCursorPosition = {24, 8};
+    
+    int input;
+    bool redrawLayout = true;
+
+    while(true) {
+        input = gnu::getch();
+        
+        if (input) {
+            redrawLayout = true;
+
+            switch (input) {
+            case gnu::key::Right:
+                if (cursorX < 171 - 12) cursorX += cursor.size.x + 2;
+                break;
+            case gnu::key::Left:
+                if (cursorX > 24) cursorX -= cursor.size.x + 2;
+                break;
+            case gnu::key::Up:
+                if (cursorY > 8) cursorY -= cursor.size.y + 2;
+                break;
+            case gnu::key::Down:
+                if (cursorY < 25 + 7) cursorY += cursor.size.y + 2;
+                break;
+            }
+        }
+
+
+        if (redrawLayout) {
+            //"limpiamos" la ultima posicion del cursor
+            cursor.position = lastCursorPosition;
+            cursor.setBoxColor({ 0, 29, 158 });
+            cursor.draw();
+
+            //redibujamos en la nueva posicion
+            cursor.position = {cursorX, cursorY};
+            cursor.setBoxColor({ 28, 209, 61 });
+            cursor.draw();
+
+            lastCursorPosition = {cursorX, cursorY};
+
+            redrawLayout = false;
+        }    
+
+        gnu::sleep(5);
+    }
+
+
+    //===============================================================================================
 
     //no puedo hugo, ya quedo zzz
     int coordx=30;//ni idea por que esta wbd si pasa de 30 se loquea
@@ -71,17 +159,18 @@ std::string menuAsientos(){
     opciones.setBoxColor({  0, 29, 158 });
     opciones.setFontColor({255,255,255});
 
-    for(short k=coordy;k<25+coordy;k+=5){//5 espacios
-        for(short j=coordx;j<135+coordx;j+=9){//9 espacios
+    for(short k = coordy; k < 25 + coordy && false; k += 5){//5 espacios
+        for(short j = coordx; j < 135 + coordx; j += 9){//9 espacios
             opciones.position= {j,k};
             opciones.content=codigos[b][a];
-            opciones.draw();
+            //opciones.draw();
             //gotoXY(j,k);
-            /*
+/*
             for(int i=0;i<sup;i++){
                 gotoXY(j,i+k);
                 gnu::print(butaca[i]);
-            } */
+            }
+*/
          a++;      
         }
         a=0;
@@ -104,21 +193,18 @@ std::string menuAsientos(){
         Sleep(10);
         b=0;
         a=0;
-        */
+*/
     short c=30;
     short d=7;
-    int input;
-    while (true){
-        seleccion.position={c,d};
-        seleccion.setBoxColor({  0, 29, 158 });
-        seleccion.draw();
-        gnu::sleep(100);
-        seleccion.setBoxColor({   28, 209, 61 });
-        seleccion.draw();
-        gnu::sleep(100);
-        
+    //int input;
+
+    //bool redrawLayout = false;
+
+    while (false){
         input = gnu::getch();
         if (input) {
+            redrawLayout = true;
+
             switch (input) {
             case gnu::key::Right:
                 c+=9;
@@ -134,6 +220,28 @@ std::string menuAsientos(){
                 break;
             }
         }
+
+        if (redrawLayout) {
+            gnu::cls();
+
+            for(short k=coordy;k<25+coordy;k+=5) {//5 espacios
+                for(short j=coordx;j<135+coordx;j+=9) {//9 espacios
+                    opciones.position= {j,k};
+                    opciones.content=codigos[k][j];
+                    opciones.draw();
+
+                }
+            }
+            redrawLayout = false;            
+        }
+
+        seleccion.position={c,d};
+        seleccion.setBoxColor({ 0, 29, 158 }); //RGB(0, 29, 158)
+        seleccion.draw();
+        gnu::sleep(5);
+        seleccion.setBoxColor({ 28, 209, 61 }); //RGB(28, 209, 61)
+        seleccion.draw();
+        gnu::sleep(5);
     }
 
 }

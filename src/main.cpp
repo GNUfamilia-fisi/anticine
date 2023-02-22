@@ -17,7 +17,7 @@
 
 int main(void) {
     gnu::initProgram();
-    gnu::menuSelector();
+    gnu::menuAsientos();
 
     return 0;
 }

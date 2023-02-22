@@ -190,9 +190,8 @@ std::string menuDetalles() {
                 case gnu::key::Enter: {
                     if (globalOpt == 1) return "submenuSeleccionarFecha";
                     if (globalOpt == 0) gnu::openBrowser(trailer_url);
-                    if (globalOpt == 2) {
-                        return "Asientos";
-                    }
+                    if (globalOpt == 2) return "Asientos";
+                    break;
                 }
                 case gnu::key::ExitKey: {
                     return "menuCartelera";
