@@ -87,7 +87,7 @@ std::string menuElegirCine() {
         gnu::sleep(5);
     }
 
-    return "selectorPelicula";
+    return "menuCartelera";
 }
 
 void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize) {
@@ -130,7 +130,7 @@ void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t sh
             gnu::print(">>");
         }
         else {
-            style::setColor(style::WHITE);
+            style::setColor(style::WHIRTE);
         }
         gnu::gotoXY(
             (gnu::getConsoleSize().x / 2) - (names[i].length() / 2),

@@ -194,6 +194,9 @@ std::string menuDetalles() {
                         return "Asientos";
                     }
                 }
+                case gnu::key::ExitKey: {
+                    return "menuCartelera";
+                }
             }
         }
 

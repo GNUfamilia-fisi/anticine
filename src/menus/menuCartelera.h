@@ -23,8 +23,6 @@ _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
 std::string menuCartelera() {
     gnu::cls();
     
-    srand(time(NULL));
-
     json rawCarteleraData = gnu::apifetch("/cines/" + g_cineID + "/cartelera");
     std::vector<json> billboard = rawCarteleraData["movies"].get<std::vector<json>>();    
     

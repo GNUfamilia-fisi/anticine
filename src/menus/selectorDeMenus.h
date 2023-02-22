@@ -32,7 +32,7 @@ void menuSelector() {
         if (menuID == "selectorCineAux") {
             menuID = gnu::menuElegirCine();
         }
-        if (menuID == "selectorPelicula") {
+        if (menuID == "menuCartelera") {
             menuID = gnu::menuCartelera();
         }
         if (menuID == "menuDetalles") {
