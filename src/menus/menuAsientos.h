@@ -16,7 +16,7 @@ std::string codigos [5][15]={{"1A","1B","1C","1D","1E","1F","1G","1H","1I","1J",
                             {"4A","4B","4C","4D","4E","4F","4G","4H","4I","4J","4k","4L","4M","4N","4P"},
                             {"5A","5B","5C","5D","5E","5F","5G","5H","5I","5J","5k","5L","5M","5N","5P"}} ;   //wstring,
 //forma de la butaca
-std::string butaca[3] ={"┌──────┐","│      │","└─'  '─┘"};  
+std::string butaca[3] ={"┌──────┐","│      │","└─'  '─┘"};
 
 std::string menuAsientos(){
     gnu::cls();
@@ -29,7 +29,7 @@ std::string menuAsientos(){
     pantalla.position={30,1};
     pantalla.showBorder=false;
     pantalla.draw();
-    
+
     //borde para decorar los asientos
     gnu::Box caja({ 146, 25 });
     caja.setBoxColor({ 104,19,1 }); // RGB(104,19,1)
@@ -49,8 +49,6 @@ std::string menuAsientos(){
     boton.draw();
     //caja para seleccionar asientos
     //dependiendo de esto hago esta vaina con colores sino sale
-    
-
 
     //seleccionar las cajas
     gnu::Box seleccion ({4,1});
@@ -58,7 +56,7 @@ std::string menuAsientos(){
     seleccion.transparent=false;
     seleccion.showBorder=true;
     //seleccion.position ={30,7};
-    
+
     int asientos = 200;
 
     int seatsByRow = floor(double(caja.size.x - 1) / double(seleccion.size.x + 2));
@@ -71,7 +69,7 @@ std::string menuAsientos(){
         for (int j = 0; j < seatsByRow; j++) {
             seleccion.position = gnu::vec2d({
                 24 + (seleccion.size.x + 2)*j,
-                8 + (seleccion.size.y + 2)*i 
+                8 + (seleccion.size.y + 2)*i
             });
             seleccion.draw();
         }
@@ -85,8 +83,7 @@ std::string menuAsientos(){
         }
     }
 
-    gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
-
+    // gnu::vec2d lastConsoleSize = gnu::getConsoleSize(); TODO: handle resize
     gnu::Box cursor({4, 1});
     cursor.setBoxColor({28, 209, 61});
     cursor.showBorder = true;
@@ -96,13 +93,13 @@ std::string menuAsientos(){
     short cursorY = 8;
 
     gnu::vec2d lastCursorPosition = {24, 8};
-    
+
     int input;
     bool redrawLayout = true;
 
     while(true) {
         input = gnu::getch();
-        
+
         if (input) {
             redrawLayout = true;
 
@@ -137,8 +134,7 @@ std::string menuAsientos(){
             lastCursorPosition = {cursorX, cursorY};
 
             redrawLayout = false;
-        }    
-
+        }
         gnu::sleep(5);
     }
 
@@ -149,7 +145,7 @@ std::string menuAsientos(){
     int coordx=30;//ni idea por que esta wbd si pasa de 30 se loquea
     int coordy=7;//5
     int a=0,b=0;
-    
+
     //avanzar de nuevo
     //azul = disponible
     //rojo ocupado
@@ -171,7 +167,7 @@ std::string menuAsientos(){
                 gnu::print(butaca[i]);
             }
 */
-         a++;      
+         a++;
         }
         a=0;
     b++;
@@ -185,7 +181,7 @@ std::string menuAsientos(){
             gotoXY(j+3,k+2);
             gnu::print(codigos[b][a]);//ya tenemos posicion en la que deben estar
                 a++;
-                Sleep(10);    
+                Sleep(10);
             }
             a=0;
             b++;
@@ -232,7 +228,7 @@ std::string menuAsientos(){
 
                 }
             }
-            redrawLayout = false;            
+            redrawLayout = false;
         }
 
         seleccion.position={c,d};
