@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cstdio>
 #include <json.hpp>
+#include <algorithm>
 #include <utf8.hpp>
 #if defined(_WIN32)
 #   include <windows.h>
@@ -149,7 +150,7 @@ void gotoXY(gnu::vec2d pos) {
         "\x1b[" + std::to_string(pos.y + 1) + ";" + std::to_string(pos.x + 1) + "H"
     );
 #else
-    COORD cursorPosition = { pos.x, pos.y };
+    COORD cursorPosition = { short(pos.x), short(pos.y) };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
@@ -160,7 +161,7 @@ void gotoX(short x) {
         "\x1b[" + std::to_string(gnu::getCursorPosition().y + 1) + ";" + std::to_string(x + 1) + "H"
     );
 #else
-    COORD cursorPosition = { x, gnu::getCursorPosition().y };
+    COORD cursorPosition = { x, short(gnu::getCursorPosition().y) };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
@@ -171,7 +172,7 @@ void gotoY(short y) {
         "\x1b[" + std::to_string(y + 1) + ";" + std::to_string(gnu::getCursorPosition().x + 1) + "H"
     );
 #else
-    COORD cursorPosition = { gnu::getCursorPosition().x, y };
+    COORD cursorPosition = { short(gnu::getCursorPosition().x), y };
     SetConsoleCursorPosition(consoleHandle, cursorPosition);
 #endif
 }
