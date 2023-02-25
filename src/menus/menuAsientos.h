@@ -14,8 +14,8 @@ std::string menuAsientos(){
 
     json totalData = apifetch("/session/lol");
 
-    int columns = totalData["room"]["columns_number"].get<int>();
-    int rows = totalData["room"]["rows_number"].get<int>();
+    const int columns = totalData["room"]["columns_number"].get<int>();
+    const int rows = totalData["room"]["rows_number"].get<int>();
 
     //pantalla
     gnu::Box pantalla({ 135, 2 });
@@ -34,10 +34,11 @@ std::string menuAsientos(){
     salaBorder.draw();
 
     //boton de seleccione el asiento
-    gnu::Box boton({ 30, 3 });
+    gnu::Box boton({ 30, 1 });
     boton.setFontColor({ 255, 138, 208 });
-    boton.content = "Seccione su asiento";
-    boton.position = { 80, 34 };
+    boton.content = "Confirmar selección";
+    boton.position.y = gnu::getConsoleSize().y - 3;
+    boton.centerHorizontal();
     boton.showBorder = true;
     boton.draw();
 
@@ -55,6 +56,7 @@ std::string menuAsientos(){
     const size_t totalsize = rows * columns;
 
     std::vector<gnu::vec2d> allPositions(totalsize);
+    bool statusSelectable[rows][columns];
 
     size_t iter = 0;
 
@@ -74,11 +76,12 @@ std::string menuAsientos(){
             canvaBox.draw();
 
             allPositions[iter] = canvaBox.position;
+            statusSelectable[rowY][colX] = seat["is_available"].get<bool>();
+
             iter++;
         }
     }
 
-    // gnu::vec2d lastConsoleSize = gnu::getConsoleSize(); TODO: handle resize
     gnu::Box cursor({4, 1});
     cursor.setBoxColor({28, 209, 61});
     cursor.showBorder = true;
@@ -90,16 +93,20 @@ std::string menuAsientos(){
     gnu::vec2d lastCursorPosition = allPositions[0];
 
     int input;
-    bool redrawLayout = false;
+    bool hasCursorMoved = false;
 
     cursor.position = allPositions[0];
     cursor.draw();
+
+    int i, j;
+    
+    gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
 
     while(true) {
         input = gnu::getch();
 
         if (input) {
-            redrawLayout = true;
+            hasCursorMoved = true;
 
             switch (input) {
             case gnu::key::Right:
@@ -126,10 +133,11 @@ std::string menuAsientos(){
         }
 
 
-        if (redrawLayout) {
-            //"limpiamos" la ultima posicion del cursor
+        if (hasCursorMoved) {
             cursor.position = lastCursorPosition;
-            cursor.setBoxColor({ 0, 29, 158 });
+            i = (lastCursorPosition.x - salaBorder.position.x - 1) / (cursor.size.x + 2);
+            j = (lastCursorPosition.y - 6) / (cursor.size.y + 2);
+            cursor.box_color = statusSelectable[j][i] ? style::rgb({ 0, 29, 158 }) : style::rgb({ 100, 100, 100 });
             cursor.draw();
 
             //redibujamos en la nueva posicion
@@ -138,9 +146,15 @@ std::string menuAsientos(){
             cursor.draw();
 
             lastCursorPosition = {cursorX, cursorY};
-
-            redrawLayout = false;
+            hasCursorMoved = false;
         }
+
+        if (lastConsoleSize != gnu::getConsoleSize()) {
+            //HOLA
+        }
+
+        lastConsoleSize = gnu::getConsoleSize();
+
         gnu::sleep(5);
     }
 
