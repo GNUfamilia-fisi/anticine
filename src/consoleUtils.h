@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <json.hpp>
 #include <algorithm>
+#include <fstream>
 #include <utf8.hpp>
 #if defined(_WIN32)
 #   include <windows.h>

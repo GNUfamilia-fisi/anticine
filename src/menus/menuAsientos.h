@@ -93,20 +93,30 @@ std::string menuAsientos(){
     gnu::vec2d lastCursorPosition = allPositions[0];
 
     int input;
-    bool hasCursorMoved = false;
+    bool hasKeyPressed = false;
+    bool mustAddPos = false;
 
     cursor.position = allPositions[0];
     cursor.draw();
 
-    int i, j;
+    int lastCursor_i, lastCursor_j;
     
     gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
+
+    std::vector<gnu::vec2d> selectedPositions;
+
+    std::ofstream hola;
+
+    hola.open("hola.txt", std::ios::app);
 
     while(true) {
         input = gnu::getch();
 
         if (input) {
-            hasCursorMoved = true;
+            hasKeyPressed = true;
+
+            lastCursor_i = (lastCursorPosition.x - salaBorder.position.x - 1) / (cursor.size.x + 2);
+            lastCursor_j = (lastCursorPosition.y - 6) / (cursor.size.y + 2);
 
             switch (input) {
             case gnu::key::Right:
@@ -129,15 +139,25 @@ std::string menuAsientos(){
                     cursorY += cursor.size.y + 2;
                 }
                 break;
+            case gnu::key::Space:
+                mustAddPos = statusSelectable[lastCursor_j][lastCursor_i];
+
+                if (mustAddPos) {
+                    if (std::find(selectedPositions.begin(), selectedPositions.end(), lastCursorPosition) == selectedPositions.end()) break;
+                    selectedPositions.push_back(lastCursorPosition);
+                }
+
+                else {
+                    Beep(150,200);
+                }
+
+                break;
             }
         }
 
-
-        if (hasCursorMoved) {
+        if (hasKeyPressed) {
             cursor.position = lastCursorPosition;
-            i = (lastCursorPosition.x - salaBorder.position.x - 1) / (cursor.size.x + 2);
-            j = (lastCursorPosition.y - 6) / (cursor.size.y + 2);
-            cursor.box_color = statusSelectable[j][i] ? style::rgb({ 0, 29, 158 }) : style::rgb({ 100, 100, 100 });
+            cursor.box_color = statusSelectable[lastCursor_j][lastCursor_i] ? style::rgb({ 0, 29, 158 }) : style::rgb({ 100, 100, 100 });
             cursor.draw();
 
             //redibujamos en la nueva posicion
@@ -146,11 +166,12 @@ std::string menuAsientos(){
             cursor.draw();
 
             lastCursorPosition = {cursorX, cursorY};
-            hasCursorMoved = false;
+            hasKeyPressed = false;
         }
 
         if (lastConsoleSize != gnu::getConsoleSize()) {
-            //HOLA
+            gnu::cls();
+            //TODO: HOLA
         }
 
         lastConsoleSize = gnu::getConsoleSize();
