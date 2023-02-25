@@ -107,7 +107,7 @@ std::string menuAsientos(){
 
     std::ofstream hola;
 
-    hola.open("hola.txt", std::ios::app);
+    hola.open("hola.log", std::ios::app);
 
     while(true) {
         input = gnu::getch();
@@ -143,14 +143,19 @@ std::string menuAsientos(){
                 mustAddPos = statusSelectable[lastCursor_j][lastCursor_i];
 
                 if (mustAddPos) {
-                    if (std::find(selectedPositions.begin(), selectedPositions.end(), lastCursorPosition) == selectedPositions.end()) break;
-                    selectedPositions.push_back(lastCursorPosition);
+                    if (selectedPositions.size() == 0 || std::find(selectedPositions.begin(), selectedPositions.end(), gnu::vec2d({lastCursor_i, lastCursor_j})) == selectedPositions.end()) {
+                        selectedPositions.push_back(gnu::vec2d({lastCursor_i, lastCursor_j}));
+                        Beep(500,200);
+                    }
                 }
-
-                else {
-                    Beep(150,200);
+                break;
+            case gnu::key::Enter:
+                hola << "Current selected positions: ";
+                for (auto h : selectedPositions) {
+                    hola << "{" << h.x << "," << h.y << "} ";
                 }
-
+                hola << "\n";
+                hola.close();
                 break;
             }
         }
