@@ -83,7 +83,9 @@ enum key {
 
     Backspace = 127,   // not sure
     Tab = 9,           // not sure
-    Supr = 2117294875, // not sure
+    Supr = 83,         // not sure
+    Home = 71,         // not sure
+    End = 79,          // not sure
 
     a = 97,
     w = 119,
