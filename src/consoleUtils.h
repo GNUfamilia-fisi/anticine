@@ -55,11 +55,11 @@ void setCursorVisible(bool isVisible);
 
 // Hacer log a un archivo
 // Ejemplo: LOG_FILE("Hola mundo" << 123 << std::endl);
-#define LOG_FILE(stream) \
+#define LOG_FILE(stream) { \
     std::ofstream logfile; \
     logfile.open("debug.log", std::ios::app); \
     logfile << stream; \
-    logfile.close();
+    logfile.close(); }
 
 struct vec2d {
     int x;

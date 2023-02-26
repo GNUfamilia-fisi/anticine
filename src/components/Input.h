@@ -61,7 +61,7 @@ class Input : public Drawable {
         // para flushear inputs anteriores
         gnu::gotoXY(this->position.x + 2, this->position.y + 1);
         gnu::print(this->value);
-        for (size_t i = 0; i < this->size.x - this->value.size() - 2; i++) {
+        for (size_t i = 0; i < this->size.x - this->value.size() - 1; i++) {
             gnu::print(" ");
         }
 
