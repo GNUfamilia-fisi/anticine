@@ -46,7 +46,7 @@ struct rgb {
 
 /**
  * Solo colores predefinidos por Windows.h
- * 
+ *
  * @example
  * setColor(style::color::RED);
  * setColor(style::color::LIGHTRED);
@@ -58,7 +58,7 @@ void setColor(style::color color) {
 }
 /**
  * Colores RGB para los caracteres
- * 
+ *
  * @example
  * style::setFg({255, 0, 0}); // Rojo
 */
@@ -76,7 +76,7 @@ void setDefaultFg() {
 }
 /**
  * Colores RGB para el fondo de los caracteres
- * 
+ *
  * @example
  * style::setBg({255, 0, 0}); // Rojo
  * style::setBg({ 127, 215, 84 }); // Verde

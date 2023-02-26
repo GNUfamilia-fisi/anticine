@@ -6,9 +6,9 @@
 #include <thread>
 #include <chrono>
 #include <cstdio>
-#include <json.hpp>
-#include <algorithm>
+#include <csignal>
 #include <fstream>
+#include <json.hpp>
 #include <utf8.hpp>
 #if defined(_WIN32)
 #   include <windows.h>
@@ -413,7 +413,7 @@ void printRawCenter(std::string raw) {
 
 /**
  * Repite un string una cierta cantidad de veces
- * 
+ *
  * @example
  * repeat("hola", 3) -> "holaholahola"
 */

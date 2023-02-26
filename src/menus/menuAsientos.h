@@ -65,8 +65,8 @@ std::string menuAsientos(){
             rowY = i;
             colX = seat["col_number"].get<int>();
 
-            if (seat["is_available"].get<bool>()) canvaBox.setBoxColor({ 0, 29, 158 }); 
-            else canvaBox.setBoxColor({ 100, 100, 100 }); 
+            if (seat["is_available"].get<bool>()) canvaBox.setBoxColor({ 0, 29, 158 });
+            else canvaBox.setBoxColor({ 100, 100, 100 });
 
             canvaBox.position = gnu::vec2d({
                 6*colX + salaBorder.position.x + 1,
@@ -100,7 +100,7 @@ std::string menuAsientos(){
     cursor.draw();
 
     int lastCursor_i, lastCursor_j;
-    
+
     gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
 
     std::vector<gnu::vec2d> selectedPositions;
@@ -145,7 +145,7 @@ std::string menuAsientos(){
                 if (mustAddPos) {
                     if (selectedPositions.size() == 0 || std::find(selectedPositions.begin(), selectedPositions.end(), gnu::vec2d({lastCursor_i, lastCursor_j})) == selectedPositions.end()) {
                         selectedPositions.push_back(gnu::vec2d({lastCursor_i, lastCursor_j}));
-                        Beep(500,200);
+                        // Beep(500,200);
                     }
                 }
                 break;

@@ -25,7 +25,7 @@ class Box {
 
     gnu::vec2d size = { 5, 5 };
     gnu::vec2d position = { 0, 0 };
-    
+
     short padding = 1;
 
     Box(gnu::vec2d size) {
@@ -97,7 +97,7 @@ class Box {
         }
         gnu::print(" ");
         style::reset_fg();
-        style::reset_bg();        
+        style::reset_bg();
     }
 
     void setBordersVisible(bool flag) {

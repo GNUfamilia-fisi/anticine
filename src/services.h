@@ -15,15 +15,15 @@ std::string apiURL = "https://anticine.up.railway.app";
 
 /**
  * Hace una petición a una URL y devuelve su respuesta.
- * 
+ *
  * Por defecto solo funciona con JSONs, por ejemplo,
  * un `fetch("www.google.com")` terminaría en error, pues
  * Google te devuelve una página web en formato HTML,
  * no texto en formato JSON.
- * 
+ *
  * Por detrás, esta función usa gnu::exec() para ejecutar
  * el comando "curl", que sirve para hacer peticiones HTTP.
- * 
+ *
  * @example
  * json response = gnu::fetch("https://api.anticine.up.railway.app")
  */
@@ -43,10 +43,10 @@ json fetch(std::string url) {
 
 /**
  * Usa a "fetch" con la url de nuestra API como base
- * 
+ *
  * Por ejemplo, el siguiente código:
  * json response = apifetch("/cines/cercanos")
- * 
+ *
  * Es equivalente a:
  * json response = fetch(apiURL + "/cines/cercanos")
  */

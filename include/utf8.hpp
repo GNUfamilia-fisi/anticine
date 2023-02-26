@@ -46,7 +46,7 @@ typedef unsigned char byte;
 /**
  * Esta función devuelve la longitud de un std::string
  * que contiene caracteres codificados en UTF-8
- * 
+ *
  * @example
  * std::string str = "áéíóú 🙀👌👌";
  * utf8::str_length(str); // 9
