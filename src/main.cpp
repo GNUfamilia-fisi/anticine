@@ -9,7 +9,7 @@ int main(void) {
     gnu::initProgram();
 
     // Selector de menús
-    // gnu::menuSelector();
+    gnu::menuSelector();
 
     // Formulario en modo pruebita (demostración de la Input API)
     gnu::menuFormulario();

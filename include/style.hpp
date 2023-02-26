@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cmath>
 #ifdef _WIN32
 // En windows, usamos windows.h para los colores básicos definidos
 #   include <Windows.h>
@@ -120,5 +121,61 @@ ANSI_ESCAPE_CODE(underline_off, 24)
 ANSI_ESCAPE_CODE(blink_off, 25)
 ANSI_ESCAPE_CODE(reset_fg, 39)
 ANSI_ESCAPE_CODE(reset_bg, 49)
+
+// Devuelve una versión más clara u oscura del baseColor para
+// usarse como complemento de luminosidad
+// https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
+#define LIGHT_MULTIPLIER 2.f
+#define DARK_MULTIPLIER 0.45f
+#define LIGHT_MAX 240
+
+style::rgb getComplementaryColor(style::rgb baseColor) {
+    float r = baseColor.r / 255.0f;
+    float g = baseColor.g / 255.0f;
+    float b = baseColor.b / 255.0f;
+
+    if (r < 0.03928f) { r = r / 12.92f; }
+    else { r = powf((r + 0.055f) / 1.055f, 2.4f); }
+
+    if (g < 0.03928f) { g = g / 12.92f; }
+    else { g = powf((g + 0.055f) / 1.055f, 2.4f); }
+
+    if (b < 0.03928f) { b = b / 12.92f; }
+    else { b = powf((b + 0.055f) / 1.055f, 2.4f); }
+
+    float L = 0.2126f * r + 0.7152f * g + 0.0722f * b;
+
+    if (L > 0.179f) {
+        // insted of returning black, we return a darker version of the base color
+        return {
+            (unsigned char)(baseColor.r * DARK_MULTIPLIER),
+            (unsigned char)(baseColor.g * DARK_MULTIPLIER),
+            (unsigned char)(baseColor.b * DARK_MULTIPLIER)
+        };
+    }
+    else {
+        // insted of returning white, we return a lighter version of the base color
+        style::rgb complementaryColor;
+        if (static_cast<int>(baseColor.r) * LIGHT_MULTIPLIER > LIGHT_MAX) {
+            complementaryColor.r = LIGHT_MAX;
+        }
+        else {
+            complementaryColor.r = static_cast<int>(baseColor.r) * LIGHT_MULTIPLIER;
+        }
+        if (static_cast<int>(baseColor.g) * LIGHT_MULTIPLIER > LIGHT_MAX) {
+            complementaryColor.g = LIGHT_MAX;
+        }
+        else {
+            complementaryColor.g = static_cast<int>(baseColor.g) * LIGHT_MULTIPLIER;
+        }
+        if (static_cast<int>(baseColor.b) * LIGHT_MULTIPLIER > LIGHT_MAX) {
+            complementaryColor.b = LIGHT_MAX;
+        }
+        else {
+            complementaryColor.b = static_cast<int>(baseColor.b) * LIGHT_MULTIPLIER;
+        }
+        return complementaryColor;
+    }
+}
 
 } // namespace colors

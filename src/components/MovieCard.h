@@ -1,6 +1,8 @@
 #pragma once
 
+#include <style.hpp>
 #include "Box.h"
+#include "../menus/menuDetallePelicula.h"
 
 namespace gnu {
 
@@ -8,17 +10,22 @@ namespace gnu {
 
 class MovieCard : public Box {
 public:
-    json data;
     char type;
 
-    MovieCard(json data, gnu::vec2d size) : Box({ 5, 5 }) {
-        this->data = data;
+    MovieCard(json movieData, gnu::vec2d size) : Box({ 5, 5 }) {
         this->size = size;
-        this->updateData(data);
+        this->updateData(movieData);
     }
 
-    void updateData(json newData) {
-        this->content = newData["title"].get<std::string>();
+    void updateData(json newMovieData) {
+        this->content = newMovieData["title"].get<std::string>();
+        style::rgb averageThumbnailColor = {
+            newMovieData["average_thumbnail_color"]["r"].get<unsigned char>(),
+            newMovieData["average_thumbnail_color"]["g"].get<unsigned char>(),
+            newMovieData["average_thumbnail_color"]["b"].get<unsigned char>()
+        };
+        this->setBoxColor(averageThumbnailColor);
+        this->setFontColor(style::getComplementaryColor(averageThumbnailColor));
     }
 
     void cardDraw() {

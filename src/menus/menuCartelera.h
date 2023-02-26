@@ -28,7 +28,12 @@ std::string menuCartelera() {
 
     json emptyMovie = json::parse(R"({
         "title": "",
-        "<thumbnail_url>": "",
+        "thumbnail_url": "",
+        "average_thumbnail_color": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+        },
         "duration": 0,
         "rating": "",
         "corporate_film_id": "",
@@ -39,17 +44,11 @@ std::string menuCartelera() {
     billboard.insert(billboard.end(), emptyMovie);
 
     gnu::MovieCard card1(billboard[0], { 18, 15 });
-    card1.position.y = 11;
-
     gnu::MovieCard card2(billboard[1], { 20, 17 });
-    card2.position.y = 10;
-
     gnu::MovieCard card3(billboard[2], { 18, 15 });
+    card1.position.y = 11;
+    card2.position.y = 10;
     card3.position.y = 11;
-
-    card1.setBoxColor({ 209, 167, 77 });
-    card2.setBoxColor({ 102, 196, 127 });
-    card3.setBoxColor({ 189, 121, 163 });
 
     //============== descripcion ===================
     gnu::Box descriptionCard({ 70, 11 });
@@ -96,8 +95,6 @@ std::string menuCartelera() {
     buttonRight.showBorder = false;
     buttonRight.setFontColor({ 255,255,255 });
 
-    size_t panel_i = 0;
-
     gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
     std::string titleLabel = billboard[1]["title"].get<std::string>();
     std::string lastLabel = titleLabel;
@@ -110,7 +107,8 @@ std::string menuCartelera() {
     std::string lastAdditionals = additionals;
     std::string additionalsPadding = "";
 
-    char opt = 0;
+    char opt = 1;
+    size_t panel_i = 1;
     int input;
 
     while (true) {
@@ -118,9 +116,7 @@ std::string menuCartelera() {
 
         switch(input){
             case gnu::key::Right: {
-                if (panel_i < billboard.size() - 3 && opt == 1) {
-                    panel_i++;
-                }
+                if (panel_i < billboard.size() - 3 && opt == 1) panel_i++;
                 break;
             }
             case gnu::key::Left: {
@@ -161,10 +157,6 @@ std::string menuCartelera() {
         card2.centerHorizontal();
         card1.setPosition( card2.position + gnu::vec2d{ (short)(-card1.size.x - 10), 1 } );
         card3.setPosition( card2.position + gnu::vec2d{ (short)(card2.size.x + 10), 1 } );
-
-        card1.setBoxColor({ 209, 167, 77 });
-        card2.setBoxColor({ 102, 196, 127 });
-        card3.setBoxColor({ 189, 121, 163 });
 
         card1.showBorder = true;
         card2.showBorder = true;
