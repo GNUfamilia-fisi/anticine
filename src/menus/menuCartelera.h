@@ -5,6 +5,7 @@
 #include "../consoleUtils.h"
 #include "../services.h"
 #include "../components/MovieCard.h"
+#include "../components/Button.h"
 
 #include "menuDetallePelicula.h" // getSynopsis()
 
@@ -72,12 +73,7 @@ std::string menuCartelera() {
     }
 
     std::string cinemaLabel = "Estas en " + cinemaName;
-    gnu::Box cinemaLabelBox({ short(cinemaLabel.size() + 4), 1 });
-    cinemaLabelBox.content = cinemaLabel;
-    cinemaLabelBox.transparent = true;
-    cinemaLabelBox.showBorder = true;
-    cinemaLabelBox.defaultFontColor = false;
-    cinemaLabelBox.setFontColor({ 255, 138, 208 });
+    gnu::Button cinemaLabelBox(cinemaLabel);
     cinemaLabelBox.position.y = 7;
 
     //=========== button indicators =================
@@ -229,31 +225,27 @@ std::string menuCartelera() {
         cinemaLabelBox.size.x = cinemaLabel.size() + 4;
         cinemaLabelBox.size.y = 1;
 
+        // Seleccionado el botón de cines
         if (opt == 0) {
             buttonRight.content = "";
             buttonLeft.content = "";
             buttonRight.transparent = true;
             buttonLeft.transparent = true;
 
-            cinemaLabelBox.defaultFontColor = false;
-            cinemaLabelBox.setFontColor({ 255, 138, 208 });
-            cinemaLabelBox.setBordersVisible(true);
+            cinemaLabelBox.focus();
         }
-
         else {
             buttonRight.content = ">>";
             buttonLeft.content = "<<";
             buttonRight.transparent = false;
             buttonLeft.transparent = false;
 
-            cinemaLabelBox.defaultFontColor = true;
-            cinemaLabelBox.setBordersVisible(false);
+            cinemaLabelBox.unfocus();
         }
-        cinemaLabelBox.draw();
 
+        cinemaLabelBox.draw();
         buttonLeft.draw();
         buttonRight.draw();
-
 
         // ----- Clear ----
         gnu::gotoXY(0, 0);

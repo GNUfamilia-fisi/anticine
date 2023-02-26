@@ -4,6 +4,7 @@
 #include <style.hpp>
 #include "../consoleUtils.h"
 #include "../components/Box.h"
+#include "../components/Button.h"
 
 #include "globales.h"
 
@@ -34,13 +35,11 @@ std::string menuAsientos(){
     salaBorder.draw();
 
     //boton de seleccione el asiento
-    gnu::Box boton({ 30, 1 });
-    boton.setFontColor({ 255, 138, 208 });
-    boton.content = "Confirmar selección";
-    boton.position.y = gnu::getConsoleSize().y - 3;
-    boton.centerHorizontal();
-    boton.showBorder = true;
-    boton.draw();
+    gnu::Button botonConfirmar("Confirmar selección", { 30, 1 });
+    botonConfirmar.setFontColor({ 255, 138, 208 });
+    botonConfirmar.position.y = gnu::getConsoleSize().y - 3;
+    botonConfirmar.centerHorizontal();
+    botonConfirmar.draw();
 
     //caja para seleccionar asientos
     gnu::Box canvaBox({4,1});
@@ -146,9 +145,9 @@ std::string menuAsientos(){
                 }
                 break;
             case gnu::key::Enter:
-                LOG_FILE("Current selected positions: ");
+                LOG_FILE("Current selected positions (" << selectedPositions.size() << "):");
                 for (auto h : selectedPositions) {
-                    LOG_FILE("{" << h.x << "," << h.y << "} ");
+                    LOG_FILE(" {" << h.x << "," << h.y << "}");
                 }
                 LOG_FILE("\n");
                 break;
