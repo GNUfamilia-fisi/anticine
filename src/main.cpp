@@ -2,13 +2,14 @@
 #include <utf8.hpp>
 
 #include "consoleUtils.h"
-#include "components/Box.h"
-#include "components/MovieCard.h"
-#include "menus/selectorDeMenus.h"
+// #include "menus/selectorDeMenus.h"
+#include "menus/menuFormulario.h"
 
 int main(void) {
     gnu::initProgram();
-    gnu::menuAsientos();
+
+    // Formulario en modo pruebita (demostración de la Input API)
+    gnu::menuFormulario();
 
     return 0;
 }

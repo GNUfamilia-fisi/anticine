@@ -44,6 +44,9 @@ void menuSelector() {
         if (menuID=="Asientos") {
             menuID= gnu::menuAsientos();
         }
+        if (menuID=="exit") {
+            break;
+        }
     }
 }
 

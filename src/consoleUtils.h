@@ -53,6 +53,14 @@ void setCursorVisible(bool isVisible);
 
 /* --- Utilidades --- */
 
+// Hacer log a un archivo
+// Ejemplo: LOG_FILE("Hola mundo" << 123 << std::endl);
+#define LOG_FILE(stream) \
+    std::ofstream logfile; \
+    logfile.open("debug.log", std::ios::app); \
+    logfile << stream; \
+    logfile.close();
+
 struct vec2d {
     int x;
     int y;
@@ -73,6 +81,10 @@ enum key {
     Left = 75,
     Right = 77,
 
+    Backspace = 127,   // not sure
+    Tab = 9,           // not sure
+    Supr = 2117294875, // not sure
+
     a = 97,
     w = 119,
     s = 115,
@@ -86,6 +98,12 @@ enum key {
     Down = 4348699,
     Left = 4479771,
     Right = 4414235,
+
+    Backspace = 127,
+    Supr = 2117294875,
+    Tab = 9,
+    Home = 4741915,
+    End = 4610843,
 
     a = 97,
     w = 119,

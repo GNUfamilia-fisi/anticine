@@ -105,10 +105,6 @@ std::string menuAsientos(){
 
     std::vector<gnu::vec2d> selectedPositions;
 
-    std::ofstream hola;
-
-    hola.open("hola.log", std::ios::app);
-
     while(true) {
         input = gnu::getch();
 
@@ -150,12 +146,11 @@ std::string menuAsientos(){
                 }
                 break;
             case gnu::key::Enter:
-                hola << "Current selected positions: ";
+                LOG_FILE("Current selected positions: ");
                 for (auto h : selectedPositions) {
-                    hola << "{" << h.x << "," << h.y << "} ";
+                    LOG_FILE("{" << h.x << "," << h.y << "} ");
                 }
-                hola << "\n";
-                hola.close();
+                LOG_FILE("\n");
                 break;
             }
         }

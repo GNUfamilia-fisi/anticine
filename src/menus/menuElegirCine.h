@@ -31,18 +31,18 @@ std::string menuElegirCine() {
 
     // Retorna una lista de cines ordenados según la geolocalización
     // del usuario, el primero siempre es el más cercano.
-    // Dependiendo de 
-    
+    // Dependiendo de
+
     json nearCinemasData = gnu::apifetch("/cines/cercanos");
 
     size_t currentCine = 0;
     int nameCursorPos = 0;
     short listLength = 5;
     bool lock = true;
-    
+
     gnu::printRawCenter(elijaLocalTitulo);
     int input;
-    
+
     // main menu loop
     while (lock) {
         gnu::gotoXY(0, 2);

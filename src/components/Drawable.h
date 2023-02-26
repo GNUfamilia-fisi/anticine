@@ -1,12 +1,15 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <utf8.hpp>
 #include "../consoleUtils.h"
 
 namespace gnu {
 
+/**
+ * @brief Una clase para representar componentes posisionables y dibujables
+ *
+ * @note Es buena práctica heredar de esta clase para crear componentes dibujables.
+ *       La función draw() debe ser implementada.
+ */
 class Drawable {
   public:
     gnu::vec2d size = { 5, 5 };

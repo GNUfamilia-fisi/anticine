@@ -13,19 +13,19 @@
 namespace gnu {
 
     std::string anticineLogo = R"(
-_______       __________      _____             
-___    |________  /___(_)________(_)___________ 
+_______       __________      _____
+___    |________  /___(_)________(_)___________
 __  /| |_  __ \  __/_  /_  ___/_  /__  __ \  _ \
 _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
-/_/  |_/_/ /_/\__/ /_/  \___/ /_/  /_/ /_/\___/ 
+/_/  |_/_/ /_/\__/ /_/  \___/ /_/  /_/ /_/\___/
 )";
 
 std::string menuCartelera() {
     gnu::cls();
-    
+
     json rawCarteleraData = gnu::apifetch("/cines/" + g_cineID + "/cartelera");
-    std::vector<json> billboard = rawCarteleraData["movies"].get<std::vector<json>>();    
-    
+    std::vector<json> billboard = rawCarteleraData["movies"].get<std::vector<json>>();
+
     json emptyMovie = json::parse(R"({
         "title": "",
         "<thumbnail_url>": "",
@@ -43,7 +43,7 @@ std::string menuCartelera() {
 
     gnu::MovieCard card2(billboard[1], { 20, 17 });
     card2.position.y = 10;
-    
+
     gnu::MovieCard card3(billboard[2], { 18, 15 });
     card3.position.y = 11;
 
@@ -80,7 +80,7 @@ std::string menuCartelera() {
     cinemaLabelBox.defaultFontColor = false;
     cinemaLabelBox.setFontColor({ 255, 138, 208 });
     cinemaLabelBox.position.y = 7;
-    
+
     //=========== button indicators =================
     gnu::Box buttonLeft({ 6, gnu::getConsoleSize().y });
     buttonLeft.setBoxColor({ 35, 35, 35 });
@@ -165,7 +165,7 @@ std::string menuCartelera() {
         card1.setBoxColor({ 209, 167, 77 });
         card2.setBoxColor({ 102, 196, 127 });
         card3.setBoxColor({ 189, 121, 163 });
- 
+
         card1.showBorder = true;
         card2.showBorder = true;
         card3.showBorder = true;
@@ -178,7 +178,7 @@ std::string menuCartelera() {
         titleLabel = billboard[1 + panel_i]["title"].get<std::string>();
 
         if (lastLabel.size() <= titleLabel.size()) {
-            gnu::printLineCentered(titleLabel);            
+            gnu::printLineCentered(titleLabel);
         }
         else {
             for (size_t i = 0; i < (lastLabel.size() - titleLabel.size() + 1) / 2; i++){
@@ -208,13 +208,13 @@ std::string menuCartelera() {
 
         //additional data
         gnu::printLineCentered(additionals);
-        
+
         duration = std::to_string(billboard[1 + panel_i]["duration"].get<int>());
         rating = billboard[1 + panel_i]["rating"].get<std::string>();
         additionals = duration + " | " + rating;
 
         if (lastAdditionals.size() <= additionals.size()) {
-            gnu::printLineCentered(additionals);            
+            gnu::printLineCentered(additionals);
         }
         else {
             for (size_t i = 0; i < (lastAdditionals.size() - additionals.size() + 1) / 2; i++){
