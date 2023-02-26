@@ -5,7 +5,7 @@ set -ex
 build_dir="bin"
 includes="./include"
 bin_name="anticine"
-cpp_flags="-Wall -Wextra"
+cpp_flags="-Wall -Wextra -pedantic"
 
 # Build
 if [ ! -d $build_dir ]; then

@@ -58,7 +58,8 @@ std::string menuAsientos(){
     const size_t totalsize = rows * columns;
 
     std::vector<gnu::vec2d> allPositions(totalsize);
-    bool statusSelectable[rows][columns];
+    // bool statusSelectable[rows][columns];
+    std::vector<std::vector<bool>> statusSelectable(rows, std::vector<bool>(columns));
 
     size_t iter = 0;
 
