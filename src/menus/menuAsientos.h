@@ -10,24 +10,27 @@
 
 namespace gnu {
 
+#define SCREEN_COLOR { 20, 156, 178 }
+#define BORDER_DECORATION_COLOR { 104, 19, 1 }
+
 std::string menuAsientos(){
     gnu::cls();
 
-    json totalData = apifetch("/session/lol");
+    json totalData = apifetch("/session/" + g_sessionID);
 
     const int columns = totalData["room"]["columns_number"].get<int>();
     const int rows = totalData["room"]["rows_number"].get<int>();
 
     //pantalla
     gnu::Box pantalla({ 135, 2 });
-    pantalla.setBoxColor({ 20, 156, 178});
+    pantalla.setBoxColor(SCREEN_COLOR);
     pantalla.centerHorizontal();
     pantalla.showBorder = false;
     pantalla.draw();
 
     //borde para decorar los asientos
     gnu::Box salaBorder({ columns*6, rows*3 });
-    salaBorder.setBoxColor({ 104, 19,1 }); // RGB(104,19,1)
+    salaBorder.setBoxColor(BORDER_DECORATION_COLOR);
     salaBorder.position.y = 5;
     salaBorder.centerHorizontal();
     salaBorder.showBorder = true;
@@ -42,8 +45,8 @@ std::string menuAsientos(){
     botonConfirmar.draw();
 
     //caja para seleccionar asientos
-    gnu::Box canvaBox({4,1});
-    canvaBox.setBoxColor({ 0, 29, 158 }); //RGB(0, 29, 158)
+    gnu::Box canvaBox({ 4, 1 });
+    canvaBox.setBoxColor({ 0, 29, 158 });
     canvaBox.transparent = false;
     canvaBox.showBorder = true;
 

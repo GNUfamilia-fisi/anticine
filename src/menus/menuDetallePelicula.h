@@ -13,6 +13,10 @@ namespace gnu {
 #define DETAIL_HEADER_HEIGHT 10
 #define MOVIE_TITLE_OFFSET_Y 7
 
+#define OPTION_VIEW_MOVIE_TRAILER 0
+#define OPTION_SELECT_OTHER_DATE 1
+#define OPTION_SELECT_SESSION 2
+
 // Submenús
 std::string submenuSeleccionarFecha();
 std::string formatTime(std::string minutes);
@@ -96,7 +100,7 @@ std::string menuDetalles() {
 
     // ====== versions ======
     std::vector<json> movieVersions = currentDayData["movie_versions"].get<std::vector<json>>();
-    std::string currentDay = currentDayData["date"].get<std::string>();
+    std::string currentDay = date.content;
 
     // Las version boxes van al lado del thumbnail, y necesitan algo de padding
     gnu::Box versionBoxTemplate({
@@ -141,60 +145,67 @@ std::string menuDetalles() {
 
     int input;
     gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
-    size_t hour_i = 0;
+    size_t session_i = 0;
 
     unsigned char globalOpt = 2;
-    unsigned char opt = 0;
+    unsigned char movie_version_i = 0;
     bool firstDraw = true;
 
     // ======== main loop ==============
     while (true) {
         input = gnu::getch();
-        if (input) {
-            switch (input) {
-                case gnu::key::Right: {
-                    if (hour_i < hourSizes[opt] - 3 && globalOpt == 2) {
-                        hour_i++;
-                    }
-                    break;
-                }
-                case gnu::key::Left: {
-                    if (hour_i > 0 && globalOpt == 2) {
-                        hour_i--;
-                    }
-                    break;
-                }
-                case gnu::key::Up: {
-                    if (opt > 0 && globalOpt == 2) {
-                        opt--;
-                        hour_i = 0;
-                        break;
-                    }
-                    if (opt == 0 && globalOpt > 0) {
-                        globalOpt--;
-                    }
-                    break;
-                }
-                case gnu::key::Down: {
-                    if (opt < movieVersionBoxes.size() - 1 && globalOpt == 2) {
-                        opt++;
-                        hour_i = 0;
-                    }
 
-                    if (opt == 0 && globalOpt < 2) {
-                        globalOpt++;
-                    }
+        if (input) switch (input) {
+            case gnu::key::Right: {
+                if (session_i < hourSizes[movie_version_i] - 3 && globalOpt == OPTION_SELECT_SESSION) {
+                    session_i++;
+                }
+                break;
+            }
+            case gnu::key::Left: {
+                if (session_i > 0 && globalOpt == OPTION_SELECT_SESSION) {
+                    session_i--;
+                }
+                break;
+            }
+            case gnu::key::Up: {
+                if (movie_version_i > 0 && globalOpt == OPTION_SELECT_SESSION) {
+                    movie_version_i--;
+                    session_i = 0;
                     break;
                 }
-                case gnu::key::Enter: {
-                    if (globalOpt == 1) return "submenuSeleccionarFecha";
-                    if (globalOpt == 0) gnu::openBrowser(trailer_url);
-                    if (globalOpt == 2) return "Asientos";
-                    break;
+                if (movie_version_i == 0 && globalOpt > OPTION_VIEW_MOVIE_TRAILER) {
+                    globalOpt--;
                 }
-                case gnu::key::ExitKey: {
-                    return "menuCartelera";
+                break;
+            }
+            case gnu::key::Down: {
+                if (movie_version_i < movieVersionBoxes.size() - 1 && globalOpt == OPTION_SELECT_SESSION) {
+                    movie_version_i++;
+                    session_i = 0;
                 }
+
+                if (movie_version_i == 0 && globalOpt < OPTION_SELECT_SESSION) {
+                    globalOpt++;
+                }
+                break;
+            }
+            case gnu::key::Enter: {
+                if (globalOpt == OPTION_VIEW_MOVIE_TRAILER) {
+                    gnu::openBrowser(trailer_url);
+                }
+                if (globalOpt == OPTION_SELECT_OTHER_DATE) {
+                    return "submenuSeleccionarFecha";
+                }
+                if (globalOpt == OPTION_SELECT_SESSION) {
+                    // guardamos el id de la sesión seleccionada
+                    g_sessionID = movieVersions[movie_version_i]["sessions"][session_i]["session_id"].get<std::string>();
+                    return "Asientos";
+                }
+                break;
+            }
+            case gnu::key::ExitKey: {
+                return "menuCartelera";
             }
         }
 
@@ -212,8 +223,8 @@ std::string menuDetalles() {
             // Nota: entiendo esta lógica, pero no sé si es neceasario un
             // sistema de scrolling, cuando podemos listar todas las horas
             for (size_t j = 0; j < sessionBoxes.size(); j++){
-                if (opt == i) {
-                    sessionBoxes[j].content = hours[j + hour_i];
+                if (movie_version_i == i) {
+                    sessionBoxes[j].content = hours[j + session_i];
                 }
                 else {
                     sessionBoxes[j].content = hours[j];
@@ -240,7 +251,7 @@ std::string menuDetalles() {
             header.size = gnu::vec2d({gnu::getConsoleSize().x , 10});
             header.draw();
 
-            if (globalOpt == 1){
+            if (globalOpt == OPTION_SELECT_OTHER_DATE){
                 date.showBorder = true;
                 date.setBorderColor({ 230, 50, 50 });
             }
@@ -290,7 +301,7 @@ std::string menuDetalles() {
         if (needToRedrawLayout || input) {
             // ======= drawing every session box on resize ===========
             for (size_t i = 0; i < movieVersionBoxes.size(); i++){
-                if (i == opt && globalOpt == 2) {
+                if (i == movie_version_i && globalOpt == OPTION_SELECT_SESSION) {
                     movieVersionBoxes[i].setBorderColor({ 230, 50, 50 });
                 }
                 else {
@@ -355,25 +366,25 @@ std::string submenuSeleccionarFecha() {
     dateContainers[1].showBorder = true;
 
     int input;
-    unsigned char opt = 0;
+    unsigned char fecha_i = 0;
 
     while (true) {
         input = gnu::getch();
 
         switch (input) {
         case gnu::key::Up:
-            if (opt > 0) opt--;
+            if (fecha_i > 0) fecha_i--;
             break;
         case gnu::key::Down:
-            if (opt < dates.size() - 3) opt++;
+            if (fecha_i < dates.size() - 3) fecha_i++;
             break;
         case gnu::key::Enter:
-            g_selectedDate = dates[1 + opt];
+            g_selectedDate = dates[1 + fecha_i];
             return "menuDetalles";
         }
 
         for (size_t i = 0; i < dateContainers.size(); i++) {
-            dateContainers[i].content = dates[i + opt];
+            dateContainers[i].content = dates[i + fecha_i];
             dateContainers[i].position = gnu::vec2d({ 0, int(15 + 3 * i)});
             dateContainers[i].showBorder = false;
             dateContainers[i].draw();

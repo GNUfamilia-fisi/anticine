@@ -9,3 +9,4 @@ std::string g_fechaSeleccionada; // (no usada)
 std::string g_cineID;
 std::string g_movieID;
 std::string g_selectedDate = "";
+std::string g_sessionID = "";
