@@ -5,10 +5,11 @@
 #include <utf8.hpp>
 #include <style.hpp>
 #include "../consoleUtils.h"
+#include "Drawable.h"
 
 namespace gnu {
 
-class Box {
+class Box : public Drawable {
   public:
     std::string content;
     bool transparent = true;
@@ -23,16 +24,10 @@ class Box {
     style::rgb text_color = { 0, 0, 0 };
     style::rgb border_color = { 0, 0, 0 };
 
-    gnu::vec2d size = { 5, 5 };
-    gnu::vec2d position = { 0, 0 };
-
     short padding = 1;
 
-    Box(gnu::vec2d size) {
-        this->size = size;
-    }
-    void setPosition(gnu::vec2d position) {
-        this->position = position;
+    Box(gnu::vec2d size) : Drawable(size) {
+
     }
     void setBoxColor(style::rgb rgb_color) {
         this->box_color = rgb_color;
@@ -227,13 +222,6 @@ class Box {
         if (this->showBorder) {
             this->drawBorder();
         }
-    }
-
-    void centerHorizontal() {
-        this->position.x = (gnu::getConsoleSize().x - this->size.x) / 2;
-    }
-    void centerVertical() {
-        this->position.y = (gnu::getConsoleSize().y - this->size.y) / 2;
     }
 };
 
