@@ -41,9 +41,12 @@ std::string menuFormulario() {
             // Al cambiar el focus, se redibuja el input automáticamente
             fields[i].setFocus(i == focus_index);
         }
-
         int input = gnu::getch();
+        //LOG_FILE("\ncontrolInput: " << controlInput << "\n");
+        //int input = (controlInput == 0 || controlInput == 224) ? gnu::getch() : controlInput;
+
         if (input) {
+            //LOG_FILE("input: " << input << "\n");
             gnu::Input::handleInfo result = fields[focus_index].handle(input);
 
             if (result.wanna_go_previous && focus_index > 0) {
@@ -53,7 +56,6 @@ std::string menuFormulario() {
                 focus_index++;
             }
         }
-
     }
 
     return "exit"; // no implementado

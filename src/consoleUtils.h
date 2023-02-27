@@ -76,10 +76,11 @@ vec2d getCursorPosition();
 // códigos de teclas para usarse con gnu::getch()
 enum key {
 #if defined(ANTICINE_WINDOWS)
-    Up = 72,
-    Down = 80,
-    Left = 75,
-    Right = 77,
+    //artificial keycodes
+    Up = 250,
+    Down = 251,
+    Left = 252,
+    Right = 253,
 
     Backspace = 127,   // not sure
     Tab = 9,           // not sure
@@ -119,9 +120,29 @@ enum key {
 };
 
 int getch() {
+
+//En windows, usando kbhit, cada vez que se guarda un keypress en el buffer, antes de este se guara uno de 2 caracteres (0 o 0xE0)
+//0 o un valor en scan code para cualquier letra del layout
+//0x0E (o 224 en decimal) para teclas especiales como las flechas
+//https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/getch-getwch?redirectedfrom=MSDN&view=msvc-170#:~:text=The%20_getch%20and,scan%20code.
 #if defined(ANTICINE_WINDOWS)
     if (_kbhit()) {
-        return _getch();
+        //primero obtenemos el caracter de control o, en su defecto, el caracter en si
+        int control = _getch();
+        int input;
+        if (_kbhit()) input = _getch();
+
+        switch (control) {
+        case 224:
+            if (input == 77) return Right;
+            if (input == 75) return Left;
+            if (input == 72) return Up;
+            if (input == 80) return Down;
+            break;
+        default:
+            return control;
+            break;
+        }
     }
     return 0;
 #else
