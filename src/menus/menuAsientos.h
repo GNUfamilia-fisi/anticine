@@ -10,8 +10,33 @@
 
 namespace gnu {
 
-#define SCREEN_COLOR { 20, 156, 178 }
-#define BORDER_DECORATION_COLOR { 104, 19, 1 }
+#define SCREEN_COLOR style::rgb({ 20, 156, 178 })
+#define BORDER_DECORATION_COLOR style::rgb({ 104, 19, 1 })
+
+#define OPCION_SELECCIONANDO_SILLAS 0
+#define OPCION_BOTON_CONFIRMAR 1
+
+#define COLOR_SILLA_DISPONIBLE style::rgb({ 0, 29, 158 })
+#define COLOR_SILLA_OCUPADA style::rgb({ 255, 0, 0 })
+#define COLOR_SILLA_SELECCIONADA style::rgb({ 255, 138, 208 })
+#define COLOR_BORDE_SILLAS_EN_CURSOR style::rgb({ 0, 200, 0 })
+
+#define FIND(vec, val) (std::find(vec.begin(), vec.end(), (val)) != vec.end())
+
+#define MENU_OPTION_SILLAS 0
+#define MENU_OPTION_BOTON_CONFIRMAR 1
+
+// NOTA: ahora las sillas seleccionadas se muestran en color rosado
+//       y el botón de confirmar funciona
+//       esto ya estaría casi listo, solo falta pequeños retoques y guardar las sillas
+//       seleccionadas como variable global
+//       (probablemente también se manden al servidor para verificar si esas sillas no están ocupadas)
+
+// NOTA: faltan elegir buenos colores
+
+// antes de refactorizar el código, las sillas se seleccionaban
+// según su posición en la console, cosa que no era buena idea y casi me hace enloquecer.
+// Ahora se seleccionan según su posición en la sala (fila y columna)
 
 std::string menuAsientos(){
     gnu::cls();
@@ -21,14 +46,16 @@ std::string menuAsientos(){
     const int columns = totalData["room"]["columns_number"].get<int>();
     const int rows = totalData["room"]["rows_number"].get<int>();
 
-    //pantalla
+    int menuOption = MENU_OPTION_SILLAS;
+
+    // pantalla
     gnu::Box pantalla({ 135, 2 });
     pantalla.setBoxColor(SCREEN_COLOR);
     pantalla.centerHorizontal();
     pantalla.showBorder = false;
     pantalla.draw();
 
-    //borde para decorar los asientos
+    // borde para decorar los asientos
     gnu::Box salaBorder({ columns*6, rows*3 });
     salaBorder.setBoxColor(BORDER_DECORATION_COLOR);
     salaBorder.position.y = 5;
@@ -37,146 +64,203 @@ std::string menuAsientos(){
     salaBorder.transparent = true;
     salaBorder.draw();
 
-    //boton de seleccione el asiento
+    // boton de seleccione el asiento
     gnu::Button botonConfirmar("Confirmar selección", { 30, 1 });
     botonConfirmar.setFontColor({ 255, 138, 208 });
     botonConfirmar.position.y = gnu::getConsoleSize().y - 3;
     botonConfirmar.centerHorizontal();
     botonConfirmar.draw();
 
-    //caja para seleccionar asientos
-    gnu::Box canvaBox({ 4, 1 });
-    canvaBox.setBoxColor({ 0, 29, 158 });
-    canvaBox.transparent = false;
-    canvaBox.showBorder = true;
-
-    std::vector<json> eachRow = totalData["room"]["rows"].get<std::vector<json>>();
-
-    int rowY = 0;
-    int colX = 0;
+    std::vector<json> roomRows = totalData["room"]["rows"].get<std::vector<json>>();
 
     const size_t totalsize = rows * columns;
 
-    std::vector<gnu::vec2d> allPositions(totalsize);
-    bool statusSelectable[rows][columns];
+    // Las posiciones de las sillas en la pantalla
+    // Las coordenadas de las sillas en la sala
+    std::vector<gnu::vec2d> seatsRoomPosition(totalsize);
+    // El estado de las sillas (ocupado/disponible)
+    std::vector<std::vector<bool>> statusSelectable(rows, std::vector<bool>(columns));
 
-    size_t iter = 0;
+    // caja reutilizable para dibujar las sillas
+    gnu::Box canvaBox({ 4, 1 });
+    canvaBox.setBoxColor(COLOR_SILLA_DISPONIBLE);
+    canvaBox.setBorderColor(COLOR_BORDE_SILLAS_EN_CURSOR);
+    canvaBox.transparent = false;
+    canvaBox.showBorder = false;
 
-    for (int i = 0; i < rows; i++) {
-        for (auto seat : eachRow[i]["seats"]) {
-            rowY = i;
-            colX = seat["col_number"].get<int>();
+    size_t seats_i = 0;
+    bool firstWithBorder = true;
+    // primer dibujado y llenado de variables
+    for (int rowY = 0; rowY < rows; rowY++) {
+        for (auto seat : roomRows[rowY]["seats"]) {
+            int colX = seat["col_number"].get<int>();
+            bool seat_ocupied = seat["is_ocupied"].get<bool>();
+            statusSelectable[rowY][colX] = !seat_ocupied;
 
-            if (seat["is_available"].get<bool>()) canvaBox.setBoxColor({ 0, 29, 158 });
-            else canvaBox.setBoxColor({ 100, 100, 100 });
+            canvaBox.setBoxColor(seat_ocupied ? COLOR_SILLA_OCUPADA : COLOR_SILLA_DISPONIBLE);
 
             canvaBox.position = gnu::vec2d({
-                6*colX + salaBorder.position.x + 1,
-                3*rowY + 6
+                6 * colX + salaBorder.position.x + 1,
+                3 * rowY + 6
             });
 
+            // esto es para arreglar un bug muy raro que hace que la primera
+            // silla SELECCIONADA no tenga border en el primer dibujado
+            if (firstWithBorder) {
+                canvaBox.showBorder = true;
+                firstWithBorder = false;
+            }
+            else {
+                canvaBox.showBorder = false;
+            }
             canvaBox.draw();
-
-            allPositions[iter] = canvaBox.position;
-            statusSelectable[rowY][colX] = seat["is_available"].get<bool>();
-
-            iter++;
+            seatsRoomPosition[seats_i] = gnu::vec2d({ colX, rowY });
+            seats_i++;
         }
     }
 
-    gnu::Box cursor({4, 1});
-    cursor.setBoxColor({28, 209, 61});
-    cursor.showBorder = true;
-    cursor.transparent = false;
-
-    short cursorX = allPositions[0].x;
-    short cursorY = allPositions[0].y;
-
-    gnu::vec2d lastCursorPosition = allPositions[0];
-
-    int input;
-    bool hasKeyPressed = false;
-    bool mustAddPos = false;
-
-    cursor.position = allPositions[0];
-    cursor.draw();
-
-    int lastCursor_i, lastCursor_j;
-
     gnu::vec2d lastConsoleSize = gnu::getConsoleSize();
-
     std::vector<gnu::vec2d> selectedPositions;
 
-    while(true) {
+    // cursorCoord hace referencia a la coordenada del cursor en [columnas, filas]
+    //  Anteriormente hacía referencia al cursor real en la pantalla, pero
+    //  esto era poco eficiente
+    gnu::vec2d cursorCoord = seatsRoomPosition[0];
+    gnu::vec2d lastCursorCoord = cursorCoord;
+    int input;
+    bool hasPressedKey = false;
+
+    while (true) {
         input = gnu::getch();
 
         if (input) {
-            hasKeyPressed = true;
-
-            lastCursor_i = (lastCursorPosition.x - salaBorder.position.x - 1) / (cursor.size.x + 2);
-            lastCursor_j = (lastCursorPosition.y - 6) / (cursor.size.y + 2);
+            // asumimos que se presionó una tecla,
+            // pero si llegamos al case: default, no se presionó ninguna
+            hasPressedKey = true;
+            lastCursorCoord = { cursorCoord.x, cursorCoord.y };
 
             switch (input) {
             case gnu::key::Right:
-                if (std::find(allPositions.begin(), allPositions.end(), gnu::vec2d({cursorX + cursor.size.x + 2, cursorY})) != allPositions.end()) {
-                    cursorX += cursor.size.x + 2;
+                if (menuOption != MENU_OPTION_SILLAS) break;
+                if (FIND(seatsRoomPosition, gnu::vec2d({cursorCoord.x + 1, cursorCoord.y}))) {
+                    cursorCoord.x++;
                 }
                 break;
             case gnu::key::Left:
-                if (std::find(allPositions.begin(), allPositions.end(), gnu::vec2d({cursorX - cursor.size.x - 2, cursorY})) != allPositions.end()) {
-                    cursorX -= cursor.size.x + 2;
+                if (menuOption != MENU_OPTION_SILLAS) break;
+                if (FIND(seatsRoomPosition, gnu::vec2d({cursorCoord.x - 1, cursorCoord.y}))) {
+                    cursorCoord.x--;
                 }
                 break;
             case gnu::key::Up:
-                if (std::find(allPositions.begin(), allPositions.end(), gnu::vec2d({cursorX, cursorY - cursor.size.y - 2})) != allPositions.end()) {
-                    cursorY -= cursor.size.y + 2;
+                if (menuOption == MENU_OPTION_BOTON_CONFIRMAR) {
+                    menuOption = MENU_OPTION_SILLAS;
+                    break;
+                }
+                if (FIND(seatsRoomPosition, gnu::vec2d({cursorCoord.x, cursorCoord.y - 1}))) {
+                    cursorCoord.y--;
                 }
                 break;
             case gnu::key::Down:
-                if (std::find(allPositions.begin(), allPositions.end(), gnu::vec2d({cursorX, cursorY + cursor.size.y + 2})) != allPositions.end()) {
-                    cursorY += cursor.size.y + 2;
+                if (menuOption == MENU_OPTION_SILLAS && cursorCoord.y == rows - 1) {
+                    menuOption = MENU_OPTION_BOTON_CONFIRMAR;
+                    break;
+                }
+                if (FIND(seatsRoomPosition, gnu::vec2d({cursorCoord.x, cursorCoord.y + 1}))) {
+                    cursorCoord.y++;
                 }
                 break;
-            case gnu::key::Space:
-                mustAddPos = statusSelectable[lastCursor_j][lastCursor_i];
+            case gnu::key::Enter: {
+                if (menuOption == MENU_OPTION_BOTON_CONFIRMAR) {
+                    // sillas guardads en el vector selectedPositions
+                    // TODO: enviar al servidor y esperar respuesta
+                    return "menuFormulario";
+                }
+                bool is_selectable = statusSelectable[lastCursorCoord.y][lastCursorCoord.x];
+                LOG_FILE("is_selectable: " << is_selectable << "\n");
 
-                if (mustAddPos) {
-                    if (selectedPositions.size() == 0 || std::find(selectedPositions.begin(), selectedPositions.end(), gnu::vec2d({lastCursor_i, lastCursor_j})) == selectedPositions.end()) {
-                        selectedPositions.push_back(gnu::vec2d({lastCursor_i, lastCursor_j}));
+                if (is_selectable) {
+                    // Si no esta en la lista, agregarlo
+                    const gnu::vec2d currentPos = { lastCursorCoord.x, lastCursorCoord.y };
+                    if (!FIND(selectedPositions, gnu::vec2d(currentPos))) {
+                        selectedPositions.push_back(gnu::vec2d(currentPos));
                         // Beep(500,200);
+                    }
+                    else {
+                        // si no esta en la lista, quitarlo (toggle)
+                        selectedPositions.erase(
+                            std::remove(
+                                selectedPositions.begin(), selectedPositions.end(),
+                                gnu::vec2d(currentPos)
+                            ), selectedPositions.end()
+                        );
                     }
                 }
                 break;
-            case gnu::key::Enter:
-                LOG_FILE("Current selected positions (" << selectedPositions.size() << "):");
-                for (auto h : selectedPositions) {
-                    LOG_FILE(" {" << h.x << "," << h.y << "}");
-                }
-                LOG_FILE("\n");
+            }
+            default:
+                hasPressedKey = false;
                 break;
             }
         }
 
-        if (hasKeyPressed) {
-            cursor.position = lastCursorPosition;
-            cursor.box_color = statusSelectable[lastCursor_j][lastCursor_i] ? style::rgb({ 0, 29, 158 }) : style::rgb({ 100, 100, 100 });
-            cursor.draw();
+        bool needToRedraw = lastConsoleSize != gnu::getConsoleSize();
 
-            //redibujamos en la nueva posicion
-            cursor.position = {cursorX, cursorY};
-            cursor.setBoxColor({ 28, 209, 61 });
-            cursor.draw();
+        if (hasPressedKey || needToRedraw) {
+            if (needToRedraw) {
+                gnu::cls();
+                pantalla.centerHorizontal();
+                salaBorder.centerHorizontal();
+                botonConfirmar.position.y = gnu::getConsoleSize().y - 3;
+                botonConfirmar.centerHorizontal();
+                pantalla.draw();
+                salaBorder.draw();
+                botonConfirmar.draw();
+            }
+            // se recorren todas las sillas para actualizar su estado en pantalla
+            for (int rowY = 0; rowY < rows; rowY++) {
+                for (auto seat : roomRows[rowY]["seats"]) {
+                    int colX = seat["col_number"].get<int>();
+                    bool seat_ocupied = !statusSelectable[rowY][colX];
 
-            lastCursorPosition = {cursorX, cursorY};
-            hasKeyPressed = false;
+                    canvaBox.position = gnu::vec2d({
+                        6 * colX + salaBorder.position.x + 1,
+                        3 * rowY + 6
+                    });
+
+                    bool is_selected_by_user = FIND(selectedPositions, gnu::vec2d({ colX, rowY }));
+                    bool is_on_cursor = cursorCoord.x == colX && cursorCoord.y == rowY;
+
+                    if (is_selected_by_user) {
+                        canvaBox.setBoxColor(COLOR_SILLA_SELECCIONADA);
+                        if (!is_on_cursor) canvaBox.flushBorders();
+                    }
+                    else if (is_on_cursor && menuOption == MENU_OPTION_SILLAS) {
+                        canvaBox.setBoxColor(
+                            statusSelectable[rowY][colX] ? COLOR_SILLA_DISPONIBLE : COLOR_SILLA_OCUPADA
+                        );
+                        canvaBox.showBorder = true;
+                    }
+                    else {
+                        canvaBox.setBoxColor(
+                            seat_ocupied ? COLOR_SILLA_OCUPADA : COLOR_SILLA_DISPONIBLE
+                        );
+                        canvaBox.showBorder = false;
+                        canvaBox.flushBorders();
+                    }
+                    canvaBox.draw();
+                }
+            }
         }
-
-        if (lastConsoleSize != gnu::getConsoleSize()) {
-            //TODO: HOLA
+        if (menuOption == MENU_OPTION_BOTON_CONFIRMAR) {
+            botonConfirmar.focus();
         }
+        else {
+            botonConfirmar.unfocus();
+        }
+        botonConfirmar.draw();
 
         lastConsoleSize = gnu::getConsoleSize();
-
         gnu::sleep(5);
     }
 
