@@ -16,6 +16,8 @@ namespace gnu {
 // TODO: validación de input y estado de error (rojo)
 
 std::string menuFormulario() {
+    gnu::cls();
+    // std::string movieRawThumbnail = movieData["raw_thumbnail_image"].get<std::string>();
 
     // Fields creadas en un array para acceder a posiciones dinámicamente
     int focus_index = 0;
@@ -41,12 +43,9 @@ std::string menuFormulario() {
             // Al cambiar el focus, se redibuja el input automáticamente
             fields[i].setFocus(i == focus_index);
         }
-        int input = gnu::getch();
-        //LOG_FILE("\ncontrolInput: " << controlInput << "\n");
-        //int input = (controlInput == 0 || controlInput == 224) ? gnu::getch() : controlInput;
 
+        int input = gnu::getch();
         if (input) {
-            //LOG_FILE("input: " << input << "\n");
             gnu::Input::handleInfo result = fields[focus_index].handle(input);
 
             if (result.wanna_go_previous && focus_index > 0) {

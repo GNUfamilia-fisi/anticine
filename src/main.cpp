@@ -10,8 +10,9 @@ int main(void) {
 
     // Selector de menús
     gnu::menuSelector();
-   
-   //auto hola = gnu::menuAsientos();
+
+    // Formulario en modo pruebita (demostración de la Input API)
+    gnu::menuFormulario();
 
     return 0;
 }
