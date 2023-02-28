@@ -14,7 +14,8 @@
 #include "menuElegirCine.h"
 #include "menuCartelera.h"
 #include "menuDetallePelicula.h"
-#include "menuFormulario.h"
+#include "menuFormInicioSesion.h"
+#include "menuFormRegistro.h"
 #include "menuAsientos.h"
 
 #include "globales.h"
@@ -45,8 +46,11 @@ void menuSelector() {
         if (menuID == "Asientos") {
             menuID = gnu::menuAsientos();
         }
-        if (menuID == "menuFormulario") {
-            menuID = gnu::menuFormulario();
+        if (menuID == "menuFormularioRegistro") {
+            menuID = gnu::menuFormularioRegistro();
+        }
+        if (menuID == "menuFormularioLogin") {
+            menuID = gnu::menuFormularioLogin();
         }
         if (menuID == "exit") {
             break;

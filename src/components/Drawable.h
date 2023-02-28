@@ -15,6 +15,7 @@ class Drawable {
     gnu::vec2d size = { 5, 5 };
     gnu::vec2d position = { 0, 0 };
 
+    Drawable() {}
     Drawable(gnu::vec2d size) {
         this->size = size;
     }

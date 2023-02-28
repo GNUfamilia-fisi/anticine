@@ -41,10 +41,10 @@ namespace gnu {
 std::string menuAsientos(){
     gnu::cls();
 
-    json totalData = apifetch("/session/" + g_sessionID);
+    json sessionData = apifetch("/session/" + g_sessionID);
 
-    const int columns = totalData["room"]["columns_number"].get<int>();
-    const int rows = totalData["room"]["rows_number"].get<int>();
+    const int columns = sessionData["room"]["columns_number"].get<int>();
+    const int rows = sessionData["room"]["rows_number"].get<int>();
 
     int menuOption = MENU_OPTION_SILLAS;
 
@@ -71,7 +71,7 @@ std::string menuAsientos(){
     botonConfirmar.centerHorizontal();
     botonConfirmar.draw();
 
-    std::vector<json> roomRows = totalData["room"]["rows"].get<std::vector<json>>();
+    std::vector<json> roomRows = sessionData["room"]["rows"].get<std::vector<json>>();
 
     const size_t totalsize = rows * columns;
 
@@ -172,9 +172,10 @@ std::string menuAsientos(){
                 break;
             case gnu::key::Enter: {
                 if (menuOption == MENU_OPTION_BOTON_CONFIRMAR) {
-                    // sillas guardads en el vector selectedPositions
+                    // sillas guardadas en el vector selectedPositions
                     // TODO: enviar al servidor y esperar respuesta
-                    return "menuFormulario";
+                    g_selectedSeats = selectedPositions;
+                    return "menuFormularioLogin";
                 }
                 bool is_selectable = statusSelectable[lastCursorCoord.y][lastCursorCoord.x];
                 LOG_FILE("is_selectable: " << is_selectable << "\n");

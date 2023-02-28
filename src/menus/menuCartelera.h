@@ -13,14 +13,6 @@
 
 namespace gnu {
 
-    std::string anticineLogo = R"(
-_______       __________      _____
-___    |________  /___(_)________(_)___________
-__  /| |_  __ \  __/_  /_  ___/_  /__  __ \  _ \
-_  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
-/_/  |_/_/ /_/\__/ /_/  \___/ /_/  /_/ /_/\___/
-)";
-
 std::string menuCartelera() {
     gnu::cls();
 
@@ -47,9 +39,9 @@ std::string menuCartelera() {
     gnu::MovieCard card1(billboard[0], { 18, 15 });
     gnu::MovieCard card2(billboard[1], { 20, 17 });
     gnu::MovieCard card3(billboard[2], { 18, 15 });
-    card1.position.y = 11;
-    card2.position.y = 10;
-    card3.position.y = 11;
+    card1.position.y = 12;
+    card2.position.y = 11;
+    card3.position.y = 12;
 
     //============== descripcion ===================
     gnu::Box descriptionCard({ 70, 11 });
@@ -86,7 +78,7 @@ std::string menuCartelera() {
 
     gnu::Box buttonRight({ 6, gnu::getConsoleSize().y });
     buttonRight.setBoxColor({ 35, 35, 35 });
-    buttonRight.position.x = gnu::getConsoleSize().x - 6;
+    buttonRight.position.x = gnu::getConsoleSize().x - 8;
     buttonRight.content = "->";
     buttonRight.showBorder = false;
     buttonRight.setFontColor({ 255,255,255 });
@@ -146,8 +138,9 @@ std::string menuCartelera() {
         descriptionCard.centerHorizontal();
 
         // ---- Update ----
-        style::setFg({ 128, 186, 209 });
-        gnu::printRawCenter(anticineLogo);
+        style::setFg(ANTICINE_LOGO_COLOR);
+        gnu::gotoY(2);
+        gnu::printRawCenter(gnu::anticineLogo);
         style::setFg({ 222, 197, 153 });
 
         card2.centerHorizontal();
@@ -217,7 +210,7 @@ std::string menuCartelera() {
 
         buttonLeft.size.y = gnu::getConsoleSize().y;
         buttonRight.size.y = gnu::getConsoleSize().y;
-        buttonRight.position.x = gnu::getConsoleSize().x - 7;
+        buttonRight.position.x = gnu::getConsoleSize().x - 8;
 
         //TODO: cinemaLabel = .....
         cinemaLabelBox.centerHorizontal();

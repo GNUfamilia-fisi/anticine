@@ -12,6 +12,7 @@ class Input : public Drawable {
     size_t cursor_index = 0;
     std::string value;
     bool focused = false;
+    std::string label = "";
     // bool isPassword = false; (TODO)
   public:
 
@@ -26,8 +27,13 @@ class Input : public Drawable {
         bool wanna_go_next = false;
     };
 
-    Input(size_t length) : Drawable({ int(length + 2), 3 }) {
+    Input(size_t length) : Drawable({ int(length + 4), 3 }) {
         this->max_length = length;
+    }
+
+    Input(std::string label, size_t length) : Drawable({ int(length + 4), 3 }) {
+        this->max_length = length;
+        this->label = label;
     }
 
     std::string getValue() { return this->value; }
@@ -52,6 +58,7 @@ class Input : public Drawable {
      */
     handleInfo handle(int key) {
         handleInfo handle_result = {};
+        if (key == 0) return handle_result;
         // Ninguna de estas teclas modifica el focus, es responsabilidad del
         // programador manejar el focus según el `handleResult`
         if (key == gnu::key::Enter) {
@@ -84,11 +91,15 @@ class Input : public Drawable {
     }
 
     void drawContent() {
+        int offset_y = 0;
         // Es importante redibujar todo el contenido hasta el final
         // para flushear inputs anteriores
-        gnu::gotoXY(this->position.x + 2, this->position.y + 1);
+        if (!this->label.empty()) {
+            offset_y = 1;
+        }
+        gnu::gotoXY(this->position.x + 2, this->position.y + 1 + offset_y);
         gnu::print(this->value);
-        for (size_t i = 0; i < this->size.x - this->value.size() - 1; i++) {
+        for (size_t i = 0; i < this->size.x - this->value.size() - 3; i++) {
             gnu::print(" ");
         }
 
@@ -96,7 +107,7 @@ class Input : public Drawable {
         // TODO: color de cursor personalizable (tal vez innecesario)
         if (!this->focused) return;
         style::inverse();
-        gnu::gotoXY(this->position.x + this->cursor_index + 2, this->position.y + 1);
+        gnu::gotoXY(this->position.x + this->cursor_index + 2, this->position.y + 1 + offset_y);
         // Si el cursor está al final, solo dibujamos un espacio
         if (this->cursor_index == this->value.size()) {
             gnu::print(" ");
@@ -109,21 +120,27 @@ class Input : public Drawable {
     }
 
     void drawBorder() {
-        gnu::gotoXY(this->position.x, this->position.y);
+        int offset_y = 0;
+        if (!this->label.empty()) {
+            offset_y = 1;
+            gnu::gotoXY(this->position.x, this->position.y);
+            gnu::print(this->label);
+        }
+        gnu::gotoXY(this->position.x, this->position.y + offset_y);
         gnu::print("┌");
-        for (int i = 0; i < this->size.x; i++) {
+        for (int i = 0; i < this->size.x - 2; i++) {
             gnu::print("─");
         }
         gnu::print("┐");
 
-        gnu::gotoXY(this->position.x, this->position.y + 1);
+        gnu::gotoXY(this->position.x, this->position.y + 1 + offset_y);
         gnu::print("│");
-        gnu::gotoXY(this->position.x + this->size.x + 1, this->position.y + 1);
+        gnu::gotoXY(this->position.x + this->size.x - 1, this->position.y + 1 + offset_y);
         gnu::print("│");
 
-        gnu::gotoXY(this->position.x, this->position.y + 2);
+        gnu::gotoXY(this->position.x, this->position.y + 2 + offset_y);
         gnu::print("└");
-        for (int i = 0; i < this->size.x; i++) {
+        for (int i = 0; i < this->size.x - 2; i++) {
             gnu::print("─");
         }
         gnu::print("┘");

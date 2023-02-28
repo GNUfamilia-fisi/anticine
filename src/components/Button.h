@@ -40,6 +40,10 @@ class Button : public Box {
         this->setBordersVisible(false);
     }
 
+    void setFocus(bool focus) {
+        focus ? this->focus() : this->unfocus();
+    }
+
 };
 
 } // namespace gnu

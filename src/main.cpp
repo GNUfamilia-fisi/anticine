@@ -3,16 +3,18 @@
 
 #include "consoleUtils.h"
 #include "menus/selectorDeMenus.h"
-#include "menus/menuFormulario.h"
+#include "menus/menuFormInicioSesion.h"
+#include "menus/menuFormRegistro.h"
 
 int main(void) {
     gnu::initProgram();
 
     // Selector de menús
-    gnu::menuSelector();
+    // gnu::menuSelector();
 
     // Formulario en modo pruebita (demostración de la Input API)
-    //auto hola = gnu::menuFormulario();
+    // gnu::menuFormularioLogin();
+    gnu::menuFormularioRegistro();
 
     return 0;
 }
