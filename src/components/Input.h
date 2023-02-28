@@ -51,9 +51,36 @@ class Input : public Drawable {
      * @return handleResult contiene información sobre el input procesado
      */
     handleInfo handle(int key) {
-        handleInfo result;
-        this->handleInput(key, result);
-        return result;
+        handleInfo handle_result = {};
+        // Ninguna de estas teclas modifica el focus, es responsabilidad del
+        // programador manejar el focus según el `handleResult`
+        if (key == gnu::key::Enter) {
+            handle_result.enter_pressed = true;
+            handle_result.wanna_go_next = true;
+            return handle_result;
+        }
+        if (key == gnu::key::ExitKey) {
+            handle_result.escape_presed = true;
+            return handle_result;
+        }
+        if (key == gnu::key::Tab) {
+            handle_result.tab_pressed = true;
+            handle_result.wanna_go_next = true;
+            return handle_result;
+        }
+        if (key == gnu::key::Down) {
+            handle_result.wanna_go_next = true;
+            return handle_result;
+        }
+        if (key == gnu::key::Up) {
+            handle_result.wanna_go_previous = true;
+            return handle_result;
+        }
+        if (key == 224) {
+            return handle_result;
+        }
+        this->handleNormalInput(key);
+        return handle_result;
     }
 
     void drawContent() {
@@ -141,44 +168,13 @@ class Input : public Drawable {
             this->cursor_index = this->value.size();
             return;
         }
+
         // El último caso es que se haya presionado un caracter dibujable
         if (this->value.size() >= this->max_length) return;
         if (!isPrintableAscii(key)) return;
 
-
         this->value.insert(this->cursor_index, 1, (char)key);
         this->cursor_index++;
-    }
-
-    void handleInput(int key, handleInfo& result) {
-        // Ninguna de estas teclas modifica el focus, es responsabilidad del
-        // programador manejar el focus según el `handleResult`
-        if (key == gnu::key::Enter) {
-            result.enter_pressed = true;
-            result.wanna_go_next = true;
-            return;
-        }
-        if (key == gnu::key::ExitKey) {
-            result.escape_presed = true;
-            return;
-        }
-        if (key == gnu::key::Tab) {
-            result.tab_pressed = true;
-            result.wanna_go_next = true;
-            return;
-        }
-        if (key == gnu::key::Down) {
-            result.wanna_go_next = true;
-            return;
-        }
-        if (key == gnu::key::Up) {
-            result.wanna_go_previous = true;
-            return;
-        }
-        if (key == 224) {
-            return;
-        }
-        this->handleNormalInput(key);
     }
 
     // Nota: Esta función no se comporta como debería en UNIX para key > 127

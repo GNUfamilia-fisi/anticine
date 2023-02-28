@@ -233,7 +233,11 @@ std::string menuAsientos(){
 
                     if (is_selected_by_user) {
                         canvaBox.setBoxColor(COLOR_SILLA_SELECCIONADA);
-                        if (!is_on_cursor) canvaBox.flushBorders();
+                        if (!is_on_cursor) {
+                            canvaBox.flushBorders();
+                            canvaBox.showBorder = false;
+                        }
+                        else canvaBox.showBorder = true;
                     }
                     else if (is_on_cursor && menuOption == MENU_OPTION_SILLAS) {
                         canvaBox.setBoxColor(

@@ -57,6 +57,6 @@ std::string menuFormulario() {
         }
     }
 
-    return "exit"; // no implementado
+    return "exit"; // luego del formulario, se debe redirigir al menú de compra
 }
 } // namespace gnu
