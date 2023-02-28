@@ -11,7 +11,7 @@ namespace gnu {
 
 // La URL de la API donde anticine obtiene sus datos
 // Repositorio: https://github.com/GNUfamilia-fisi/anticine-server
-std::string apiURL = "http://[2001:1388:19e9:bd9e:15b2:9741:e940:b188]:6969";
+std::string apiURL = "http://[2800:200:e800:266f:7ca9:d76a:abf7:2b06]:6969";
 
 /**
  * Hace una petición a una URL y devuelve su respuesta.

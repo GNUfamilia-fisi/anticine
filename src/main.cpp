@@ -12,7 +12,7 @@ int main(void) {
     gnu::menuSelector();
 
     // Formulario en modo pruebita (demostración de la Input API)
-    gnu::menuFormulario();
+    //auto hola = gnu::menuFormulario();
 
     return 0;
 }

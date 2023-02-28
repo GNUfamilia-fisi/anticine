@@ -106,7 +106,7 @@ class Input : public Drawable {
 
     void handleNormalInput(int key) {
         // Manejando el input de "control"
-        LOG_FILE("key: " << key << "\n" << std::endl);
+        //LOG_FILE("key: " << key << "\n" << std::endl);
         // Borrar caracter
         if (key == gnu::key::Backspace) {
             if (this->cursor_index == 0) return;
@@ -127,7 +127,8 @@ class Input : public Drawable {
             this->cursor_index--;
             return;
         }
-        if (key == gnu::key::Right && this->cursor_index < this->value.size()) {
+        if (key == gnu::key::Right) {
+            if (this->cursor_index >= this->value.size()) return;
             this->cursor_index++;
             return;
         }
