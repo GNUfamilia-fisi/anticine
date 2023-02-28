@@ -92,11 +92,11 @@ enum key {
     Left = 252,
     Right = 253,
 
-    Backspace = 127,   // not sure
+    Backspace = 8,   // not sure
     Tab = 9,           // not sure
-    Supr = 83,         // not sure
-    Home = 71,         // not sure
-    End = 79,          // not sure
+    End = 35,          // not sure
+    Home = 36,         // not sure
+    Supr = 46,         // not sure
 
     a = 97,
     w = 119,
