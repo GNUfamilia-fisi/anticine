@@ -10,14 +10,14 @@ namespace gnu {
 class Input : public Drawable {
     size_t max_length;
     size_t cursor_index = 0;
-    std::string value;
     bool focused = false;
     std::string label = "";
     // bool isPassword = false; (TODO)
   public:
+    std::string text;
 
     struct handleInfo {
-        std::string value = "";
+        std::string text = "";
         bool enter_pressed = false;
         bool escape_presed = false;
         bool tab_pressed = false;
@@ -36,7 +36,7 @@ class Input : public Drawable {
         this->label = label;
     }
 
-    std::string getValue() { return this->value; }
+    std::string getValue() { return this->text; }
 
     void setFocus(bool focus) {
         // Cada vez que cambia el focus, se redibuja el input
@@ -98,8 +98,8 @@ class Input : public Drawable {
             offset_y = 1;
         }
         gnu::gotoXY(this->position.x + 2, this->position.y + 1 + offset_y);
-        gnu::print(this->value);
-        for (size_t i = 0; i < this->size.x - this->value.size() - 3; i++) {
+        gnu::print(this->text);
+        for (size_t i = 0; i < this->size.x - this->text.size() - 3; i++) {
             gnu::print(" ");
         }
 
@@ -109,12 +109,12 @@ class Input : public Drawable {
         style::inverse();
         gnu::gotoXY(this->position.x + this->cursor_index + 2, this->position.y + 1 + offset_y);
         // Si el cursor está al final, solo dibujamos un espacio
-        if (this->cursor_index == this->value.size()) {
+        if (this->cursor_index == this->text.size()) {
             gnu::print(" ");
         }
         else {
             // Reescribimos el caracter que está debajo del cursor
-            gnu::print(this->value.at(this->cursor_index));
+            gnu::print(this->text.at(this->cursor_index));
         }
         style::reset();
     }
@@ -154,15 +154,15 @@ class Input : public Drawable {
         // Borrar caracter
         if (key == gnu::key::Backspace) {
             if (this->cursor_index == 0) return;
-            if (this->value.empty()) return;
-            this->value.erase(this->cursor_index - 1, 1);
+            if (this->text.empty()) return;
+            this->text.erase(this->cursor_index - 1, 1);
             this->cursor_index--;
             return;
         }
         // Suprimir caracter
         if (key == gnu::key::Supr) {
-            if (this->cursor_index == this->value.size()) return;
-            this->value.erase(this->cursor_index, 1);
+            if (this->cursor_index == this->text.size()) return;
+            this->text.erase(this->cursor_index, 1);
             return;
         }
         // Navegación
@@ -172,7 +172,7 @@ class Input : public Drawable {
             return;
         }
         if (key == gnu::key::Right) {
-            if (this->cursor_index >= this->value.size()) return;
+            if (this->cursor_index >= this->text.size()) return;
             this->cursor_index++;
             return;
         }
@@ -182,15 +182,15 @@ class Input : public Drawable {
             return;
         }
         if (key == gnu::key::End) {
-            this->cursor_index = this->value.size();
+            this->cursor_index = this->text.size();
             return;
         }
 
         // El último caso es que se haya presionado un caracter dibujable
-        if (this->value.size() >= this->max_length) return;
+        if (this->text.size() >= this->max_length) return;
         if (!isPrintableAscii(key)) return;
 
-        this->value.insert(this->cursor_index, 1, (char)key);
+        this->text.insert(this->cursor_index, 1, (char)key);
         this->cursor_index++;
     }
 

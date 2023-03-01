@@ -99,6 +99,40 @@ std::string menuFormularioRegistro() {
                     if (button_focus_i == Buttons::Registrarse) {
                         // No implementado
                         // Debería verificar los datos en la db y redirigir a menú de compra
+                        json data = {
+                            { "fullname", registrationFields[0].text + " " + registrationFields[1].text },
+                            { "DNI", registrationFields[2].text },
+                            { "email", registrationFields[3].text },
+                            { "password", registrationFields[4].text }
+                        };
+                        json response = gnu::apipost("/register", data);
+                        LOG_FILE("Registration response: " << response.dump(4) << std::endl);
+
+                        int code = response["code"].get<int>();
+
+                        if (code == 200) {
+                            // registrado
+                            g_usuarioInvitado = false;
+                            g_usuarioLogueado = true;
+                            return "menuCompraEntradas"
+                        }
+                        else if (code == 409) {
+                            // usuario ya existente
+                            gnu::cls();
+                            gnu::gotoY(15);
+                            gnu::printRawCenter(gnu::anticineLogo);
+                            gnu::gotoY(25);
+                            gnu::printRawCenter("El correo electrónico ya está registrado!");
+                            gnu::gotoY(27);
+                            gnu::printRawCenter("Presione cualquier tecla para continuar");
+                            gnu::getch();
+                            return "menuFormularioRegistro";
+                        }
+                        else {
+                            // si llega aquí ya fue
+                            // probablemente un colapso de la base de datos
+                            // (si fuese un colapso de la api, simplemente crashearía)
+                        }
                         return "exit";
                     }
                     else if (button_focus_i == Buttons::YaTengoUnaCuenta) {

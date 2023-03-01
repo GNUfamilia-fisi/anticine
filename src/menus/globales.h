@@ -14,5 +14,9 @@ std::string g_fechaSeleccionada; // (no usada)
 std::string g_cineID;
 std::string g_movieID;
 std::string g_selectedDate = "";
-std::string g_sessionID = "62254"; // testing
-std::vector<gnu::vec2d> g_selectedSeats;
+std::string g_sessionID = ""; // obtenida al seleccionar un horario
+std::string g_userID = ""; // solo si está logueado
+std::vector<gnu::vec2d> g_selectedSeats; // guardadas en menuAsientos.h
+bool g_usuarioLogueado = false;
+bool g_usuarioInvitado = false;
+

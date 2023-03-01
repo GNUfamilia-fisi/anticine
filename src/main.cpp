@@ -13,8 +13,9 @@ int main(void) {
     gnu::menuSelector();
 
     // Formulario en modo pruebita (demostración de la Input API)
-    // gnu::menuFormularioLogin();
     // gnu::menuFormularioRegistro();
+    // gnu::menuFormularioLogin();
+    // std::cin.get();
 
     return 0;
 }

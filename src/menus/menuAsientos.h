@@ -41,7 +41,7 @@ namespace gnu {
 std::string menuAsientos(){
     gnu::cls();
 
-    json sessionData = apifetch("/session/" + g_sessionID);
+    json sessionData = apifetch("/sessions/" + g_sessionID);
 
     const int columns = sessionData["room"]["columns_number"].get<int>();
     const int rows = sessionData["room"]["rows_number"].get<int>();

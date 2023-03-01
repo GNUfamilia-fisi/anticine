@@ -11,7 +11,7 @@ namespace gnu {
 
 // La URL de la API donde anticine obtiene sus datos
 // Repositorio: https://github.com/GNUfamilia-fisi/anticine-server
-std::string apiURL = "http://[2001:1388:19e9:bd9e:eaa4:d188:b3b2:7d44]:6969";
+std::string apiURL = "http://[2001:1388:19e8:4b8b:4aa9:3f91:9ea6:49e4]:6969";
 
 /**
  * Hace una petición a una URL y devuelve su respuesta.
@@ -50,8 +50,25 @@ json fetch(std::string url) {
  * Es equivalente a:
  * json response = fetch(apiURL + "/cines/cercanos")
  */
-json apifetch(std::string ednpoint) {
-    return fetch(apiURL + ednpoint);
+json apifetch(std::string endpoint) {
+    return fetch(apiURL + endpoint);
+}
+
+json apipost(std::string endpoint, json data) {
+    std::string url = apiURL + endpoint;
+    std::string command = "curl -s -X POST -H \"Content-Type: application/json\" -d '" + data.dump() + "' " + url;
+    LOG_FILE("Comando: " << command << std::endl);
+    std::string fetchResult = gnu::exec(command);
+
+    json response;
+
+    try {
+        response = json::parse(fetchResult);
+    }
+    catch (...) {
+        throw std::runtime_error("Error al intentar hacer fetch a " + url);
+    }
+    return response;
 }
 
 } // namespace gnu

@@ -13,6 +13,8 @@ namespace gnu {
 #define LOGIN_OPCION_BOTONES 1
 #define INICIO_SESION_HEADER_OFFSET_Y 14
 
+using json = nlohmann::json;
+
 std::string menuFormularioLogin() {
     gnu::cls();
 
@@ -88,6 +90,32 @@ std::string menuFormularioLogin() {
                     if (button_focus_i == Buttons::Ingresar) {
                         // No implementado
                         // Debería verificar los datos en la db y redirigir a menú de compra
+                        json loginData = {
+                            {"email", registrationFields[0].text},
+                            {"password", registrationFields[1].text}
+                        };
+
+                        json response = gnu::apipost("/login", loginData);
+
+                        int code = response["code"].get<int>();
+
+                        if (code == 200) {
+                            g_usuarioLogueado = true;
+                            g_usuarioInvitado = false;
+                            return "menuCompra";
+                        }
+                        else {
+                            gnu::cls();
+                            gnu::gotoY(15);
+                            gnu::printRawCenter(gnu::anticineLogo);
+                            gnu::gotoY(25);
+                            gnu::printRawCenter("Usuario o contraseña incorrectos");
+                            gnu::gotoY(27);
+                            gnu::printRawCenter("Presione cualquier tecla para continuar");
+                            gnu::getch();
+                            return "menuFormularioLogin";
+                        }
+
                         return "exit";
                     }
                     else if (button_focus_i == Buttons::NoTengoUnaCuenta) {
