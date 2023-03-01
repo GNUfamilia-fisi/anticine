@@ -20,7 +20,9 @@ cineData: {
 }
 */
 json g_cineData;
+
 std::string g_movieID = "";
+
 /*
 interface CinemaMovieInformation {
   corporate_film_id: string;
@@ -56,12 +58,23 @@ type MovieRating = (
 );
 */
 json g_movieData;
+
 // obtenida al seleccionar un horario
 std::string g_sessionID = "";
 // Usado en menuDetallePelicula.h -> std::string submenuSeleccionarFecha()
 std::string g_selectedDate = "";
 // solo disponible si está logueado
 std::string g_userID = "";
+
+/*
+sessionData: {
+    session_id: string,
+    day: string,
+    hour: string
+}
+*/
+json g_sessionData;
+
 /*
 userData: {
     id: string,

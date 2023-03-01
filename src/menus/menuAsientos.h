@@ -5,21 +5,24 @@
 #include "../consoleUtils.h"
 #include "../components/Box.h"
 #include "../components/Button.h"
+#include "menuDetallePelicula.h"
 
 #include "globales.h"
 
 namespace gnu {
 
-#define SCREEN_COLOR style::rgb({ 20, 156, 178 })
-#define BORDER_DECORATION_COLOR style::rgb({ 104, 19, 1 })
+#define SCREEN_COLOR style::rgb({ 49, 125, 137 })
+
+#define SCREEN_OFFSET_Y 14
 
 #define OPCION_SELECCIONANDO_SILLAS 0
 #define OPCION_BOTON_CONFIRMAR 1
 
-#define COLOR_SILLA_DISPONIBLE style::rgb({ 0, 29, 158 })
-#define COLOR_SILLA_OCUPADA style::rgb({ 255, 0, 0 })
-#define COLOR_SILLA_SELECCIONADA style::rgb({ 255, 138, 208 })
-#define COLOR_BORDE_SILLAS_EN_CURSOR style::rgb({ 0, 200, 0 })
+#define COLOR_SILLA_DISPONIBLE style::rgb({ 58, 60, 84 })
+#define BORDER_DECORATION_COLOR COLOR_SILLA_DISPONIBLE
+#define COLOR_SILLA_OCUPADA style::rgb({ 222, 25, 25 })
+#define COLOR_SILLA_SELECCIONADA style::rgb({ 27, 165, 46 })
+#define COLOR_BORDE_SILLAS_EN_CURSOR COLOR_SILLA_SELECCIONADA
 
 #define FIND(vec, val) (std::find(vec.begin(), vec.end(), (val)) != vec.end())
 
@@ -38,10 +41,13 @@ namespace gnu {
 // según su posición en la console, cosa que no era buena idea y casi me hace enloquecer.
 // Ahora se seleccionan según su posición en la sala (fila y columna)
 
+void redibujarCabecera();
+
 std::string menuAsientos(){
     gnu::cls();
 
     json sessionData = apifetch("/sessions/" + g_sessionID);
+    g_sessionData = sessionData["session"];
 
     const int columns = sessionData["room"]["columns_number"].get<int>();
     const int rows = sessionData["room"]["rows_number"].get<int>();
@@ -49,16 +55,19 @@ std::string menuAsientos(){
     int menuOption = MENU_OPTION_SILLAS;
 
     // pantalla
-    gnu::Box pantalla({ 135, 2 });
+    gnu::Box pantalla({ 137, 2 });
     pantalla.setBoxColor(SCREEN_COLOR);
     pantalla.centerHorizontal();
-    pantalla.showBorder = false;
+    pantalla.position.y = SCREEN_OFFSET_Y;
+    pantalla.showBorder = true;
+    pantalla.defaultBorderColor = false;
+    pantalla.setBorderColor(SCREEN_COLOR);
     pantalla.draw();
 
     // borde para decorar los asientos
     gnu::Box salaBorder({ columns*6, rows*3 });
     salaBorder.setBoxColor(BORDER_DECORATION_COLOR);
-    salaBorder.position.y = 5;
+    salaBorder.position.y = SCREEN_OFFSET_Y + 5;
     salaBorder.centerHorizontal();
     salaBorder.showBorder = true;
     salaBorder.transparent = true;
@@ -67,7 +76,7 @@ std::string menuAsientos(){
     // boton de seleccione el asiento
     gnu::Button botonConfirmar("Confirmar selección", { 30, 1 });
     botonConfirmar.setFontColor({ 255, 138, 208 });
-    botonConfirmar.position.y = gnu::getConsoleSize().y - 3;
+    botonConfirmar.position.y = gnu::getConsoleSize().y - 5;
     botonConfirmar.centerHorizontal();
     botonConfirmar.draw();
 
@@ -91,6 +100,9 @@ std::string menuAsientos(){
     size_t seats_i = 0;
     bool firstWithBorder = true;
     // primer dibujado y llenado de variables
+
+    redibujarCabecera();
+
     for (int rowY = 0; rowY < rows; rowY++) {
         for (auto seat : roomRows[rowY]["seats"]) {
             int colX = seat["col_number"].get<int>();
@@ -101,7 +113,7 @@ std::string menuAsientos(){
 
             canvaBox.position = gnu::vec2d({
                 6 * colX + salaBorder.position.x + 1,
-                3 * rowY + 6
+                3 * rowY + 6 + SCREEN_OFFSET_Y
             });
 
             // esto es para arreglar un bug muy raro que hace que la primera
@@ -216,9 +228,10 @@ std::string menuAsientos(){
         if (hasPressedKey || needToRedraw) {
             if (needToRedraw) {
                 gnu::cls();
+                redibujarCabecera();
                 pantalla.centerHorizontal();
                 salaBorder.centerHorizontal();
-                botonConfirmar.position.y = gnu::getConsoleSize().y - 3;
+                botonConfirmar.position.y = gnu::getConsoleSize().y - 5;
                 botonConfirmar.centerHorizontal();
                 pantalla.draw();
                 salaBorder.draw();
@@ -232,7 +245,7 @@ std::string menuAsientos(){
 
                     canvaBox.position = gnu::vec2d({
                         6 * colX + salaBorder.position.x + 1,
-                        3 * rowY + 6
+                        3 * rowY + 6 + SCREEN_OFFSET_Y
                     });
 
                     bool is_selected_by_user = FIND(selectedPositions, gnu::vec2d({ colX, rowY }));
@@ -277,4 +290,18 @@ std::string menuAsientos(){
 
     return "hola";
 }
+
+void redibujarCabecera() {
+    gnu::gotoXY({ 0, 0 });
+    style::setFg({ 219, 119, 126 });
+    gnu::print("\n\n\n\n\n");
+    gnu::printRawCenter(gnu::parseStringToASCIIArtText("Selecciona tus asientos"));
+    style::setFg({ 222, 196, 198 });
+    gnu::print("\n\n");
+    LOG_FILE("g_movieData: " << g_sessionData.dump(4) << "\n");
+    gnu::printLineCentered(
+        "Selecciona tus asientos para ver \"" + g_movieData["title"].get<std::string>() + "\" (" + g_sessionData["day"].get<std::string>() + " " + g_sessionData["hour"].get<std::string>() + ")"
+    );
+}
+
 } // namespace gnu

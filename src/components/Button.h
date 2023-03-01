@@ -6,6 +6,9 @@
 
 namespace gnu {
 
+#define BUTTON_TEXT_DEFAULT_COLOR style::rgb({ 161, 148, 202 })
+#define BUTTON_BORDER_DEFAULT_COLOR ANTICINE_LOGO_COLOR
+
 /**
  * @brief Una clase para simplificar la creación de botones genéricos
  */
@@ -17,7 +20,9 @@ class Button : public Box {
         this->transparent = true;
         this->showBorder = false;
         this->defaultFontColor = false;
-        this->text_color = { 255, 138, 208 };
+        this->text_color = BUTTON_TEXT_DEFAULT_COLOR;
+        this->defaultBorderColor = false;
+        this->border_color = BUTTON_BORDER_DEFAULT_COLOR;
     }
 
     Button(std::string content, gnu::vec2d size) : Box(size) {
@@ -25,7 +30,9 @@ class Button : public Box {
         this->transparent = true;
         this->showBorder = false;
         this->defaultFontColor = false;
-        this->text_color = { 255, 138, 208 };
+        this->text_color = BUTTON_TEXT_DEFAULT_COLOR;
+        this->defaultBorderColor = false;
+        this->border_color = BUTTON_BORDER_DEFAULT_COLOR;
     }
 
     void focus() {

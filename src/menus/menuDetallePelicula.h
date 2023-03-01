@@ -90,12 +90,12 @@ std::string menuDetalles() {
     synopsis.content = getSynopsis(movieData);
 
     // ======= date selector =========
-    // TODO: recalcular esto:
     gnu::Box date({ 14, 1 });
-    date.position = { short(getConsoleSize().x - 15), DETAIL_HEADER_HEIGHT - 3 };
+    date.position = { short(getConsoleSize().x - 16), DETAIL_HEADER_HEIGHT - 3 };
     date.content = currentDayData["date"].get<std::string>();
     date.showBorder = false;
-    date.transparent = true;
+    date.setBoxColor(averageThumbnailColor);
+    date.setBorderColor(averageThumbnailColor);
     date.draw();
 
     // ====== versions ======
@@ -251,16 +251,6 @@ std::string menuDetalles() {
             header.size = gnu::vec2d({gnu::getConsoleSize().x , 10});
             header.draw();
 
-            if (globalOpt == OPTION_SELECT_OTHER_DATE){
-                date.showBorder = true;
-                date.setBorderColor({ 230, 50, 50 });
-            }
-            else {
-                date.showBorder = false;
-                date.flushBorders();
-            }
-            date.draw();
-
             // Poster
             gnu::gotoXY({ 0, MOVIE_TITLE_OFFSET_Y - 1 });
             gnu::printRawOffset(movieRawThumbnail, 2);
@@ -317,32 +307,40 @@ std::string menuDetalles() {
                 typeSubBox.position = movieVersionBoxes[i].position;
                 typeSubBox.draw();
             }
+
+            if (globalOpt == OPTION_SELECT_OTHER_DATE){
+                date.showBorder = true;
+            }
+            else {
+                date.showBorder = false;
+                date.flushBorders();
+            }
+            date.position = { short(getConsoleSize().x - 16), DETAIL_HEADER_HEIGHT - 3 };
+            date.draw();
         }
         lastConsoleSize = gnu::getConsoleSize();
         gnu::sleep(5);
     }
-    return "hola"; // ????? TODO: hola
+    return "exit"; // no se debería llegar aquí
 }
 
 /* --- Submenús --- */
 
 std::string submenuSeleccionarFecha() {
     gnu::cls();
-    std::string rawMessage = R"(
-         _             _
- ___ ___| |___ ___ ___|_|___ ___ ___
-|_ -| -_| | -_|  _|  _| | . |   | .'|
-|___|___|_|___|_______|_|_____|_|__,|
-                ____        _
- _ _ ___ ___   |  __|__ ___| |_ ___
-| | |   | .'|  |  _| -_|  _|   | .'|
-|___|_|_|__,|  |_| |___|___|_|_|__,|
-)";
+    std::string seleccionaFechaTitulo = gnu::parseStringToASCIIArtText("Selecciona una fecha");
 
-    gnu::printRawCenter(rawMessage);
+    gnu::gotoXY({ 0, 0 });
+    style::setFg({ 219, 119, 126 });
+    gnu::print("\n\n\n\n\n");
+    gnu::printRawCenter(seleccionaFechaTitulo);
+    style::setFg({ 222, 196, 198 });
+    gnu::print("\n\n");
+    gnu::printLineCentered("Selecciona tu fecha favorita para ver \"" + g_movieData["title"].get<std::string>() + "\"");
+
     gnu::gotoY(15);
 
-    json wholeRaw = gnu::apifetch("/cines/2705/cartelera/91074");
+    json wholeRaw = gnu::apifetch("/cines/" + g_cineID + "/cartelera/" + g_movieID);
     std::vector<json> daysRaw = wholeRaw["days"].get<std::vector<json>>();
 
     std::vector<std::string> dates;
