@@ -175,7 +175,6 @@ std::string menuAsientos(){
         }
 
         if (lastConsoleSize != gnu::getConsoleSize()) {
-            gnu::cls();
             //TODO: HOLA
         }
 
