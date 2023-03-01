@@ -4,6 +4,7 @@
 #include <style.hpp>
 #include "../consoleUtils.h"
 #include "../services.h"
+#include "menuDetallePelicula.h"
 
 #include "globales.h"
 
@@ -14,17 +15,7 @@ namespace gnu {
 
 void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize);
 
-
-std::string elijaLocalTitulo = R"(
-         _             _
- ___ ___| |___ ___ ___|_|___ ___ ___
-|_ -| -_| | -_|  _|  _| | . |   | .'|
-|___|___|_|___|___|___|_|___|_|_|__,|
-               _             _
-    _ _ ___   | |___ ___ ___| |
-   | | |   |  | | . |  _| .'| |
-   |___|_|_|  |_|___|___|__,|_|
-)";
+std::string elijaLocalTitulo = gnu::parseStringToASCIIArtText("Selecciona otro cine");
 
 std::string menuElegirCine() {
     gnu::cls();
@@ -40,7 +31,12 @@ std::string menuElegirCine() {
     short listLength = 5;
     bool lock = true;
 
+    style::setFg({ 219, 119, 126 });
+    gnu::print("\n\n\n\n");
     gnu::printRawCenter(elijaLocalTitulo);
+    style::setFg({ 222, 196, 198 });
+    gnu::print("\n\n");
+    gnu::printLineCentered("Selecciona tu local favorito de Anticine");
     int input;
 
     // main menu loop
