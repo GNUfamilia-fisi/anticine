@@ -174,7 +174,13 @@ std::string menuAsientos(){
                 if (menuOption == MENU_OPTION_BOTON_CONFIRMAR) {
                     // sillas guardadas en el vector selectedPositions
                     // TODO: enviar al servidor y esperar respuesta
-                    g_selectedSeats = selectedPositions;
+                    g_selectedSeats.clear();
+                    for (auto pos : selectedPositions) {
+                        g_selectedSeats.push_back(json({
+                            { "row_number", pos.y },
+                            { "col_number", pos.x }
+                        }));
+                    }
                     return "menuFormularioLogin";
                 }
                 bool is_selectable = statusSelectable[lastCursorCoord.y][lastCursorCoord.x];

@@ -14,18 +14,6 @@ namespace gnu {
 
 void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize);
 
-
-std::string elijaLocalTitulo = R"(
-         _             _
- ___ ___| |___ ___ ___|_|___ ___ ___
-|_ -| -_| | -_|  _|  _| | . |   | .'|
-|___|___|_|___|___|___|_|___|_|_|__,|
-               _             _
-    _ _ ___   | |___ ___ ___| |
-   | | |   |  | | . |  _| .'| |
-   |___|_|_|  |_|___|___|__,|_|
-)";
-
 std::string menuElegirCine() {
     gnu::cls();
 
@@ -89,57 +77,6 @@ std::string menuElegirCine() {
     }
 
     return "menuCartelera";
-}
-
-void cinemaListDisplay(json closeData, size_t current, size_t namePos, size_t showSize) {
-    style::setColor(style::color::WHITE);
-
-    size_t indic = namePos;
-
-    std::string displayName;
-
-    if (closeData.size() < showSize) {
-        showSize = closeData.size();
-    }
-    if (current < showSize) {
-        indic = current;
-    }
-
-    // std::string names[showSize];
-    std::string names[128];
-
-    if (current < showSize) {
-        for (size_t i = 0; i < showSize; i++) {
-            names[i] = closeData[i]["name"].get<std::string>();
-        }
-    }
-    else {
-        for (size_t i = 0; i < showSize; i++) {
-            names[i] = closeData[i + current - showSize + 1]["name"].get<std::string>();
-        }
-    }
-
-    for (size_t i = 0; i < showSize; i++) {
-
-        if (i == indic) {
-            gnu::gotoXY(
-                (gnu::getConsoleSize().x / 2) - names[i].length() - 1,
-                20 + i
-            );
-
-            style::setColor(style::GREEN);
-            gnu::print(">>");
-        }
-        else {
-            style::setColor(style::WHITE);
-        }
-        gnu::gotoXY(
-            (gnu::getConsoleSize().x / 2) - (names[i].length() / 2),
-            20 + i
-        );
-
-        gnu::print(names[i]);
-    }
 }
 
 } // namespace gnu

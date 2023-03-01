@@ -17,6 +17,7 @@
 #include "menuFormInicioSesion.h"
 #include "menuFormRegistro.h"
 #include "menuAsientos.h"
+#include "menuCompraEntradas.h"
 
 #include "globales.h"
 
@@ -27,6 +28,7 @@ namespace gnu {
 void menuSelector() {
     json menuRawData = gnu::apifetch("/cines/cercanos");
     g_cineID = menuRawData["nearest_id"].get<std::string>();
+    g_cineData = menuRawData["cinemas"][0]; // el primero es el más cercano
 
     std::string menuID = gnu::menuCartelera();
 
@@ -51,6 +53,9 @@ void menuSelector() {
         }
         if (menuID == "menuFormularioLogin") {
             menuID = gnu::menuFormularioLogin();
+        }
+        if (menuID == "menuCompraEntradas") {
+            menuID = gnu::menuCompraEntradas();
         }
         if (menuID == "exit") {
             break;

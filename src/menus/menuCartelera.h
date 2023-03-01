@@ -39,15 +39,15 @@ std::string menuCartelera() {
     gnu::MovieCard card1(billboard[0], { 18, 15 });
     gnu::MovieCard card2(billboard[1], { 20, 17 });
     gnu::MovieCard card3(billboard[2], { 18, 15 });
-    card1.position.y = 12;
-    card2.position.y = 11;
-    card3.position.y = 12;
+    card1.position.y = 14;
+    card2.position.y = 13;
+    card3.position.y = 14;
 
     //============== descripcion ===================
-    gnu::Box descriptionCard({ 70, 11 });
+    gnu::Box descriptionCard({ 86, 11 });
     descriptionCard.content = getSynopsis(billboard[1]);
     descriptionCard.defaultFontColor = true;
-    descriptionCard.position.y = 33;
+    descriptionCard.position.y = 38;
     descriptionCard.transparent = true;
     descriptionCard.showBorder = false;
 
@@ -66,7 +66,8 @@ std::string menuCartelera() {
 
     std::string cinemaLabel = "Estas en " + cinemaName;
     gnu::Button cinemaLabelBox(cinemaLabel);
-    cinemaLabelBox.position.y = 7;
+    cinemaLabelBox.position.y = 9;
+    cinemaLabelBox.size.y = 1;
 
     //=========== button indicators =================
     gnu::Box buttonLeft({ 6, gnu::getConsoleSize().y });
@@ -102,7 +103,7 @@ std::string menuCartelera() {
     while (true) {
         input = gnu::getch();
 
-        switch(input){
+        if (input) switch(input){
             case gnu::key::Right: {
                 if (panel_i < billboard.size() - 3 && opt == 1) panel_i++;
                 break;
@@ -121,7 +122,8 @@ std::string menuCartelera() {
             }
             case gnu::key::Enter: {
                 if (opt == 1) {
-                    g_movieID = billboard[1 + panel_i]["corporate_film_id"].get<std::string>();
+                    g_movieData = billboard[1 + panel_i];
+                    g_movieID = g_movieData["corporate_film_id"].get<std::string>();
                     return "menuDetalles";
                 }
                 else {
@@ -169,7 +171,7 @@ std::string menuCartelera() {
         }
         lastLabel = titleLabel;
 
-        gnu::print("\n");
+        gnu::print("\n\n");
         // emojis
         std::string emojisRaw = billboard[1 + panel_i]["emojis"].get<std::string>();
 
@@ -185,7 +187,7 @@ std::string menuCartelera() {
             gnu::print(h);
         }
 
-        gnu::print("\n");
+        gnu::print("\n\n");
 
         //additional data
         gnu::printLineCentered(additionals);
@@ -205,18 +207,16 @@ std::string menuCartelera() {
         }
         lastAdditionals = additionals;
 
-
         descriptionCard.draw();
 
         buttonLeft.size.y = gnu::getConsoleSize().y;
         buttonRight.size.y = gnu::getConsoleSize().y;
-        buttonRight.position.x = gnu::getConsoleSize().x - 8;
+        buttonRight.position.x = gnu::getConsoleSize().x - 6;
 
-        //TODO: cinemaLabel = .....
+        // TODO: no sé qué quiere panda diestro pero a cada rato para poniendo "TODO's" sin contexto alguno
         cinemaLabelBox.centerHorizontal();
         cinemaLabelBox.content = cinemaLabel;
         cinemaLabelBox.size.x = cinemaLabel.size() + 4;
-        cinemaLabelBox.size.y = 1;
 
         // Seleccionado el botón de cines
         if (opt == 0) {

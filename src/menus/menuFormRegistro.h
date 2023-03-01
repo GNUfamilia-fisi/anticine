@@ -2,6 +2,7 @@
 
 #include "../components/Input.h"
 #include "../consoleUtils.h"
+#include "../menus/menuMensajeAnticine.h"
 
 #include "globales.h"
 
@@ -114,34 +115,31 @@ std::string menuFormularioRegistro() {
                             // registrado
                             g_usuarioInvitado = false;
                             g_usuarioLogueado = true;
-                            return "menuCompraEntradas"
+                            g_userData = response["user"];
+                            return "menuCompraEntradas";
                         }
                         else if (code == 409) {
                             // usuario ya existente
-                            gnu::cls();
-                            gnu::gotoY(15);
-                            gnu::printRawCenter(gnu::anticineLogo);
-                            gnu::gotoY(25);
-                            gnu::printRawCenter("El correo electrónico ya está registrado!");
-                            gnu::gotoY(27);
-                            gnu::printRawCenter("Presione cualquier tecla para continuar");
-                            gnu::getch();
-                            return "menuFormularioRegistro";
+                            return gnu::menuMensajeAnticine("menuFormularioRegistro", "El correo electrónico ya está registrado!");
                         }
                         else {
                             // si llega aquí ya fue
                             // probablemente un colapso de la base de datos
                             // (si fuese un colapso de la api, simplemente crashearía)
+                            LOG_FILE("Error inesperado al registrar usuario, probablemente un colapso de la base de datos, (si fuese un colapso de la api, simplemente crashearía)" << std::endl);
+                            return gnu::menuMensajeAnticine("exit", "Ups! Algo salió mal, por favor intenta más tarde");
                         }
-                        return "exit";
                     }
                     else if (button_focus_i == Buttons::YaTengoUnaCuenta) {
                         // Redirigir a formulario de registro
                         return "menuFormularioLogin";
                     }
                     else if (button_focus_i == Buttons::ContinuarComoInvitado) {
-                        // No implementado, debería redirigir al menú de compra
-                        return "exit";
+                        // Redirige al menús de compras, no es necesario loguearse,
+                        // pero los datos de la compra igual serán pedidoss
+                        g_usuarioInvitado = true;
+                        g_usuarioLogueado = false;
+                        return "menuCompraEntradas";
                     }
                     break;
                 }

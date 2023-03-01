@@ -4,6 +4,7 @@
 #include "../components/Button.h"
 #include "../consoleUtils.h"
 #include "../menus/menuDetallePelicula.h"
+#include "../menus/menuMensajeAnticine.h"
 
 #include "globales.h"
 
@@ -102,29 +103,23 @@ std::string menuFormularioLogin() {
                         if (code == 200) {
                             g_usuarioLogueado = true;
                             g_usuarioInvitado = false;
-                            return "menuCompra";
+                            g_userData = response["user"];
+                            return "menuCompraEntradas";
                         }
                         else {
-                            gnu::cls();
-                            gnu::gotoY(15);
-                            gnu::printRawCenter(gnu::anticineLogo);
-                            gnu::gotoY(25);
-                            gnu::printRawCenter("Usuario o contraseña incorrectos");
-                            gnu::gotoY(27);
-                            gnu::printRawCenter("Presione cualquier tecla para continuar");
-                            gnu::getch();
-                            return "menuFormularioLogin";
+                            return gnu::menuMensajeAnticine("menuFormularioLogin", "Usuario o contraseña incorrectos");
                         }
-
-                        return "exit";
                     }
                     else if (button_focus_i == Buttons::NoTengoUnaCuenta) {
                         // Redirigir a formulario de registro
                         return "menuFormularioRegistro";
                     }
                     else if (button_focus_i == Buttons::ContinuarComoInvitado) {
-                        // No implementado, debería redirigir al menú de compra
-                        return "exit";
+                        // Redirige al menús de compras, no es necesario loguearse,
+                        // pero los datos de la compra igual serán pedidoss
+                        g_usuarioInvitado = true;
+                        g_usuarioLogueado = false;
+                        return "menuCompraEntradas";
                     }
                     break;
                 }

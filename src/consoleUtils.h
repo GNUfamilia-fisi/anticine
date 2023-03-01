@@ -53,8 +53,7 @@ void setCursorVisible(bool isVisible);
 
 #define ANTICINE_LOGO_COLOR style::rgb({ 128, 186, 209 })
 
-std::string anticineLogo = R"(
-_______       __________      _____
+std::string anticineLogo = R"(_______       __________      _____
 ___    |________  /___(_)________(_)___________
 __  /| |_  __ \  __/_  /_  ___/_  /__  __ \  _ \
 _  ___ |  / / / /_ _  / / /__ _  / _  / / /  __/
