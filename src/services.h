@@ -2,6 +2,7 @@
 
 #include <string>
 #include <json.hpp>
+#include <utf8.hpp>
 #include "consoleUtils.h"
 #include "services.h"
 
@@ -56,7 +57,19 @@ json apifetch(std::string endpoint) {
 
 json apipost(std::string endpoint, json data) {
     std::string url = apiURL + endpoint;
-    std::string command = "curl -s -X POST -H \"Content-Type: application/json\" -d '" + data.dump() + "' " + url;
+
+    std::string raw_data = "";
+
+    for (auto ch : utf8::iterate(data.dump())) {
+        if (ch == "\"") {
+            raw_data += "\\\"";
+        }
+        else {
+            raw_data += ch;
+        }
+    }
+
+    std::string command = "curl -s -X POST -H \"Content-Type: application/json\" -d \"" + raw_data + "\" " + url;
     LOG_FILE("Comando: " << command << std::endl);
     std::string fetchResult = gnu::exec(command);
 
