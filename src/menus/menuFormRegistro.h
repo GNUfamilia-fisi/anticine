@@ -3,6 +3,7 @@
 #include "../components/Input.h"
 #include "../consoleUtils.h"
 #include "../menus/menuMensajeAnticine.h"
+#include "../menus/menuDetallePelicula.h"
 
 #include "globales.h"
 
@@ -10,7 +11,7 @@ namespace gnu {
 
 #define REGISTRO_OPCION_FORMULARIO 0
 #define REGISTRO_OPCION_BOTONES 1
-#define REGISTRO_HEADER_OFFSET_Y 14
+#define REGISTRO_HEADER_OFFSET_Y 17
 
 // Demostración de la Input API, sin uso real
 // TODO: Implementar pequeños campos de texto encima del input
@@ -120,7 +121,7 @@ std::string menuFormularioRegistro() {
                         }
                         else if (code == 409) {
                             // usuario ya existente
-                            return gnu::menuMensajeAnticine("menuFormularioRegistro", "El correo electrónico ya está registrado!");
+                            return gnu::menuMensajeAnticine("menuFormularioRegistro", "El correo \"" + registrationFields[3].text + "\" ya fue registrado anteriormente!");
                         }
                         else {
                             // si llega aquí ya fue
@@ -156,9 +157,13 @@ std::string menuFormularioRegistro() {
         if (needToRedrawLayout) {
             gnu::cls();
             // Poster;
-            gnu::gotoY(4);
+            gnu::gotoY(3);
+            style::bold();
             style::setFg(ANTICINE_LOGO_COLOR);
             gnu::printRawCenter(gnu::anticineLogo);
+            gnu::print("\n\n");
+            style::bold_off();
+            gnu::printRawCenter(gnu::parseStringToASCIIArtText("Regístrate en Anticine"));
 
         }
         // Actualizamos el estado de focus de cada input

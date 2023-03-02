@@ -35,6 +35,7 @@ std::string menuDetalles() {
     json movieResponse = gnu::apifetch("/cines/" + g_cineID + "/cartelera/" + g_movieID);
     std::vector<json> movieDaysData = movieResponse["days"].get<std::vector<json>>();
     json movieData                  = movieResponse["movie"];
+    g_movieData                     = movieData; // guardando la variable para futuros usos
 
     // Reparto de la película
     std::vector<json> castData = movieData["cast"].get<std::vector<json>>();
@@ -340,8 +341,8 @@ std::string submenuSeleccionarFecha() {
 
     gnu::gotoY(15);
 
-    json wholeRaw = gnu::apifetch("/cines/" + g_cineID + "/cartelera/" + g_movieID);
-    std::vector<json> daysRaw = wholeRaw["days"].get<std::vector<json>>();
+    json movieResponse = gnu::apifetch("/cines/" + g_cineID + "/cartelera/" + g_movieID);
+    std::vector<json> daysRaw = movieResponse["days"].get<std::vector<json>>();
 
     std::vector<std::string> dates;
 
@@ -515,7 +516,9 @@ std::unordered_map<std::string, std::pair<std::string, std::string>> asciiMap = 
     { "9", {"█▀█"   ,
             "▀▀█"   } },
     { "0", {"█▀█"  ,
-            "█▄█"  } }
+            "█▄█"  } },
+    { "/", {"░█",
+            "█░"} }
 };
 
 #include <locale> // std::locale, std::tolower
@@ -530,12 +533,19 @@ std::string parseStringToASCIIArtText(std::string text) {
         toLowerText += std::tolower(c, std::locale());
     }
 
-    for (const utf8::utf8_char_t &ch : utf8::iterate(toLowerText)) {
+    for (utf8::utf8_char_t &ch : utf8::iterate(toLowerText)) {
         if (ch == " ") {
             asciiArtTop += "  ";
             asciiArtBottom += "  ";
             continue;
         }
+        if (ch == "á") ch = "a";
+        if (ch == "é") ch = "e";
+        if (ch == "í") ch = "i";
+        if (ch == "ó") ch = "o";
+        if (ch == "ú") ch = "u";
+        if (ch == "ñ") ch = "n";
+
         if (asciiMap.find(ch) == asciiMap.end()) continue;
         asciiArtTop += asciiMap[ch].first + " ";
         asciiArtBottom += asciiMap[ch].second + " ";

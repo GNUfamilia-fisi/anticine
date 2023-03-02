@@ -122,8 +122,9 @@ std::string menuCartelera() {
             }
             case gnu::key::Enter: {
                 if (opt == 1) {
-                    g_movieData = billboard[1 + panel_i];
-                    g_movieID = g_movieData["corporate_film_id"].get<std::string>();
+                    // g_movieData ahora se guarda en menuDetallePelicula.h
+                    // g_movieData = billboard[1 + panel_i];
+                    g_movieID = billboard[1 + panel_i]["corporate_film_id"].get<std::string>();
                     return "menuDetalles";
                 }
                 else {
@@ -142,7 +143,9 @@ std::string menuCartelera() {
         // ---- Update ----
         style::setFg(ANTICINE_LOGO_COLOR);
         gnu::gotoY(2);
+        style::bold();
         gnu::printRawCenter(gnu::anticineLogo);
+        style::bold_off();
         style::setFg({ 222, 197, 153 });
 
         card2.centerHorizontal();

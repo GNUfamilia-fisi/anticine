@@ -12,17 +12,19 @@ std::string menuMensajeAnticine(std::string menuDeRegreso, std::string mensaje) 
 
     while (true) {
         gnu::gotoY(15);
+        style::bold();
         gnu::printRawCenter(gnu::anticineLogo);
         gnu::gotoY(25);
         gnu::printRawCenter(mensaje);
         gnu::gotoY(27);
-        gnu::printRawCenter("Presione cualquier tecla para continuar");
+        gnu::printRawCenter("Presione Enter tecla para continuar");
 
         if (lastConsoleSize != gnu::getConsoleSize()) {
             gnu::cls();
         }
 
         if (gnu::getch() == gnu::key::Enter) {
+            style::reset();
             return menuDeRegreso;
         }
         lastConsoleSize = gnu::getConsoleSize();

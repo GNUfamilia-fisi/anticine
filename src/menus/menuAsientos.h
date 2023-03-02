@@ -6,6 +6,7 @@
 #include "../components/Box.h"
 #include "../components/Button.h"
 #include "menuDetallePelicula.h"
+#include "menuMensajeAnticine.h"
 
 #include "globales.h"
 
@@ -48,6 +49,7 @@ std::string menuAsientos(){
 
     json sessionData = apifetch("/sessions/" + g_sessionID);
     g_sessionData = sessionData["session"];
+    g_movieVersion = sessionData["movie_version"];
 
     const int columns = sessionData["room"]["columns_number"].get<int>();
     const int rows = sessionData["room"]["rows_number"].get<int>();
@@ -184,6 +186,7 @@ std::string menuAsientos(){
                 break;
             case gnu::key::Enter: {
                 if (menuOption == MENU_OPTION_BOTON_CONFIRMAR) {
+                    if (selectedPositions.empty()) return gnu::menuMensajeAnticine("Asientos", "No ha seleccionado ningún asiento");
                     // sillas guardadas en el vector selectedPositions
                     // TODO: enviar al servidor y esperar respuesta
                     g_selectedSeats.clear();
@@ -298,7 +301,6 @@ void redibujarCabecera() {
     gnu::printRawCenter(gnu::parseStringToASCIIArtText("Selecciona tus asientos"));
     style::setFg({ 222, 196, 198 });
     gnu::print("\n\n");
-    LOG_FILE("g_movieData: " << g_sessionData.dump(4) << "\n");
     gnu::printLineCentered(
         "Selecciona tus asientos para ver \"" + g_movieData["title"].get<std::string>() + "\" (" + g_sessionData["day"].get<std::string>() + " " + g_sessionData["hour"].get<std::string>() + ")"
     );

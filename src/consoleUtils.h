@@ -51,7 +51,7 @@ void print(const char* str);
 void print(std::string str);
 void setCursorVisible(bool isVisible);
 
-#define ANTICINE_LOGO_COLOR style::rgb({ 128, 186, 209 })
+#define ANTICINE_LOGO_COLOR style::rgb({ 111, 107, 138 })
 
 std::string anticineLogo = R"(_______       __________      _____
 ___    |________  /___(_)________(_)___________

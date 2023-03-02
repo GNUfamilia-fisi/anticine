@@ -51,7 +51,7 @@ typedef unsigned char byte;
  * std::string str = "áéíóú 🙀👌👌";
  * utf8::str_length(str); // 9
 */
-std::size_t str_length(std::string &str) {
+std::size_t str_length(const std::string &str) {
     if (str.empty()) return 0;
 
 #if defined(UTF8_STRICT_COUNT)

@@ -12,7 +12,7 @@ namespace gnu {
 
 #define LOGIN_OPCION_FORMULARIO 0
 #define LOGIN_OPCION_BOTONES 1
-#define INICIO_SESION_HEADER_OFFSET_Y 14
+#define INICIO_SESION_HEADER_OFFSET_Y 17
 
 using json = nlohmann::json;
 
@@ -136,9 +136,13 @@ std::string menuFormularioLogin() {
         if (needToRedrawLayout) {
             gnu::cls();
             // Poster;
-            gnu::gotoY(4);
+            gnu::gotoY(3);
+            style::bold();
             style::setFg(ANTICINE_LOGO_COLOR);
             gnu::printRawCenter(gnu::anticineLogo);
+            gnu::print("\n\n");
+            style::bold_off();
+            gnu::printRawCenter(gnu::parseStringToASCIIArtText("Inicia sesion en ANTICINE"));
 
         }
         // Actualizamos el estado de focus de cada input

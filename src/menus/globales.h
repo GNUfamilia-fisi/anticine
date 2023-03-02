@@ -76,6 +76,18 @@ sessionData: {
 json g_sessionData;
 
 /*
+interface MovieVersion {
+  corporate_film_id: string;
+  movie_version_id: string; // film_HOPK
+  title: string;
+  version_tags: string;
+  language_tags: string;
+  seats_tags: string;
+}
+*/
+json g_movieVersion;
+
+/*
 userData: {
     id: string,
     fullname: string,
