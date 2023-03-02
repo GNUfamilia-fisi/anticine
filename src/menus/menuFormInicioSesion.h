@@ -104,7 +104,7 @@ std::string menuFormularioLogin() {
                             g_usuarioLogueado = true;
                             g_usuarioInvitado = false;
                             g_userData = response["user"];
-                            return "menuCompraEntradas";
+                            return gnu::menuMensajeAnticine("menuCompraEntradas", "Bienvenido de nuevo " + g_userData["fullname"].get<std::string>() + "!");
                         }
                         else {
                             return gnu::menuMensajeAnticine("menuFormularioLogin", "Usuario o contraseña incorrectos");
