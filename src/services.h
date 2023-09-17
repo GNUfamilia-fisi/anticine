@@ -12,7 +12,7 @@ namespace gnu {
 
 // La URL de la API donde anticine obtiene sus datos
 // Repositorio: https://github.com/GNUfamilia-fisi/anticine-server
-std::string apiURL = "http://[2001:1388:19e8:4b8b:4aa9:3f91:9ea6:49e4]:6969";
+std::string apiURL = "http://localhost:6969";
 
 /**
  * Hace una petición a una URL y devuelve su respuesta.
@@ -30,10 +30,16 @@ std::string apiURL = "http://[2001:1388:19e8:4b8b:4aa9:3f91:9ea6:49e4]:6969";
  */
 json fetch(std::string url) {
     std::string command = "curl -s " + url;
+
+    // ejecutamos el comando en la terminal
     std::string fetchResult = gnu::exec(command);
+
+    std::cout << "result: " << fetchResult << std::endl;
+
     json data;
 
     try {
+        // Intentamos transformar la repuesta del servidor a JSON
         data = json::parse(fetchResult);
     }
     catch (...) {
@@ -52,14 +58,22 @@ json fetch(std::string url) {
  * json response = fetch(apiURL + "/cines/cercanos")
  */
 json apifetch(std::string endpoint) {
+    // Usamos la apiURL como base
+
+    // Por ejemplo, si apiURL es "http://localhost:6969"
+    // y endpoint es "/cines/cercanos", entonces
+
+    // url = "http://localhost:6969/cines/cercanos"
     return fetch(apiURL + endpoint);
 }
 
 json apipost(std::string endpoint, json data) {
+    // Usamos la apiURL como base
     std::string url = apiURL + endpoint;
-
     std::string raw_data = "";
 
+    // Agregamos un "\" antes de cada comilla antes de enviar el JSON
+    // {"a": "b", "c": "d"} -> {\"a\": \"b\", \"c\": \"d\"}
     for (auto ch : utf8::iterate(data.dump())) {
         if (ch == "\"") {
             raw_data += "\\\"";
@@ -76,6 +90,7 @@ json apipost(std::string endpoint, json data) {
     json response;
 
     try {
+        // Intentamos transformar la repuesta del servidor a JSON para retornarlo
         response = json::parse(fetchResult);
     }
     catch (...) {

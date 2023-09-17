@@ -27,8 +27,14 @@ namespace gnu {
 
 void menuSelector() {
     json menuRawData = gnu::apifetch("/cines/cercanos");
-    g_cineID = menuRawData["nearest_id"].get<std::string>();
-    g_cineData = menuRawData["cinemas"][0]; // el primero es el más cercano
+    if (menuRawData["code"].get<int>() == 404) {
+        g_cineID = "";
+        g_cineData = json();
+    }
+    else {
+        g_cineID = menuRawData["nearest_id"].get<std::string>();
+        g_cineData = menuRawData["cinemas"][0]; // el primero es el más cercano
+    }
 
     std::string menuID = gnu::menuCartelera();
 
